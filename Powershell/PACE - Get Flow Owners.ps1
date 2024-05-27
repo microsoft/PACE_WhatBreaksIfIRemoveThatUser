@@ -6,6 +6,7 @@ $symbols = @("⣾⣿", "⣽⣿", "⣻⣿", "⢿⣿", "⡿⣿", "⣟⣿", "⣯⣿
     "⣿⣾", "⣿⣽", "⣿⣻", "⣿⢿", "⣿⡿", "⣿⣟", "⣿⣯", "⣿⣷")
 $i = 0;
 
+Write-Host $PSVersionTable.PSVersion
 
 while ($job.State -eq "Running") {
     $symbol = $symbols[$i]
@@ -18,4 +19,4 @@ while ($job.State -eq "Running") {
 }
 
 $out = $job | Receive-Job -Keep
-$out | Format-Table -Property DisplayName, ConnectorName, ConnectionName, Status, CreatedTime, Environment_DisplayName -Wrap
+$out | Sort-Object -Property Flow_DisplayName | Format-Table -Property FlowName, Flow_DisplayName, Flow_CreatedTime, Environment_DisplayName -Wrap
