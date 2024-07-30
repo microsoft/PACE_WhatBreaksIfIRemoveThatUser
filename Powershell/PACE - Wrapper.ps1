@@ -11,7 +11,11 @@ param (
     [string]$csvPath = (Join-Path -Path (Get-Location) -ChildPath "\output\")
  )
 
+# send welcome message
+Write-Host "Welcome to the 'What breaks if I disable this user?' program. This program will help you identify all the connections and flows that will break if you disable a user."
+
 # check dependencies
+Write-Host "Checking dependencies..."
 .\checkDependencies.ps1
 
 # check target owner parameter
@@ -94,3 +98,6 @@ else {
 }
 
 Write-Host "All done."
+
+# wait for confirmation before closing the window
+Read-Host "Press Enter to exit"
