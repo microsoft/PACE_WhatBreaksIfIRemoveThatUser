@@ -28,11 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WhatBreaksIfControl));
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbClose = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.tbTargetUserEmail = new XrmToolBox.Controls.TextBoxWithPlaceholder();
+            this.cbCheckConnectionReferences = new System.Windows.Forms.CheckBox();
+            this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
             this.tbStatus = new System.Windows.Forms.TextBox();
             this.btnStartQueries = new System.Windows.Forms.Button();
@@ -91,6 +95,9 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.tbTargetUserEmail);
+            this.panel1.Controls.Add(this.cbCheckConnectionReferences);
+            this.panel1.Controls.Add(this.cbCheckFlowOwners);
             this.panel1.Controls.Add(this.lblWarning);
             this.panel1.Controls.Add(this.tbStatus);
             this.panel1.Controls.Add(this.btnStartQueries);
@@ -101,17 +108,49 @@
             this.panel1.Size = new System.Drawing.Size(344, 778);
             this.panel1.TabIndex = 12;
             // 
+            // tbTargetUserEmail
+            // 
+            this.tbTargetUserEmail.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.tbTargetUserEmail.Location = new System.Drawing.Point(10, 22);
+            this.tbTargetUserEmail.Name = "tbTargetUserEmail";
+            this.tbTargetUserEmail.Placeholder = null;
+            this.tbTargetUserEmail.Size = new System.Drawing.Size(274, 20);
+            this.tbTargetUserEmail.TabIndex = 29;
+            this.tbTargetUserEmail.Tag = true;
+            this.tbTargetUserEmail.TextChanged += new System.EventHandler(this.tbTargetUserEmail_TextChanged);
+            // 
+            // cbCheckConnectionReferences
+            // 
+            this.cbCheckConnectionReferences.AutoSize = true;
+            this.cbCheckConnectionReferences.Checked = true;
+            this.cbCheckConnectionReferences.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbCheckConnectionReferences.Location = new System.Drawing.Point(10, 85);
+            this.cbCheckConnectionReferences.Name = "cbCheckConnectionReferences";
+            this.cbCheckConnectionReferences.Size = new System.Drawing.Size(172, 17);
+            this.cbCheckConnectionReferences.TabIndex = 28;
+            this.cbCheckConnectionReferences.Text = "Check Connection References";
+            this.cbCheckConnectionReferences.UseVisualStyleBackColor = true;
+            // 
+            // cbCheckFlowOwners
+            // 
+            this.cbCheckFlowOwners.AutoSize = true;
+            this.cbCheckFlowOwners.Checked = true;
+            this.cbCheckFlowOwners.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbCheckFlowOwners.Location = new System.Drawing.Point(10, 62);
+            this.cbCheckFlowOwners.Name = "cbCheckFlowOwners";
+            this.cbCheckFlowOwners.Size = new System.Drawing.Size(135, 17);
+            this.cbCheckFlowOwners.TabIndex = 27;
+            this.cbCheckFlowOwners.Text = "Check Flow Ownership";
+            this.cbCheckFlowOwners.UseVisualStyleBackColor = true;
+            // 
             // lblWarning
             // 
-            this.lblWarning.AutoSize = true;
             this.lblWarning.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblWarning.Location = new System.Drawing.Point(7, 387);
             this.lblWarning.Name = "lblWarning";
-            this.lblWarning.Size = new System.Drawing.Size(334, 65);
+            this.lblWarning.Size = new System.Drawing.Size(334, 242);
             this.lblWarning.TabIndex = 26;
-            this.lblWarning.Text = "Attention: This is an early version. \r\nUse at your own risk and always test on a " +
-    "non-production system first.\r\n\r\nRemember to use accounts with admin privileges t" +
-    "o enable \r\nimpersonation.";
+            this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
             // tbStatus
             // 
@@ -125,12 +164,13 @@
             // btnStartQueries
             // 
             this.btnStartQueries.Enabled = false;
-            this.btnStartQueries.Location = new System.Drawing.Point(3, 25);
+            this.btnStartQueries.Location = new System.Drawing.Point(95, 255);
             this.btnStartQueries.Name = "btnStartQueries";
             this.btnStartQueries.Size = new System.Drawing.Size(127, 23);
             this.btnStartQueries.TabIndex = 16;
             this.btnStartQueries.Text = "Start";
             this.btnStartQueries.UseVisualStyleBackColor = true;
+            this.btnStartQueries.Click += new System.EventHandler(this.btnStartQueries_Click);
             // 
             // tabControl1
             // 
@@ -207,5 +247,8 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.ListBox lbDebugOutput;
+        private XrmToolBox.Controls.TextBoxWithPlaceholder tbTargetUserEmail;
+        private System.Windows.Forms.CheckBox cbCheckConnectionReferences;
+        private System.Windows.Forms.CheckBox cbCheckFlowOwners;
     }
 }

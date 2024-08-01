@@ -1,4 +1,5 @@
 ﻿using McTools.Xrm.Connection;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
@@ -138,6 +139,48 @@ namespace WhatBreaksIf
         #endregion
 
 
+        #region Methods
+
+        /// <summary>
+        /// Base level implementation on how to get Flows owned by a user. 
+        /// This will be called async later but this method is not supposed to handle async code itself
+        /// </summary>
+        /// <param name="userId"></param>
+        private object GetAllFlowsOwnedByUser(string userId)
+        {
+            // wait 5 seconds for demo purposes
+            System.Threading.Thread.Sleep(5000);
+
+            // auth
+
+            // call api
+
+            // transform response
+
+            // report back
+
+            return "We just pretend we have something here";
+        }
+
+        private object GetAllConnectionReferencesOwnedByUser(string userId)
+        {
+            // wait 10 seconds for demo purposes
+            System.Threading.Thread.Sleep(10000);
+
+            // auth
+
+            // call api
+
+            // transform response
+
+            // report back
+
+            return "We just pretend we have something here";
+        }
+
+        #endregion
+
+
         #region overrides
 
         private new void LogInfo(string text, params object[] args)
@@ -205,5 +248,105 @@ namespace WhatBreaksIf
 
 
         #endregion
+
+        private void btnStartQueries_Click(object sender, EventArgs eventArgs)
+        {
+            LogInfo("Starting....");
+
+            var targetUser = tbTargetUserEmail.Text;
+            bool checkFlowOwners = cbCheckFlowOwners.Checked;
+            bool checkConnectionReferences = cbCheckConnectionReferences.Checked;
+
+            // disable controls
+            tbTargetUserEmail.Enabled = false;
+            cbCheckFlowOwners.Enabled = false;
+            cbCheckConnectionReferences.Enabled = false;
+            btnStartQueries.Enabled = false;
+
+            LogInfo($"Will search the following for {targetUser}:" +
+                $" Flow Ownership: {(cbCheckFlowOwners.Checked ? "yes" : "no")}" +
+                $" Connection References: {(cbCheckConnectionReferences.Checked ? "yes" : "no")}" +
+                $" ...");
+
+            if (checkFlowOwners)
+            {
+                WorkAsync(new WorkAsyncInfo
+                {
+                    Message = "Getting Flow Ownership",
+                    Work = (worker, args) =>
+                    {
+                        var result = GetAllFlowsOwnedByUser(targetUser);
+
+                        // TODO: Implement progress reporting
+                        worker.ReportProgress(100, result);
+                        args.Result = result;
+                    },
+                    ProgressChanged = e =>
+                    {
+                        SetWorkingMessage(e.ToString());
+                    },
+                    PostWorkCallBack = (args) =>
+                    {
+                        if (args.Error != null)
+                        {
+                            MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        var result = args.Result;
+
+                        // TODO: do something with the result
+
+                        LogInfo("Finished Flow Ownership query.");
+                    },
+                    AsyncArgument = null,
+                    // Progress information panel size
+                    MessageWidth = 340,
+                    MessageHeight = 150
+                });
+            }
+
+            if (checkConnectionReferences)
+            {
+                WorkAsync(new WorkAsyncInfo
+                {
+                    Message = "Getting Connection References",
+                    Work = (worker, args) =>
+                    {
+                        var result = GetAllConnectionReferencesOwnedByUser(targetUser);
+
+                        // TODO: Implement progress reporting
+                        worker.ReportProgress(100, result);
+                        args.Result = result;
+                    },
+                    ProgressChanged = e =>
+                    {
+                        SetWorkingMessage(e.ToString());
+                    },
+                    PostWorkCallBack = (args) =>
+                    {
+                        if (args.Error != null)
+                        {
+                            MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        var result = args.Result;
+
+                        // TODO: do something with the result
+
+                        LogInfo("Finished Connection References query.");
+                    },
+                    AsyncArgument = null,
+                    // Progress information panel size
+                    MessageWidth = 340,
+                    MessageHeight = 150
+                });
+            }
+
+            // --- careful, all the stuff above runs async, so this will run before the queries are done ----
+        }
+
+        private void tbTargetUserEmail_TextChanged(object sender, EventArgs e)
+        {
+            // enable the button if the text is not empty
+            btnStartQueries.Enabled = !string.IsNullOrEmpty(tbTargetUserEmail.Text);
+        }
     }
 }
