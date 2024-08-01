@@ -7,7 +7,7 @@ using System.Reflection;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 
-namespace OwnedByX
+namespace WhatBreaksIf
 {
     // Do not forget to update version number and author (company attribute) in AssemblyInfo.cs class
     // To generate Base64 string for Images below, you can use https://www.base64-image.de/
@@ -21,17 +21,17 @@ namespace OwnedByX
         ExportMetadata("BackgroundColor", "Lavender"),
         ExportMetadata("PrimaryFontColor", "Black"),
         ExportMetadata("SecondaryFontColor", "Gray")]
-    public class OwnedByX : PluginBase
+    public class WhatBreaksIf : PluginBase
     {
         public override IXrmToolBoxPluginControl GetControl()
         {
-            return new MyPluginControl();
+            return new WhatBreaksIfControl();
         }
 
         /// <summary>
         /// Constructor 
         /// </summary>
-        public OwnedByX()
+        public WhatBreaksIf()
         {
             // If you have external assemblies that you need to load, uncomment the following to 
             // hook into the event that will fire when an Assembly fails to resolve

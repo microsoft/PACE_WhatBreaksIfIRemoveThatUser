@@ -3,7 +3,7 @@
 
 #region set up params
 param (
-    [string]$owner = "admin@MngEnvMCAP275987.onmicrosoft.com",
+    [string]$owner = "femora@MngEnvMCAP525856.onmicrosoft.com",
     [bool]$queryAllEnvironments = $false,
     [string]$targetEnvironment,
     [bool]$outputAsCSV = $true,
