@@ -12,7 +12,7 @@ namespace WhatBreaksIf
     // Do not forget to update version number and author (company attribute) in AssemblyInfo.cs class
     // To generate Base64 string for Images below, you can use https://www.base64-image.de/
     [Export(typeof(IXrmToolBoxPlugin)),
-        ExportMetadata("Name", "OwnedByX"),
+        ExportMetadata("Name", "WhatBreaksIf"),
         ExportMetadata("Description", "What breaks if I disable this user?"),
         // Please specify the base64 content of a 32x32 pixels image
         ExportMetadata("SmallImageBase64", null),

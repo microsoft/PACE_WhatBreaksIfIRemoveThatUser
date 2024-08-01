@@ -54,7 +54,7 @@
             this.tssSeparator1});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
-            this.toolStripMenu.Size = new System.Drawing.Size(1257, 25);
+            this.toolStripMenu.Size = new System.Drawing.Size(1417, 25);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
@@ -86,7 +86,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1257, 789);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1417, 790);
             this.tableLayoutPanel1.TabIndex = 13;
             // 
             // panel1
@@ -98,7 +98,7 @@
             this.panel1.Location = new System.Drawing.Point(6, 6);
             this.panel1.Name = "panel1";
             this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
-            this.panel1.Size = new System.Drawing.Size(344, 777);
+            this.panel1.Size = new System.Drawing.Size(344, 778);
             this.panel1.TabIndex = 12;
             // 
             // lblWarning
@@ -140,7 +140,7 @@
             this.tabControl1.Name = "tabControl1";
             this.tableLayoutPanel1.SetRowSpan(this.tabControl1, 2);
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(955, 777);
+            this.tabControl1.Size = new System.Drawing.Size(1055, 778);
             this.tabControl1.TabIndex = 14;
             this.tabControl1.TabStop = false;
             // 
@@ -150,7 +150,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(947, 751);
+            this.tabPage2.Size = new System.Drawing.Size(1047, 752);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Log Output";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -170,7 +170,7 @@
             this.lbDebugOutput.Name = "lbDebugOutput";
             this.lbDebugOutput.ScrollAlwaysVisible = true;
             this.lbDebugOutput.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbDebugOutput.Size = new System.Drawing.Size(941, 745);
+            this.lbDebugOutput.Size = new System.Drawing.Size(1041, 746);
             this.lbDebugOutput.TabIndex = 11;
             this.lbDebugOutput.TabStop = false;
             // 
@@ -181,7 +181,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.toolStripMenu);
             this.Name = "WhatBreaksIfControl";
-            this.Size = new System.Drawing.Size(1257, 814);
+            this.Size = new System.Drawing.Size(1417, 815);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
