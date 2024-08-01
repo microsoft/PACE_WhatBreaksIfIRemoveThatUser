@@ -13,7 +13,7 @@ namespace WhatBreaksIf
 
         #region Fields
 
-        private delegate void _updateLogWindowDelegate(string msg);
+        private delegate void _updateLogWindowDelegate(string msg, params object[] args);
 
         #endregion
 
@@ -107,7 +107,7 @@ namespace WhatBreaksIf
 
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
-            ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
+            LogInfo("Hello world :) ");
 
             // Loads or creates the settings for the plugin
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
@@ -120,6 +120,7 @@ namespace WhatBreaksIf
             {
                 LogInfo("Settings found and loaded");
             }
+
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -133,16 +134,22 @@ namespace WhatBreaksIf
 
         #region Helpers
 
-        private void CustomLog(string text)
+
+        #endregion
+
+
+        #region overrides
+
+        private new void LogInfo(string text, params object[] args)
         {
             if (lbDebugOutput.InvokeRequired)
             {
-                _updateLogWindowDelegate update = new _updateLogWindowDelegate(CustomLog);
+                _updateLogWindowDelegate update = new _updateLogWindowDelegate(LogInfo);
                 lbDebugOutput.Invoke(update, text);
             }
             else
             {
-                LogInfo(text);
+                base.LogInfo(text, args);
                 lbDebugOutput.Items.Add(text);
                 if (lbDebugOutput.Items.Count > 1000)
                 {
@@ -154,6 +161,47 @@ namespace WhatBreaksIf
             }
         }
 
+        private new void LogError(string text, params object[] args)
+        {
+            if (lbDebugOutput.InvokeRequired)
+            {
+                _updateLogWindowDelegate update = new _updateLogWindowDelegate(LogError);
+                lbDebugOutput.Invoke(update, text);
+            }
+            else
+            {
+                base.LogError(text, args);
+                lbDebugOutput.Items.Add(text);
+                if (lbDebugOutput.Items.Count > 1000)
+                {
+                    lbDebugOutput.Items.RemoveAt(0); // remove first line
+                }
+                // Make sure the last item is made visible
+                lbDebugOutput.SelectedIndex = lbDebugOutput.Items.Count - 1;
+                lbDebugOutput.ClearSelected();
+            }
+        }
+
+        private new void LogWarning(string text, params object[] args)
+        {
+            if (lbDebugOutput.InvokeRequired)
+            {
+                _updateLogWindowDelegate update = new _updateLogWindowDelegate(LogWarning);
+                lbDebugOutput.Invoke(update, text);
+            }
+            else
+            {
+                base.LogWarning(text, args);
+                lbDebugOutput.Items.Add(text);
+                if (lbDebugOutput.Items.Count > 1000)
+                {
+                    lbDebugOutput.Items.RemoveAt(0); // remove first line
+                }
+                // Make sure the last item is made visible
+                lbDebugOutput.SelectedIndex = lbDebugOutput.Items.Count - 1;
+                lbDebugOutput.ClearSelected();
+            }
+        }
 
 
         #endregion
