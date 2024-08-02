@@ -13,7 +13,7 @@ using XrmToolBox.Extensibility.Interfaces;
 
 namespace WhatBreaksIf
 {
-    public partial class WhatBreaksIfControl : PluginControlBase, INoConnectionRequired, IGitHubPlugin, IAboutPlugin, IHelpPlugin
+    public partial class WhatBreaksIfControl : PluginControlBase
     {
         // helper class to hold information about the environment and the status of the queries
         public class EnvironmentQueryStatus
@@ -90,29 +90,6 @@ namespace WhatBreaksIf
         private readonly EnvironmentCollection targetEnvironments = new EnvironmentCollection();
 
         private Settings mySettings;
-
-        #endregion
-
-        #region GitHub implementation
-
-        public string RepositoryName => "PACE_WhatBreaksIfIRemoveThatUser";
-
-        public string UserName => "microsoft";
-
-        #endregion
-
-        #region IHelpPluginImplementation
-
-        public string HelpUrl => "https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser";
-
-        #endregion
-
-        # region IAbout implementation
-
-        public void ShowAboutDialog()
-        {
-            throw new NotImplementedException();
-        }
 
         #endregion
 
@@ -365,7 +342,6 @@ namespace WhatBreaksIf
                 LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
             }
         }
-
 
         /// <summary>
         /// Base level implementation on how to get Flows owned by a user. 
