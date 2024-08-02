@@ -35,18 +35,17 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.treeView1 = new PersonalViewMigrationTool.CustomTreeViewControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lbDebugOutput = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnStartQueries = new System.Windows.Forms.Button();
+            this.btnExportToExcel = new System.Windows.Forms.Button();
             this.pbMain = new System.Windows.Forms.ProgressBar();
             this.tbTargetUserEmail = new XrmToolBox.Controls.TextBoxWithPlaceholder();
             this.cbCheckConnectionReferences = new System.Windows.Forms.CheckBox();
             this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
-            this.btnStartQueries = new System.Windows.Forms.Button();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.btnExportToExcel = new System.Windows.Forms.Button();
-            this.treeView1 = new PersonalViewMigrationTool.CustomTreeViewControl();
             this.toolStripMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -60,14 +59,12 @@
             this.toolStripMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbClose,
-            this.tssSeparator1,
-            this.toolStripButton1});
+            this.tssSeparator1});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(1428, 25);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
-            this.toolStripMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStripMenu_ItemClicked);
             // 
             // tsbClose
             // 
@@ -124,6 +121,15 @@
             this.tabPage1.Text = "Overview";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // treeView1
+            // 
+            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView1.Location = new System.Drawing.Point(3, 3);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.ShowNodeToolTips = true;
+            this.treeView1.Size = new System.Drawing.Size(1052, 692);
+            this.treeView1.TabIndex = 1;
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.lbDebugOutput);
@@ -169,6 +175,27 @@
             this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
             this.panel1.Size = new System.Drawing.Size(344, 724);
             this.panel1.TabIndex = 12;
+            // 
+            // btnStartQueries
+            // 
+            this.btnStartQueries.Enabled = false;
+            this.btnStartQueries.Location = new System.Drawing.Point(107, 217);
+            this.btnStartQueries.Name = "btnStartQueries";
+            this.btnStartQueries.Size = new System.Drawing.Size(127, 23);
+            this.btnStartQueries.TabIndex = 16;
+            this.btnStartQueries.Text = "Start";
+            this.btnStartQueries.UseVisualStyleBackColor = true;
+            this.btnStartQueries.Click += new System.EventHandler(this.btnStartQueries_Click);
+            // 
+            // btnExportToExcel
+            // 
+            this.btnExportToExcel.Enabled = false;
+            this.btnExportToExcel.Location = new System.Drawing.Point(131, 246);
+            this.btnExportToExcel.Name = "btnExportToExcel";
+            this.btnExportToExcel.Size = new System.Drawing.Size(75, 23);
+            this.btnExportToExcel.TabIndex = 31;
+            this.btnExportToExcel.Text = "Export";
+            this.btnExportToExcel.UseVisualStyleBackColor = true;
             // 
             // pbMain
             // 
@@ -223,45 +250,6 @@
             this.lblWarning.TabIndex = 26;
             this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
-            // btnStartQueries
-            // 
-            this.btnStartQueries.Enabled = false;
-            this.btnStartQueries.Location = new System.Drawing.Point(107, 217);
-            this.btnStartQueries.Name = "btnStartQueries";
-            this.btnStartQueries.Size = new System.Drawing.Size(127, 23);
-            this.btnStartQueries.TabIndex = 16;
-            this.btnStartQueries.Text = "Start";
-            this.btnStartQueries.UseVisualStyleBackColor = true;
-            this.btnStartQueries.Click += new System.EventHandler(this.btnStartQueries_Click);
-            // 
-            // toolStripButton1
-            // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(44, 22);
-            this.toolStripButton1.Text = "About";
-            // 
-            // btnExportToExcel
-            // 
-            this.btnExportToExcel.Enabled = false;
-            this.btnExportToExcel.Location = new System.Drawing.Point(131, 246);
-            this.btnExportToExcel.Name = "btnExportToExcel";
-            this.btnExportToExcel.Size = new System.Drawing.Size(75, 23);
-            this.btnExportToExcel.TabIndex = 31;
-            this.btnExportToExcel.Text = "Export";
-            this.btnExportToExcel.UseVisualStyleBackColor = true;
-            // 
-            // treeView1
-            // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.Location = new System.Drawing.Point(3, 3);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.ShowNodeToolTips = true;
-            this.treeView1.Size = new System.Drawing.Size(1052, 692);
-            this.treeView1.TabIndex = 1;
-            // 
             // WhatBreaksIfControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -301,7 +289,6 @@
         private System.Windows.Forms.ListBox lbDebugOutput;
         private PersonalViewMigrationTool.CustomTreeViewControl treeView1;
         private System.Windows.Forms.ProgressBar pbMain;
-        private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.Button btnExportToExcel;
     }
 }

@@ -13,7 +13,7 @@ using XrmToolBox.Extensibility.Interfaces;
 
 namespace WhatBreaksIf
 {
-    public partial class WhatBreaksIfControl : PluginControlBase, IGitHubPlugin, IAboutPlugin, IHelpPlugin
+    public partial class WhatBreaksIfControl : PluginControlBase, INoConnectionRequired, IGitHubPlugin, IAboutPlugin, IHelpPlugin
     {
         // helper class to hold information about the environment and the status of the queries
         public class EnvironmentQueryStatus
@@ -158,13 +158,6 @@ namespace WhatBreaksIf
                 LogInfo("Settings found and loaded");
             }
 
-            // check if the user connected to an environment when opening the plugin. If not, ask him to connect to one now.
-            if (ConnectionDetail == null)
-            {
-                MessageBox.Show("Please connect to an environment first.", "No environment connected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                // call the service.execute method to force connecting to an environment now
-                Service.Execute(new WhoAmIRequest());
-            }
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -571,11 +564,6 @@ namespace WhatBreaksIf
                 lbDebugOutput.SelectedIndex = lbDebugOutput.Items.Count - 1;
                 lbDebugOutput.ClearSelected();
             }
-        }
-
-        private void toolStripMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
         }
 
         #endregion

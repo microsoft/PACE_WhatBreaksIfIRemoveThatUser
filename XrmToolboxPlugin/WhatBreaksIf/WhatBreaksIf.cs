@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 
@@ -80,5 +81,14 @@ namespace WhatBreaksIf
 
             return loadAssembly;
         }
+
+        #region IAboutPlugin implementation
+
+        public void ShowAboutDialog()
+        {
+            MessageBox.Show(@"This is a sample tool", @"About Sample Tool", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        #endregion IAboutPlugin implementation
     }
 }
