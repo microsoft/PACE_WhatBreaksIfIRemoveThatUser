@@ -5,27 +5,33 @@ using WhatBreaksIf.TreeViewUIElements;
 
 namespace WhatBreaksIf.TreeViewUI
 {
-    // one implementation of TreeNodeElementBase, this one is used to display Flows in the treeview
-    internal class FlowTreeNodeElement : EnvironmentTreeNodeElement
+    // one implementation of TreeNodeElementBase, this one is used to display Flows in the treeview. Parent is always the environment 
+    internal class FlowTreeNodeElement : TreeNodeElementBase
     {
-        internal TreeNodeElementBase _parentNodeElement;
+        internal DirectoryTreeNode _parentNodeElement;
 
-        public string FlowName { get; set; }
+        public string FlowName { get; }
 
-        public string FlowId { get; set; }
+        public string FlowId { get; }
+
+        public string EnvironmentId { get; }
 
         public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments{EnvironmentId}/solutions/~preferred/flows/{FlowId})"); }
 
         public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
-                                  TreeNodeElementBase parentNodeElement,
+                                  DirectoryTreeNode parentNodeElement,
                                   string flowName,
                                   string flowId,
-                                  string environmentId,
-                                  string environmentName) : base(updateNodeUiDelegate, environmentName, environmentId)
+                                  string environmentId
+                                 ) : base(updateNodeUiDelegate)
         {
             // ctor has been called, this means we need to call the update method to display the flow in the UI
             // TODO Implement logic for updating object that already exist
 
+            _parentNodeElement = parentNodeElement;
+            FlowName = flowName;
+            FlowId = flowId;
+            EnvironmentId = environmentId;
             updateNodeUiDelegate(new NodeUpdateObject()
             {
                 TreeNodeElement = this,
@@ -33,12 +39,12 @@ namespace WhatBreaksIf.TreeViewUI
                 NodeText = FlowName,
                 UpdateReason = UpdateReason.AddedToList
             });
-            _parentNodeElement = parentNodeElement;
         }
 
         // right now we dont have any child objects, but we could have them in the future, for example to show connection references that sit under a flow
         internal override IEnumerable<TreeNodeElementBase> ChildObjects => throw new NotImplementedException();
 
         internal override TreeNodeElementBase Parent => _parentNodeElement;
+
     }
 }

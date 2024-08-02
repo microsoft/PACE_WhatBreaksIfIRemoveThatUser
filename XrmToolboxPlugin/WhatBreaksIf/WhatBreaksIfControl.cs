@@ -94,9 +94,6 @@ namespace WhatBreaksIf
                 // call the service.execute method to force connecting to an environment now
                 Service.Execute(new WhoAmIRequest());
             }
-
-            // create environment node
-            var envNode = new EnvironmentTreeNodeElement(UpdateNode, ConnectionDetail.ServerName, ConnectionDetail.EnvironmentId);
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -137,9 +134,15 @@ namespace WhatBreaksIf
             // do this foreach of the environments
             foreach (var targetEnvironmentId in targetEnvironments)
             {
-                LogInfo($"Processing environment {0}", targetEnvironmentId); 
+                // create environment node for the current environment
+                var environmentNode = new EnvironmentTreeNodeElement(UpdateNode, ConnectionDetail.ServerName, ConnectionDetail.EnvironmentId);
+
+                LogInfo($"Processing environment {0}", targetEnvironmentId);
                 if (checkFlowOwners)
                 {
+                    // create a directory node that holds the references to the flows so we know where in the UI to place them
+                    var flowDirectoryNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
+
                     WorkAsync(new WorkAsyncInfo
                     {
                         Message = "Getting Flow Ownership",
@@ -162,12 +165,11 @@ namespace WhatBreaksIf
 
                             // create treenodeelement
                             new FlowTreeNodeElement(UpdateNode,
-                                                    parentNodeElement: null,
+                                                    parentNodeElement: flowDirectoryNode,
                                                     flowName: flowName,
                                                     flowId: flowId,
-                                                    environmentId: environmentId,
-                                                    environmentName: "EnvironmentName");
-
+                                                    environmentId: environmentId
+                                                    );
                         },
                         PostWorkCallBack = (args) =>
                         {
@@ -189,36 +191,52 @@ namespace WhatBreaksIf
                 }
 
                 if (checkConnectionReferences)
+                {
+                    // create a directory node that holds the references to the connectionreferences so we know where in the UI to place them
+                    var connectionReferencesDirectoryNode = new DirectoryTreeNode(UpdateNode, "Connection References", environmentNode);
+
+                    WorkAsync(new WorkAsyncInfo
                     {
-                        WorkAsync(new WorkAsyncInfo
+                        Message = "Getting Connection References",
+                        Work = (worker, args) =>
                         {
-                            Message = "Getting Connection References",
-                            Work = (worker, args) =>
-                            {
-                                GetAllConnectionReferencesOwnedByUserInEnvironment(targetUser, targetEnvironmentId, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
-                            },
-                            ProgressChanged = e =>
-                            {
-                                // TODO: Display the flow that was retrieved and update progressbar
-                            },
-                            PostWorkCallBack = (args) =>
-                            {
-                                if (args.Error != null)
-                                {
-                                    MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                }
-                                var result = args.Result;
+                            GetAllConnectionReferencesOwnedByUserInEnvironment(targetUser, targetEnvironmentId, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                        },
+                        ProgressChanged = e =>
+                        {
+                            // TODO: Display the flow that was retrieved and update progressbar
 
-                                // all the connectionreferences should already be displayed in the UI since we report continuously on them
+                            // todo: maybe get rid of the dynamic and use a typed object
+                            dynamic connectionReferenceObj = e.UserState;
+                            string connectionReferenceName = connectionReferenceObj.ConnectionReferenceName;
+                            string environmentId = connectionReferenceObj.EnvironmentId;
 
-                                LogInfo("Finished Connection References query.");
-                            },
-                            AsyncArgument = null,
-                            // Progress information panel size
-                            MessageWidth = 340,
-                            MessageHeight = 150
-                        });
-                    }
+                            // create treenodeelement
+                            new ConnectionReferenceTreeNodeElement(UpdateNode,
+                                                    parentNodeElement: connectionReferencesDirectoryNode,
+                                                    connectionReferenceName: connectionReferenceName,
+                                                    environmentId: environmentId
+                                                    );
+
+                        },
+                        PostWorkCallBack = (args) =>
+                        {
+                            if (args.Error != null)
+                            {
+                                MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            var result = args.Result;
+
+                            // all the connectionreferences should already be displayed in the UI since we report continuously on them
+
+                            LogInfo("Finished Connection References query.");
+                        },
+                        AsyncArgument = null,
+                        // Progress information panel size
+                        MessageWidth = 340,
+                        MessageHeight = 150
+                    });
+                }
             }
 
             // --- careful, all the stuff above runs async, so this will run before the queries are done ----
@@ -271,7 +289,8 @@ namespace WhatBreaksIf
                 // call api
 
                 // get flow informnation 
-                var returnObj = new { 
+                var returnObj = new
+                {
                     Index = i,
                     FlowName = $"Flow_XYZ{i}",
                     FlowId = i.ToString(),
@@ -283,7 +302,7 @@ namespace WhatBreaksIf
             }
         }
 
-        private void GetAllConnectionReferencesOwnedByUserInEnvironment(string userId, string environmentId, Action<ProgressChangedEventArgs> ProgressChanged)
+        private void GetAllConnectionReferencesOwnedByUserInEnvironment(string userId, string targetEnvironmentId, Action<ProgressChangedEventArgs> ProgressChanged)
         {
             // auth
 
@@ -292,10 +311,13 @@ namespace WhatBreaksIf
             // report progress for every flow that is returned by the API
             for (int i = 0; i < 10; i++)
             {
-                // wait 2 seconds for demo purposes
-                System.Threading.Thread.Sleep(2000);
+                // wait 1 second for demo purposes
+                System.Threading.Thread.Sleep(1000);
 
-                var returnObj = new { Index = i, FlowName = $"ConnectionReference_XYZ{i}" };
+                var returnObj = new { 
+                    ConnectionReferenceName = $"ConnectionReference_XYZ{i}",
+                    EnvironmentId = targetEnvironmentId
+                };
 
                 // report progress
                 ProgressChanged(new ProgressChangedEventArgs(i * 10, returnObj));
@@ -444,7 +466,7 @@ namespace WhatBreaksIf
             }
         }
 
-#endregion
+        #endregion
 
 
         // TODO: Implement ConnectionReferenceTreeNodeElement

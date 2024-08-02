@@ -5,11 +5,11 @@ using WhatBreaksIf.DTO;
 namespace WhatBreaksIf.TreeViewUIElements
 {
     // this base class is used so we can display different types of objects in the treeview. Abstract because we enforce typed implementations
-    internal abstract class TreeNodeElementBase
+    internal abstract class TreeNodeElementBase 
     {
         private readonly Action<NodeUpdateObject> updateNodeUi;
 
-        public string ElementId { get; set; }
+        public string ElementId { get; }
 
         internal abstract IEnumerable<TreeNodeElementBase> ChildObjects { get; }
 
@@ -18,6 +18,8 @@ namespace WhatBreaksIf.TreeViewUIElements
         public TreeNodeElementBase(Action<NodeUpdateObject> updateNodeUi)
         {
             this.updateNodeUi = updateNodeUi;
+            // generate a new guid for the element id
+            ElementId = Guid.NewGuid().ToString();
         }
     }
 }
