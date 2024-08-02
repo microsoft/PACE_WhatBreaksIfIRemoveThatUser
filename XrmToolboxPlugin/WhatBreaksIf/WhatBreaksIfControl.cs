@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
+using WhatBreaksIf.DTO;
+using WhatBreaksIf.TreeViewUI;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 
@@ -55,20 +57,6 @@ namespace WhatBreaksIf
         }
 
         #endregion
-
-        /// <summary>
-        /// This event occurs when the connection has been updated in XrmToolBox
-        /// </summary>
-        public override void UpdateConnection(IOrganizationService newService, ConnectionDetail detail, string actionName, object parameter)
-        {
-            base.UpdateConnection(newService, detail, actionName, parameter);
-
-            if (mySettings != null && detail != null)
-            {
-                mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
-                LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
-            }
-        }
 
         #region Events
 
@@ -233,8 +221,6 @@ namespace WhatBreaksIf
                     }
             }
 
-
-
             // --- careful, all the stuff above runs async, so this will run before the queries are done ----
         }
 
@@ -244,10 +230,24 @@ namespace WhatBreaksIf
             btnStartQueries.Enabled = !string.IsNullOrEmpty(tbTargetUserEmail.Text);
         }
 
-
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// This event occurs when the connection has been updated in XrmToolBox
+        /// </summary>
+        public override void UpdateConnection(IOrganizationService newService, ConnectionDetail detail, string actionName, object parameter)
+        {
+            base.UpdateConnection(newService, detail, actionName, parameter);
+
+            if (mySettings != null && detail != null)
+            {
+                mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
+                LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
+            }
+        }
+
 
         /// <summary>
         /// Base level implementation on how to get Flows owned by a user. 
@@ -444,107 +444,8 @@ namespace WhatBreaksIf
             }
         }
 
+#endregion
 
-        #endregion
-
-        // This object is only used to transfer data to update the UI, it is not meant to hold any data on itself
-        internal class NodeUpdateObject
-        {
-            internal UpdateReason UpdateReason { get; set; }
-            internal string NodeId { get { return TreeNodeElement.ElementId; } }
-            internal string ParentNodeId { get; set; }
-            internal string NodeText { get; set; }
-            internal TreeNodeElementBase TreeNodeElement { get; set; }
-        }
-
-        internal enum UpdateReason
-        {
-            AddedToList,
-            RemovedFromList,
-            DetailsAdded
-        }
-
-        // this base class is used so we can display different types of objects in the treeview. Abstract because we enforce typed implementations
-        internal abstract class TreeNodeElementBase
-        {
-            private readonly Action<NodeUpdateObject> updateNodeUi;
-
-            public string ElementId { get; set; }
-
-            internal abstract IEnumerable<TreeNodeElementBase> ChildObjects { get; }
-
-            internal abstract TreeNodeElementBase Parent { get; }
-
-            public TreeNodeElementBase(Action<NodeUpdateObject> updateNodeUi)
-            {
-                this.updateNodeUi = updateNodeUi;
-            }
-        }
-
-        // implementation of TreeNodeElementBase, this one is used to display Environments in the treeview
-        internal class EnvironmentTreeNodeElement : TreeNodeElementBase
-        {
-            public string EnvironmentName { get; set; }
-
-            public string EnvironmentId { get; set; }
-
-            public EnvironmentTreeNodeElement(Action<NodeUpdateObject> updateNodeUi, string environmentName, string environmentId) : base(updateNodeUi)
-            {
-                EnvironmentName = environmentName;
-                EnvironmentId = environmentId;
-
-                // constructor for the environment tree node was called, update the UI to display it. This needs to happen after the backing fields of the properties have been set!
-                updateNodeUi(new NodeUpdateObject()
-                {
-                    TreeNodeElement = this,
-                    NodeText = EnvironmentName,
-                    UpdateReason = UpdateReason.AddedToList
-                });
-            }
-
-            internal List<TreeNodeElementBase> EnvironmentNodeElements { get;} = new List<TreeNodeElementBase>();
-
-            internal override TreeNodeElementBase Parent => null; // this is the top level node
-
-            internal override IEnumerable<TreeNodeElementBase> ChildObjects => EnvironmentNodeElements;
-        }
-
-        // one implementation of TreeNodeElementBase, this one is used to display Flows in the treeview
-        internal class FlowTreeNodeElement : EnvironmentTreeNodeElement
-        {
-            internal TreeNodeElementBase _parentNodeElement;
-
-            public string FlowName { get; set; }
-
-            public string FlowId { get; set; }
-
-            public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments{EnvironmentId}/solutions/~preferred/flows/{FlowId})"); }
-
-            public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
-                                      TreeNodeElementBase parentNodeElement,
-                                      string flowName,
-                                      string flowId,
-                                      string environmentId,
-                                      string environmentName) : base(updateNodeUiDelegate, environmentName, environmentId)
-            {
-                // ctor has been called, this means we need to call the update method to display the flow in the UI
-                // TODO Implement logic for updating object that already exist
-
-                updateNodeUiDelegate(new NodeUpdateObject()
-                {
-                    TreeNodeElement = this,
-                    ParentNodeId = (parentNodeElement != null) ? _parentNodeElement.ElementId.ToString() : null,
-                    NodeText = FlowName,
-                    UpdateReason = UpdateReason.AddedToList
-                });
-                _parentNodeElement = parentNodeElement;
-            }
-
-            // right now we dont have any child objects, but we could have them in the future, for example to show connection references that sit under a flow
-            internal override IEnumerable<TreeNodeElementBase> ChildObjects => throw new NotImplementedException();
-
-            internal override TreeNodeElementBase Parent => _parentNodeElement;
-        }
 
         // TODO: Implement ConnectionReferenceTreeNodeElement
     }

@@ -73,6 +73,10 @@
     <Compile Include="CustomTreeViewControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DTO\NodeUpdateObject.cs" />
+    <Compile Include="TreeViewUI\EnvironmentTreeNodeElement.cs" />
+    <Compile Include="TreeViewUI\FlowTreeNodeElement.cs" />
+    <Compile Include="TreeViewUI\TreeNodeElementBase.cs" />
     <Compile Include="WhatBreaksIf.cs" />
     <Compile Include="WhatBreaksIfControl.cs">
       <SubType>UserControl</SubType>
@@ -144,6 +148,7 @@
       <Version>1.2023.10.67</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF NOT EXIST Plugins mkdir Plugins
