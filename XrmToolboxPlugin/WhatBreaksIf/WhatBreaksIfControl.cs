@@ -1,8 +1,10 @@
 ﻿using McTools.Xrm.Connection;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
@@ -14,7 +16,11 @@ namespace WhatBreaksIf
 
         #region Fields
 
+        // these delegates are used to update the UI from a different thread
         private delegate void _updateLogWindowDelegate(string msg, params object[] args);
+        private delegate void _updateTreeNodeDelegate(NodeUpdateObject nodeUpdateObject);
+
+        private Settings mySettings;
 
         #endregion
 
@@ -41,8 +47,6 @@ namespace WhatBreaksIf
 
         #endregion
 
-        private Settings mySettings;
-
         #region ctor
 
         public WhatBreaksIfControl()
@@ -51,33 +55,6 @@ namespace WhatBreaksIf
         }
 
         #endregion
-
-        private void GetAccounts()
-        {
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = "Getting accounts",
-                Work = (worker, args) =>
-                {
-                    args.Result = Service.RetrieveMultiple(new QueryExpression("account")
-                    {
-                        TopCount = 50
-                    });
-                },
-                PostWorkCallBack = (args) =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    var result = args.Result as EntityCollection;
-                    if (result != null)
-                    {
-                        MessageBox.Show($"Found {result.Entities.Count} accounts");
-                    }
-                }
-            });
-        }
 
         /// <summary>
         /// This event occurs when the connection has been updated in XrmToolBox
@@ -122,6 +99,16 @@ namespace WhatBreaksIf
                 LogInfo("Settings found and loaded");
             }
 
+            // check if the user connected to an environment when opening the plugin. If not, ask him to connect to one now.
+            if (ConnectionDetail == null)
+            {
+                MessageBox.Show("Please connect to an environment first.", "No environment connected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                // call the service.execute method to force connecting to an environment now
+                Service.Execute(new WhoAmIRequest());
+            }
+
+            // create environment node
+            var envNode = new EnvironmentTreeNodeElement(UpdateNode, ConnectionDetail.ServerName, ConnectionDetail.EnvironmentId);
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -129,15 +116,136 @@ namespace WhatBreaksIf
             CloseTool();
         }
 
+        private void btnStartQueries_Click(object sender, EventArgs eventArgs)
+        {
+            LogInfo("Starting....");
+
+            var targetUser = tbTargetUserEmail.Text;
+            bool checkFlowOwners = cbCheckFlowOwners.Checked;
+            bool checkConnectionReferences = cbCheckConnectionReferences.Checked;
+
+            // disable controls
+            tbTargetUserEmail.Enabled = false;
+            cbCheckFlowOwners.Enabled = false;
+            cbCheckConnectionReferences.Enabled = false;
+            btnStartQueries.Enabled = false;
+
+            LogInfo($"Will search the following for {targetUser}:" +
+                $" Flow Ownership: {(cbCheckFlowOwners.Checked ? "yes" : "no")}" +
+                $" Connection References: {(cbCheckConnectionReferences.Checked ? "yes" : "no")}" +
+                $" ...");
+
+
+            // get all selected environments
+            LogInfo("Getting all selected environments....");
+            List<string> targetEnvironments = new List<string>();
+
+            LogInfo($"Will query {targetEnvironments.Count} environments");
+
+            // always add the current environment from the plugin connection
+            // TODO: Implement plugin that can handle multiple connections
+            targetEnvironments.Add(ConnectionDetail.EnvironmentId);
+
+            // do this foreach of the environments
+            foreach (var targetEnvironmentId in targetEnvironments)
+            {
+                LogInfo($"Processing environment {0}", targetEnvironmentId); 
+                if (checkFlowOwners)
+                {
+                    WorkAsync(new WorkAsyncInfo
+                    {
+                        Message = "Getting Flow Ownership",
+                        Work = (worker, args) =>
+                        {
+                            GetAllFlowsOwnedByUserInEnvironment(targetUser, targetEnvironmentId, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                        },
+                        ProgressChanged = e =>
+                        {
+                            // TODO: Display the flow that was retrieved and update progressbar
+
+                            // e.UserState is the object that was returned by the API
+                            // e.ProgressPercentage is the progress of the query - probably useless right now because we do not have progress reporting implemented and it will be difficult since we run multithreaded for several environemnts
+
+                            // todo: maybe get rid of the dynamic and use a typed object
+                            dynamic flowObj = e.UserState;
+                            string flowName = flowObj.FlowName;
+                            string flowId = flowObj.FlowId;
+                            string environmentId = flowObj.EnvironmentId;
+
+                            // create treenodeelement
+                            new FlowTreeNodeElement(UpdateNode,
+                                                    parentNodeElement: null,
+                                                    flowName: flowName,
+                                                    flowId: flowId,
+                                                    environmentId: environmentId,
+                                                    environmentName: "EnvironmentName");
+
+                        },
+                        PostWorkCallBack = (args) =>
+                        {
+                            if (args.Error != null)
+                            {
+                                MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            var result = args.Result;
+
+                            // all the flows should already be displayed in the UI since we report continuously on them
+
+                            LogInfo("Finished Flow Ownership query.");
+                        },
+                        AsyncArgument = null,
+                        // Progress information panel size
+                        MessageWidth = 340,
+                        MessageHeight = 150
+                    });
+                }
+
+                if (checkConnectionReferences)
+                    {
+                        WorkAsync(new WorkAsyncInfo
+                        {
+                            Message = "Getting Connection References",
+                            Work = (worker, args) =>
+                            {
+                                GetAllConnectionReferencesOwnedByUserInEnvironment(targetUser, targetEnvironmentId, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                            },
+                            ProgressChanged = e =>
+                            {
+                                // TODO: Display the flow that was retrieved and update progressbar
+                            },
+                            PostWorkCallBack = (args) =>
+                            {
+                                if (args.Error != null)
+                                {
+                                    MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+                                var result = args.Result;
+
+                                // all the connectionreferences should already be displayed in the UI since we report continuously on them
+
+                                LogInfo("Finished Connection References query.");
+                            },
+                            AsyncArgument = null,
+                            // Progress information panel size
+                            MessageWidth = 340,
+                            MessageHeight = 150
+                        });
+                    }
+            }
+
+
+
+            // --- careful, all the stuff above runs async, so this will run before the queries are done ----
+        }
+
+        private void tbTargetUserEmail_TextChanged(object sender, EventArgs e)
+        {
+            // enable the button if the text is not empty
+            btnStartQueries.Enabled = !string.IsNullOrEmpty(tbTargetUserEmail.Text);
+        }
+
 
         #endregion
-
-
-        #region Helpers
-
-
-        #endregion
-
 
         #region Methods
 
@@ -146,40 +254,130 @@ namespace WhatBreaksIf
         /// This will be called async later but this method is not supposed to handle async code itself
         /// </summary>
         /// <param name="userId"></param>
-        private object GetAllFlowsOwnedByUser(string userId)
+        /// <param name="ProgressChanged">Event handler that will be called each time the progress changes</param>
+        private void GetAllFlowsOwnedByUserInEnvironment(string userId, string targetEnvironmentId, Action<ProgressChangedEventArgs> ProgressChanged)
         {
-            // wait 5 seconds for demo purposes
-            System.Threading.Thread.Sleep(5000);
-
             // auth
 
             // call api
 
-            // transform response
+            // report progress for every flow that is returned by the API
+            for (int i = 0; i < 10; i++)
+            {
+                // wait 2 seconds for demo purposes
+                System.Threading.Thread.Sleep(2000);
 
-            // report back
 
-            return "We just pretend we have something here";
+                // call api
+
+                // get flow informnation 
+                var returnObj = new { 
+                    Index = i,
+                    FlowName = $"Flow_XYZ{i}",
+                    FlowId = i.ToString(),
+                    EnvironmentId = targetEnvironmentId,
+                };
+
+                // report progress
+                ProgressChanged(new ProgressChangedEventArgs(i * 10, returnObj));
+            }
         }
 
-        private object GetAllConnectionReferencesOwnedByUser(string userId)
+        private void GetAllConnectionReferencesOwnedByUserInEnvironment(string userId, string environmentId, Action<ProgressChangedEventArgs> ProgressChanged)
         {
-            // wait 10 seconds for demo purposes
-            System.Threading.Thread.Sleep(10000);
-
             // auth
 
             // call api
 
-            // transform response
+            // report progress for every flow that is returned by the API
+            for (int i = 0; i < 10; i++)
+            {
+                // wait 2 seconds for demo purposes
+                System.Threading.Thread.Sleep(2000);
 
-            // report back
+                var returnObj = new { Index = i, FlowName = $"ConnectionReference_XYZ{i}" };
 
-            return "We just pretend we have something here";
+                // report progress
+                ProgressChanged(new ProgressChangedEventArgs(i * 10, returnObj));
+            }
+        }
+
+        private void UpdateNode(NodeUpdateObject nodeUpdateObject)
+        {
+            // because this might be called from a different thread
+            if (treeView1.InvokeRequired)
+            {
+                treeView1.Invoke(new _updateTreeNodeDelegate(UpdateNode), nodeUpdateObject);
+            }
+            else
+            {
+                try
+                {
+                    switch (nodeUpdateObject.UpdateReason)
+                    {
+                        case UpdateReason.AddedToList:
+                            var parentNode = treeView1.Nodes.Find(nodeUpdateObject.ParentNodeId, true).FirstOrDefault();
+                            if (parentNode == null)
+                            {
+                                // create a new top level node
+                                var createNode = new TreeNode
+                                {
+                                    Name = nodeUpdateObject.NodeId,
+                                    Text = nodeUpdateObject.NodeText,
+                                    ForeColor = System.Drawing.Color.Black,
+                                    Tag = nodeUpdateObject.TreeNodeElement,
+                                    //ToolTipText = "n/a",
+                                    Checked = true
+                                };
+                                treeView1.Nodes.Add(createNode);
+                                createNode.Expand();
+
+                            }
+                            else
+                            {
+                                // add under an existing node
+                                var createNode = new TreeNode
+                                {
+                                    Name = nodeUpdateObject.NodeId,
+                                    Text = nodeUpdateObject.NodeText,
+                                    ForeColor = System.Drawing.Color.Black,
+                                    Tag = nodeUpdateObject.TreeNodeElement,
+                                    //ToolTipText = "n/a",
+                                    Checked = true
+                                };
+                                parentNode.Nodes.Add(createNode);
+                                parentNode.Expand();
+                            }
+                            break;
+
+                        // this is used so we can update nodes in the UI that are already there with additional details
+                        case UpdateReason.DetailsAdded:
+                            var updateNode = treeView1.Nodes.Find(nodeUpdateObject.NodeId, true).FirstOrDefault();
+                            updateNode.ForeColor = System.Drawing.Color.Black;
+                            updateNode.Tag = nodeUpdateObject.TreeNodeElement;
+                            //updateNode.ToolTipText = "n/a.";
+                            updateNode.Checked = true;
+
+                            break;
+
+                        case UpdateReason.RemovedFromList:
+                            // not implemented
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    LogError("Exception building the TreeView. This is not critical but weird.");
+                    LogError(ex.Message + " " + ex.StackTrace);
+                }
+            }
         }
 
         #endregion
-
 
         #region overrides
 
@@ -249,104 +447,105 @@ namespace WhatBreaksIf
 
         #endregion
 
-        private void btnStartQueries_Click(object sender, EventArgs eventArgs)
+        // This object is only used to transfer data to update the UI, it is not meant to hold any data on itself
+        internal class NodeUpdateObject
         {
-            LogInfo("Starting....");
+            internal UpdateReason UpdateReason { get; set; }
+            internal string NodeId { get { return TreeNodeElement.ElementId; } }
+            internal string ParentNodeId { get; set; }
+            internal string NodeText { get; set; }
+            internal TreeNodeElementBase TreeNodeElement { get; set; }
+        }
 
-            var targetUser = tbTargetUserEmail.Text;
-            bool checkFlowOwners = cbCheckFlowOwners.Checked;
-            bool checkConnectionReferences = cbCheckConnectionReferences.Checked;
+        internal enum UpdateReason
+        {
+            AddedToList,
+            RemovedFromList,
+            DetailsAdded
+        }
 
-            // disable controls
-            tbTargetUserEmail.Enabled = false;
-            cbCheckFlowOwners.Enabled = false;
-            cbCheckConnectionReferences.Enabled = false;
-            btnStartQueries.Enabled = false;
+        // this base class is used so we can display different types of objects in the treeview. Abstract because we enforce typed implementations
+        internal abstract class TreeNodeElementBase
+        {
+            private readonly Action<NodeUpdateObject> updateNodeUi;
 
-            LogInfo($"Will search the following for {targetUser}:" +
-                $" Flow Ownership: {(cbCheckFlowOwners.Checked ? "yes" : "no")}" +
-                $" Connection References: {(cbCheckConnectionReferences.Checked ? "yes" : "no")}" +
-                $" ...");
+            public string ElementId { get; set; }
 
-            if (checkFlowOwners)
+            internal abstract IEnumerable<TreeNodeElementBase> ChildObjects { get; }
+
+            internal abstract TreeNodeElementBase Parent { get; }
+
+            public TreeNodeElementBase(Action<NodeUpdateObject> updateNodeUi)
             {
-                WorkAsync(new WorkAsyncInfo
+                this.updateNodeUi = updateNodeUi;
+            }
+        }
+
+        // implementation of TreeNodeElementBase, this one is used to display Environments in the treeview
+        internal class EnvironmentTreeNodeElement : TreeNodeElementBase
+        {
+            public string EnvironmentName { get; set; }
+
+            public string EnvironmentId { get; set; }
+
+            public EnvironmentTreeNodeElement(Action<NodeUpdateObject> updateNodeUi, string environmentName, string environmentId) : base(updateNodeUi)
+            {
+                EnvironmentName = environmentName;
+                EnvironmentId = environmentId;
+
+                // constructor for the environment tree node was called, update the UI to display it. This needs to happen after the backing fields of the properties have been set!
+                updateNodeUi(new NodeUpdateObject()
                 {
-                    Message = "Getting Flow Ownership",
-                    Work = (worker, args) =>
-                    {
-                        var result = GetAllFlowsOwnedByUser(targetUser);
-
-                        // TODO: Implement progress reporting
-                        worker.ReportProgress(100, result);
-                        args.Result = result;
-                    },
-                    ProgressChanged = e =>
-                    {
-                        SetWorkingMessage(e.ToString());
-                    },
-                    PostWorkCallBack = (args) =>
-                    {
-                        if (args.Error != null)
-                        {
-                            MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        var result = args.Result;
-
-                        // TODO: do something with the result
-
-                        LogInfo("Finished Flow Ownership query.");
-                    },
-                    AsyncArgument = null,
-                    // Progress information panel size
-                    MessageWidth = 340,
-                    MessageHeight = 150
+                    TreeNodeElement = this,
+                    NodeText = EnvironmentName,
+                    UpdateReason = UpdateReason.AddedToList
                 });
             }
 
-            if (checkConnectionReferences)
+            internal List<TreeNodeElementBase> EnvironmentNodeElements { get;} = new List<TreeNodeElementBase>();
+
+            internal override TreeNodeElementBase Parent => null; // this is the top level node
+
+            internal override IEnumerable<TreeNodeElementBase> ChildObjects => EnvironmentNodeElements;
+        }
+
+        // one implementation of TreeNodeElementBase, this one is used to display Flows in the treeview
+        internal class FlowTreeNodeElement : EnvironmentTreeNodeElement
+        {
+            internal TreeNodeElementBase _parentNodeElement;
+
+            public string FlowName { get; set; }
+
+            public string FlowId { get; set; }
+
+            public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments{EnvironmentId}/solutions/~preferred/flows/{FlowId})"); }
+
+            public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
+                                      TreeNodeElementBase parentNodeElement,
+                                      string flowName,
+                                      string flowId,
+                                      string environmentId,
+                                      string environmentName) : base(updateNodeUiDelegate, environmentName, environmentId)
             {
-                WorkAsync(new WorkAsyncInfo
+                // ctor has been called, this means we need to call the update method to display the flow in the UI
+                // TODO Implement logic for updating object that already exist
+
+                updateNodeUiDelegate(new NodeUpdateObject()
                 {
-                    Message = "Getting Connection References",
-                    Work = (worker, args) =>
-                    {
-                        var result = GetAllConnectionReferencesOwnedByUser(targetUser);
-
-                        // TODO: Implement progress reporting
-                        worker.ReportProgress(100, result);
-                        args.Result = result;
-                    },
-                    ProgressChanged = e =>
-                    {
-                        SetWorkingMessage(e.ToString());
-                    },
-                    PostWorkCallBack = (args) =>
-                    {
-                        if (args.Error != null)
-                        {
-                            MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        var result = args.Result;
-
-                        // TODO: do something with the result
-
-                        LogInfo("Finished Connection References query.");
-                    },
-                    AsyncArgument = null,
-                    // Progress information panel size
-                    MessageWidth = 340,
-                    MessageHeight = 150
+                    TreeNodeElement = this,
+                    ParentNodeId = (parentNodeElement != null) ? _parentNodeElement.ElementId.ToString() : null,
+                    NodeText = FlowName,
+                    UpdateReason = UpdateReason.AddedToList
                 });
+                _parentNodeElement = parentNodeElement;
             }
 
-            // --- careful, all the stuff above runs async, so this will run before the queries are done ----
+            // right now we dont have any child objects, but we could have them in the future, for example to show connection references that sit under a flow
+            internal override IEnumerable<TreeNodeElementBase> ChildObjects => throw new NotImplementedException();
+
+            internal override TreeNodeElementBase Parent => _parentNodeElement;
         }
 
-        private void tbTargetUserEmail_TextChanged(object sender, EventArgs e)
-        {
-            // enable the button if the text is not empty
-            btnStartQueries.Enabled = !string.IsNullOrEmpty(tbTargetUserEmail.Text);
-        }
+        // TODO: Implement ConnectionReferenceTreeNodeElement
     }
 }
