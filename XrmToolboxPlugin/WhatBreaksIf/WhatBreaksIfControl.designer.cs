@@ -39,12 +39,13 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lbDebugOutput = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnStartQueries = new System.Windows.Forms.Button();
+            this.btnExportToExcel = new System.Windows.Forms.Button();
+            this.pbMain = new System.Windows.Forms.ProgressBar();
             this.tbTargetUserEmail = new XrmToolBox.Controls.TextBoxWithPlaceholder();
             this.cbCheckConnectionReferences = new System.Windows.Forms.CheckBox();
             this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
-            this.tbStatus = new System.Windows.Forms.TextBox();
-            this.btnStartQueries = new System.Windows.Forms.Button();
             this.toolStripMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -61,7 +62,7 @@
             this.tssSeparator1});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
-            this.toolStripMenu.Size = new System.Drawing.Size(1417, 25);
+            this.toolStripMenu.Size = new System.Drawing.Size(1428, 25);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
@@ -93,7 +94,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1417, 790);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1428, 736);
             this.tableLayoutPanel1.TabIndex = 13;
             // 
             // tabControl1
@@ -105,7 +106,7 @@
             this.tabControl1.Name = "tabControl1";
             this.tableLayoutPanel1.SetRowSpan(this.tabControl1, 2);
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1055, 778);
+            this.tabControl1.Size = new System.Drawing.Size(1066, 724);
             this.tabControl1.TabIndex = 15;
             this.tabControl1.TabStop = false;
             // 
@@ -115,7 +116,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1047, 752);
+            this.tabPage1.Size = new System.Drawing.Size(1058, 698);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Overview";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -126,7 +127,7 @@
             this.treeView1.Location = new System.Drawing.Point(3, 3);
             this.treeView1.Name = "treeView1";
             this.treeView1.ShowNodeToolTips = true;
-            this.treeView1.Size = new System.Drawing.Size(1041, 746);
+            this.treeView1.Size = new System.Drawing.Size(1052, 692);
             this.treeView1.TabIndex = 1;
             // 
             // tabPage2
@@ -135,7 +136,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1047, 752);
+            this.tabPage2.Size = new System.Drawing.Size(1058, 698);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Log Output";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -155,24 +156,55 @@
             this.lbDebugOutput.Name = "lbDebugOutput";
             this.lbDebugOutput.ScrollAlwaysVisible = true;
             this.lbDebugOutput.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbDebugOutput.Size = new System.Drawing.Size(1041, 746);
+            this.lbDebugOutput.Size = new System.Drawing.Size(1052, 692);
             this.lbDebugOutput.TabIndex = 11;
             this.lbDebugOutput.TabStop = false;
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btnStartQueries);
+            this.panel1.Controls.Add(this.btnExportToExcel);
+            this.panel1.Controls.Add(this.pbMain);
             this.panel1.Controls.Add(this.tbTargetUserEmail);
             this.panel1.Controls.Add(this.cbCheckConnectionReferences);
             this.panel1.Controls.Add(this.cbCheckFlowOwners);
             this.panel1.Controls.Add(this.lblWarning);
-            this.panel1.Controls.Add(this.tbStatus);
-            this.panel1.Controls.Add(this.btnStartQueries);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(6, 6);
             this.panel1.Name = "panel1";
             this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
-            this.panel1.Size = new System.Drawing.Size(344, 778);
+            this.panel1.Size = new System.Drawing.Size(344, 724);
             this.panel1.TabIndex = 12;
+            // 
+            // btnStartQueries
+            // 
+            this.btnStartQueries.Enabled = false;
+            this.btnStartQueries.Location = new System.Drawing.Point(107, 217);
+            this.btnStartQueries.Name = "btnStartQueries";
+            this.btnStartQueries.Size = new System.Drawing.Size(127, 23);
+            this.btnStartQueries.TabIndex = 16;
+            this.btnStartQueries.Text = "Start";
+            this.btnStartQueries.UseVisualStyleBackColor = true;
+            this.btnStartQueries.Click += new System.EventHandler(this.btnStartQueries_Click);
+            // 
+            // btnExportToExcel
+            // 
+            this.btnExportToExcel.Enabled = false;
+            this.btnExportToExcel.Location = new System.Drawing.Point(131, 246);
+            this.btnExportToExcel.Name = "btnExportToExcel";
+            this.btnExportToExcel.Size = new System.Drawing.Size(75, 23);
+            this.btnExportToExcel.TabIndex = 31;
+            this.btnExportToExcel.Text = "Export";
+            this.btnExportToExcel.UseVisualStyleBackColor = true;
+            // 
+            // pbMain
+            // 
+            this.pbMain.Enabled = false;
+            this.pbMain.Location = new System.Drawing.Point(3, 297);
+            this.pbMain.Name = "pbMain";
+            this.pbMain.Size = new System.Drawing.Size(338, 23);
+            this.pbMain.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.pbMain.TabIndex = 30;
             // 
             // tbTargetUserEmail
             // 
@@ -218,26 +250,6 @@
             this.lblWarning.TabIndex = 26;
             this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
-            // tbStatus
-            // 
-            this.tbStatus.Enabled = false;
-            this.tbStatus.Location = new System.Drawing.Point(3, 334);
-            this.tbStatus.Name = "tbStatus";
-            this.tbStatus.Size = new System.Drawing.Size(338, 20);
-            this.tbStatus.TabIndex = 22;
-            this.tbStatus.Text = "Not started";
-            // 
-            // btnStartQueries
-            // 
-            this.btnStartQueries.Enabled = false;
-            this.btnStartQueries.Location = new System.Drawing.Point(95, 255);
-            this.btnStartQueries.Name = "btnStartQueries";
-            this.btnStartQueries.Size = new System.Drawing.Size(127, 23);
-            this.btnStartQueries.TabIndex = 16;
-            this.btnStartQueries.Text = "Start";
-            this.btnStartQueries.UseVisualStyleBackColor = true;
-            this.btnStartQueries.Click += new System.EventHandler(this.btnStartQueries_Click);
-            // 
             // WhatBreaksIfControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -245,7 +257,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.toolStripMenu);
             this.Name = "WhatBreaksIfControl";
-            this.Size = new System.Drawing.Size(1417, 815);
+            this.Size = new System.Drawing.Size(1428, 761);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
@@ -267,7 +279,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label lblWarning;
-        private System.Windows.Forms.TextBox tbStatus;
         private System.Windows.Forms.Button btnStartQueries;
         private XrmToolBox.Controls.TextBoxWithPlaceholder tbTargetUserEmail;
         private System.Windows.Forms.CheckBox cbCheckConnectionReferences;
@@ -277,5 +288,7 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.ListBox lbDebugOutput;
         private PersonalViewMigrationTool.CustomTreeViewControl treeView1;
+        private System.Windows.Forms.ProgressBar pbMain;
+        private System.Windows.Forms.Button btnExportToExcel;
     }
 }

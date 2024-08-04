@@ -78,8 +78,10 @@
     <Compile Include="Model\Environments.cs" />
     <Compile Include="Model\FlowPermissions.cs" />
     <Compile Include="Model\FlowsInEnvironment.cs" />
+    <Compile Include="TreeViewUI\ConnectionReferenceTreeNodeElement.cs" />
     <Compile Include="TreeViewUI\EnvironmentTreeNodeElement.cs" />
     <Compile Include="TreeViewUI\FlowTreeNodeElement.cs" />
+    <Compile Include="TreeViewUI\DirectoryTreeNode.cs" />
     <Compile Include="TreeViewUI\TreeNodeElementBase.cs" />
     <Compile Include="WhatBreaksIf.cs" />
     <Compile Include="WhatBreaksIfControl.cs">
