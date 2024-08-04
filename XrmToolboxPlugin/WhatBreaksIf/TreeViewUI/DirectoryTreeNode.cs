@@ -12,7 +12,7 @@ namespace WhatBreaksIf.TreeViewUI
     internal class DirectoryTreeNode : TreeNodeElementBase
     {
         private readonly string directoryName;
-        private EnvironmentTreeNodeElement parentNodeElement;
+        public EnvironmentTreeNodeElement parentNodeElement;
         internal List<TreeNodeElementBase> childNodeElements { get; } = new List<TreeNodeElementBase>();
 
         public DirectoryTreeNode(Action<NodeUpdateObject> updateNodeUi,

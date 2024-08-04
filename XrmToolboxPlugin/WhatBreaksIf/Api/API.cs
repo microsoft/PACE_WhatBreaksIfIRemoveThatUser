@@ -1,5 +1,6 @@
 ﻿using Microsoft.Identity.Client;
 using Newtonsoft.Json;
+using NuGet.Protocol;
 using System;
 using System.Activities.Statements;
 using System.Collections.Generic;
@@ -12,28 +13,29 @@ using WhatBreaksIf.Model;
 
 namespace WhatBreaksIf
 {
+
+    //Get-AdminFlowOwnerRole
+    //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/flows/{flowName}/permissions?api-version={apiVersion}" `
+
+    //Get Environment (by name)
+    //"https://{bapEndpoint}/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentName}?`$$expandParameter&api-version={apiVersion}"
+
+    //Get Environments (all environments)
+    //"https://{bapEndpoint}/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments?`$$expandParameter&api-version={apiVersion}"
+
+    //Get-AdminFlow (by environment, name)
+    //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/flows/{flowName}?api-version={apiVersion}&`$top={top}$($includeDeletedParam)"
+
+    //Get-AdminFlows (by environment)
+    //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/v2/flows?api-version={apiVersion}&`$top={top}$($includeDeletedParam)"
+
+    //Get-UsersOrGroupsFromGraph
+    //$GraphApiVersion = "1.6"
+    //"https://graph.windows.net/myorganization/users?filter={filter}&api-version={graphApiVersion}"
+    //"startswith(userPrincipalName,'$SearchString') or startswith(displayName,'$SearchString')"
+
     public static class API
     {
-        //Get-AdminFlowOwnerRole
-        //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/flows/{flowName}/permissions?api-version={apiVersion}" `
-
-        //Get Environment (by name)
-        //"https://{bapEndpoint}/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentName}?`$$expandParameter&api-version={apiVersion}"
-
-        //Get Environments (all environments)
-        //"https://{bapEndpoint}/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments?`$$expandParameter&api-version={apiVersion}"
-
-        //Get-AdminFlow (by environment, name)
-        //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/flows/{flowName}?api-version={apiVersion}&`$top={top}$($includeDeletedParam)"
-
-        //Get-AdminFlows (by environment)
-        //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/v2/flows?api-version={apiVersion}&`$top={top}$($includeDeletedParam)"
-
-        //Get-UsersOrGroupsFromGraph
-        //$GraphApiVersion = "1.6"
-        //"https://graph.windows.net/myorganization/users?filter={filter}&api-version={graphApiVersion}"
-        //"startswith(userPrincipalName,'$SearchString') or startswith(displayName,'$SearchString')"
-
         static IPublicClientApplication app = null;
 
         public enum AuthType
@@ -43,6 +45,7 @@ namespace WhatBreaksIf
             Graph
         }
 
+        #region Authentication
         public static async Task<AuthenticationResult> AuthenticateAsync(AuthType authType)
         {
             string[] scopes = null;
@@ -87,7 +90,9 @@ namespace WhatBreaksIf
 
             return result;
         }
+        #endregion
 
+        #region Graph calls
         public static async Task<string> GetUserIdFromGraph(string accesstoken, string user, Action<string, object[]> LogInfo)
         {
             string graphApiVersion = "1.6";
@@ -113,7 +118,9 @@ namespace WhatBreaksIf
                 }
             }
         }
+        #endregion
 
+        #region PowerApps calls
         public static async Task<EnvironmentList> GetAllEnvironmentsInTenantAsync(string accesstoken, Action<string, object[]> LogInfo)
         {
             string apiversion = "2016-11-01";
@@ -139,8 +146,10 @@ namespace WhatBreaksIf
 
             return environmentsList;
         }
+        #endregion
 
-        public static async Task<EnvironmentList> GetAllFlowPermissions(string userId, string targetEnvironmentId, EnvironmentList environmentList, string accesstoken)
+        #region Flow Calls
+        public static async Task<EnvironmentList> GetAllFlowPermissions(string userId, string targetEnvironmentId, EnvironmentList environmentList, string accesstoken, Action<ProgressChangedEventArgs> ProgressChanged)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
@@ -166,6 +175,25 @@ namespace WhatBreaksIf
                         else
                         {
                             // Handle the error here
+                        }
+                    }
+
+                    //Report owner found to the UI?
+                    //TODO - WIP
+                    foreach (var permission in flow.permissions)
+                    {
+                        if (permission.properties.roleName == "Owner" &&
+                                        permission.properties.principal.id == userId)
+                        {
+                            var returnObj = new
+                            {
+                                FlowName = flow.properties.displayName,
+                                FlowId = flow.name,
+                                EnvironmentId = environment.name,
+                                EnvironmentName = environment.properties.displayName,
+                            };
+
+                            ProgressChanged(new ProgressChangedEventArgs(70, returnObj));
                         }
                     }
                 }
@@ -204,6 +232,7 @@ namespace WhatBreaksIf
 
             return environments;
         }
+        #endregion
 
         private static void GetAllConnectionReferencesOwnedByUserInEnvironment(string userId, string environmentId, Action<ProgressChangedEventArgs> ProgressChanged)
         {
