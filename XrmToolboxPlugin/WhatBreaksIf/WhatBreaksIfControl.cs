@@ -1,15 +1,19 @@
 ﻿using McTools.Xrm.Connection;
 using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Identity.Client;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Tooling.Connector;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using WhatBreaksIf.DTO;
+using WhatBreaksIf.Model;
 using WhatBreaksIf.TreeViewUI;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
+using static WhatBreaksIf.API;
 
 namespace WhatBreaksIf
 {
@@ -137,7 +141,7 @@ namespace WhatBreaksIf
             // do this foreach of the environments
             foreach (var targetEnvironmentId in targetEnvironments)
             {
-                LogInfo($"Processing environment {0}", targetEnvironmentId); 
+                LogInfo($"Processing environment {0}", targetEnvironmentId);
                 if (checkFlowOwners)
                 {
                     WorkAsync(new WorkAsyncInfo
@@ -145,7 +149,68 @@ namespace WhatBreaksIf
                         Message = "Getting Flow Ownership",
                         Work = (worker, args) =>
                         {
-                            GetAllFlowsOwnedByUserInEnvironment(targetUser, targetEnvironmentId, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                            var AuthGraphTask = API.AuthenticateAsync(AuthType.Graph);
+                            AuthenticationResult auth = AuthGraphTask.Result;
+
+                            worker.ReportProgress(10, "Authentication PowerApps Complete");
+
+                            //LogInfo("Authentication PowerApps Complete.",new object[] { });
+
+                            var userTask = API.GetUserIdFromGraph(auth.AccessToken, "laurenva@partner.eursc.eu", LogInfo);
+                            string userid = userTask.Result;
+
+                            var AuthPATask = API.AuthenticateAsync(AuthType.PowerApps);
+                            auth = AuthPATask.Result;
+
+                            var EnvironmentsTask = API.GetAllEnvironmentsInTenantAsync(auth.AccessToken, LogInfo);
+                            EnvironmentList environments = EnvironmentsTask.Result;
+
+                            worker.ReportProgress(20, "Got all environments in tenant");
+
+                            //LogInfo("Got all environments in tenant.");
+
+                            var AuthFlowTask = API.AuthenticateAsync(AuthType.Flow);
+                            auth = AuthFlowTask.Result;
+
+                            worker.ReportProgress(30, "Authentication Flow Complete");
+
+                            //LogInfo("Authentication Flow Complete.");
+
+
+                            var flowsTask = API.GetAllFlows("", "", environments, auth.AccessToken);
+                            environments = flowsTask.Result;
+
+                            worker.ReportProgress(40, "Get All Flows Completed");
+
+                            //LogInfo("Get All Flows Completed.");
+
+                            var flowPermissionsTask = API.GetAllFlowPermissions("", "", environments, auth.AccessToken);
+                            environments = flowPermissionsTask.Result;
+
+                            worker.ReportProgress(50, "Get All Flows Permissions Completed");
+
+                            //LogInfo("Get All Flows Permissions Completed.");
+
+                            // Filter the environments based on the conditions
+                            List<Model.Environment> filteredEnvironments = new List<Model.Environment>();
+                            foreach (var environment in environments.value)
+                            {
+                                var flows = environment.flows.Where(flow =>
+                                    flow.permissions.Any(permission =>
+                                        permission.properties.roleName == "Owner" &&
+                                        permission.properties.principal.id == userid
+                                    )
+                                ).ToList();
+                                if (flows.Count > 0)
+                                {
+                                    filteredEnvironments.Add(environment);
+                                    environment.flows = flows;
+                                }
+                            }
+
+
+                            worker.ReportProgress(50, "Get All Flows Permissions Completed");
+                            //GetAllFlowsOwnedByUserInEnvironment(targetUser, targetEnvironmentId, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
                         },
                         ProgressChanged = e =>
                         {
@@ -155,18 +220,18 @@ namespace WhatBreaksIf
                             // e.ProgressPercentage is the progress of the query - probably useless right now because we do not have progress reporting implemented and it will be difficult since we run multithreaded for several environemnts
 
                             // todo: maybe get rid of the dynamic and use a typed object
-                            dynamic flowObj = e.UserState;
-                            string flowName = flowObj.FlowName;
-                            string flowId = flowObj.FlowId;
-                            string environmentId = flowObj.EnvironmentId;
+                            //dynamic flowObj = e.UserState;
+                            //string flowName = flowObj.FlowName;
+                            //string flowId = flowObj.FlowId;
+                            //string environmentId = flowObj.EnvironmentId;
 
                             // create treenodeelement
-                            new FlowTreeNodeElement(UpdateNode,
+                            /* FlowTreeNodeElement(UpdateNode,
                                                     parentNodeElement: null,
                                                     flowName: flowName,
                                                     flowId: flowId,
                                                     environmentId: environmentId,
-                                                    environmentName: "EnvironmentName");
+                                                    environmentName: "EnvironmentName");*/
 
                         },
                         PostWorkCallBack = (args) =>
@@ -189,36 +254,36 @@ namespace WhatBreaksIf
                 }
 
                 if (checkConnectionReferences)
+                {
+                    WorkAsync(new WorkAsyncInfo
                     {
-                        WorkAsync(new WorkAsyncInfo
+                        Message = "Getting Connection References",
+                        Work = (worker, args) =>
                         {
-                            Message = "Getting Connection References",
-                            Work = (worker, args) =>
+                            GetAllConnectionReferencesOwnedByUserInEnvironment(targetUser, targetEnvironmentId, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                        },
+                        ProgressChanged = e =>
+                        {
+                            // TODO: Display the flow that was retrieved and update progressbar
+                        },
+                        PostWorkCallBack = (args) =>
+                        {
+                            if (args.Error != null)
                             {
-                                GetAllConnectionReferencesOwnedByUserInEnvironment(targetUser, targetEnvironmentId, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
-                            },
-                            ProgressChanged = e =>
-                            {
-                                // TODO: Display the flow that was retrieved and update progressbar
-                            },
-                            PostWorkCallBack = (args) =>
-                            {
-                                if (args.Error != null)
-                                {
-                                    MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                }
-                                var result = args.Result;
+                                MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            var result = args.Result;
 
-                                // all the connectionreferences should already be displayed in the UI since we report continuously on them
+                            // all the connectionreferences should already be displayed in the UI since we report continuously on them
 
-                                LogInfo("Finished Connection References query.");
-                            },
-                            AsyncArgument = null,
-                            // Progress information panel size
-                            MessageWidth = 340,
-                            MessageHeight = 150
-                        });
-                    }
+                            LogInfo("Finished Connection References query.");
+                        },
+                        AsyncArgument = null,
+                        // Progress information panel size
+                        MessageWidth = 340,
+                        MessageHeight = 150
+                    });
+                }
             }
 
             // --- careful, all the stuff above runs async, so this will run before the queries are done ----
@@ -271,7 +336,8 @@ namespace WhatBreaksIf
                 // call api
 
                 // get flow informnation 
-                var returnObj = new { 
+                var returnObj = new
+                {
                     Index = i,
                     FlowName = $"Flow_XYZ{i}",
                     FlowId = i.ToString(),
@@ -444,7 +510,7 @@ namespace WhatBreaksIf
             }
         }
 
-#endregion
+        #endregion
 
 
         // TODO: Implement ConnectionReferenceTreeNodeElement

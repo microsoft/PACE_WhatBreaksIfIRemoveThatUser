@@ -74,6 +74,10 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="DTO\NodeUpdateObject.cs" />
+    <Compile Include="Api\API.cs" />
+    <Compile Include="Model\Environments.cs" />
+    <Compile Include="Model\FlowPermissions.cs" />
+    <Compile Include="Model\FlowsInEnvironment.cs" />
     <Compile Include="TreeViewUI\EnvironmentTreeNodeElement.cs" />
     <Compile Include="TreeViewUI\FlowTreeNodeElement.cs" />
     <Compile Include="TreeViewUI\TreeNodeElementBase.cs" />
@@ -110,6 +114,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CrmSdk.XrmTooling.WpfControls">
       <Version>9.1.1.65</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Identity.Client">
+      <Version>4.62.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.IdentityModel">
       <Version>7.0.0</Version>
