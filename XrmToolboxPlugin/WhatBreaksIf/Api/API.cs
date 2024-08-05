@@ -121,7 +121,7 @@ namespace WhatBreaksIf
         #endregion
 
         #region PowerApps calls
-        public static async Task<EnvironmentList> GetAllEnvironmentsInTenantAsync(string accesstoken, Action<string, object[]> LogInfo)
+        public static async Task<EnvironmentList> GetAllEnvironmentsInTenantAsync(string accesstoken, Action<ProgressChangedEventArgs> ProgressChanged)
         {
             string apiversion = "2016-11-01";
             EnvironmentList environmentsList = new EnvironmentList();
@@ -141,8 +141,18 @@ namespace WhatBreaksIf
                     // Handle the error here
                 }
             }
+            foreach (var environment in environmentsList.value)
+            {
+                var returnObj = new
+                {
+                    FlowName = string.Empty,
+                    FlowId = string.Empty,
+                    EnvironmentId = environment.name,
+                    EnvironmentName = environment.properties.displayName,
+                };
 
-            //LogInfo($"Found {environmentsList.value.Count} environments", new object[] { });
+                ProgressChanged(new ProgressChangedEventArgs(10, returnObj));
+            }
 
             return environmentsList;
         }
