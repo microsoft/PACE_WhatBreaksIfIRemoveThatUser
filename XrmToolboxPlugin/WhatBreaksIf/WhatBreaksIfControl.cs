@@ -17,7 +17,7 @@ using static WhatBreaksIf.API;
 
 namespace WhatBreaksIf
 {
-    public partial class WhatBreaksIfControl : PluginControlBase
+    public partial class WhatBreaksIfControl : PluginControlBase, INoConnectionRequired, IAboutPlugin
     {
         // helper class to hold information about the environment and the status of the queries
         public class EnvironmentQueryStatus
@@ -625,6 +625,11 @@ namespace WhatBreaksIf
                 lbDebugOutput.SelectedIndex = lbDebugOutput.Items.Count - 1;
                 lbDebugOutput.ClearSelected();
             }
+        }
+
+        public void ShowAboutDialog()
+        {
+            MessageBox.Show("hallo");
         }
 
         #endregion
