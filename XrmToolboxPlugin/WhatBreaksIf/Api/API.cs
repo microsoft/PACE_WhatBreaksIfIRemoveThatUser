@@ -93,7 +93,7 @@ namespace WhatBreaksIf
         #endregion
 
         #region Graph calls
-        public static async Task<string> GetUserIdFromGraph(string accesstoken, string user, Action<string, object[]> LogInfo)
+        public static async Task<string> GetUserIdFromGraph(string accesstoken, string user)
         {
             string graphApiVersion = "1.6";
             string filter = $"startswith(userPrincipalName,'{user}') or startswith(displayName,'{user}')";
@@ -113,7 +113,7 @@ namespace WhatBreaksIf
                 else
                 {
                     // Handle the error here
-                    LogInfo($"An error occurred: {response.StatusCode}", new object[] { });
+                    //LogInfo($"An error occurred: {response.StatusCode}", new object[] { });
                     return null;
                 }
             }
@@ -164,7 +164,8 @@ namespace WhatBreaksIf
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
 
-            await Task.WhenAll(environmentList.value.Select(async environment =>
+
+            await Task.WhenAll(environmentList.value.Where(x => x.name == targetEnvironmentId).Select(async environment =>
             {
                 foreach (var flow in environment.flows)
                 {
@@ -188,8 +189,6 @@ namespace WhatBreaksIf
                         }
                     }
 
-                    //Report owner found to the UI?
-                    //TODO - WIP
                     foreach (var permission in flow.permissions)
                     {
                         if (permission.properties.roleName == "Owner" &&
@@ -212,33 +211,34 @@ namespace WhatBreaksIf
             return environmentList;
         }
 
-        public static async Task<EnvironmentList> GetAllFlows(string userId, string targetEnvironmentId, EnvironmentList environments, string accesstoken)
+        public static async Task<EnvironmentList> GetAllFlowsInEnvironment(string userId, string targetEnvironmentId, EnvironmentList environments, string accesstoken)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
 
-            foreach (var environment in environments.value)
+            //foreach (var environment in environments.value)
+            //{
+            FlowList flowList = new FlowList();
+
+            using (HttpClient client = new HttpClient())
             {
-                FlowList flowList = new FlowList();
-
-                using (HttpClient client = new HttpClient())
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accesstoken);
+                string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironmentId}/v2/flows?api-version={apiVersion}";
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
                 {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accesstoken);
-                    string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment.name}/v2/flows?api-version={apiVersion}";
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseContent = await response.Content.ReadAsStringAsync();
-                        flowList = JsonConvert.DeserializeObject<FlowList>(responseContent);
-                    }
-                    else
-                    {
-                        // Handle the error here
-                    }
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    flowList = JsonConvert.DeserializeObject<FlowList>(responseContent);
                 }
-
-                environment.flows = flowList.value;
+                else
+                {
+                    // Handle the error here
+                }
             }
+
+            environments.value.Single(x => x.name == targetEnvironmentId).flows = flowList.value;
+            //environment.flows = flowList.value;
+            //}
 
             return environments;
         }

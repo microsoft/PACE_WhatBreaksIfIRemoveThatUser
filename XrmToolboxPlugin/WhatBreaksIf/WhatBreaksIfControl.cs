@@ -2,11 +2,11 @@
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Identity.Client;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Tooling.Connector;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using WhatBreaksIf.DTO;
 using WhatBreaksIf.Model;
@@ -57,7 +57,7 @@ namespace WhatBreaksIf
             public event EventHandler AllEnvironmentQueriesCompleted;
         }
 
-        public class EnvironmentCollection : Dictionary<string, EnvironmentQueryStatus>
+        public class EnvironmentCollection : Dictionary<Model.Environment, EnvironmentQueryStatus>
         {
             /// <summary>
             /// This Event is thrown when the queries of all environments have been completed.
@@ -68,10 +68,10 @@ namespace WhatBreaksIf
             { }
 
             // implement our own add method so we can subscribe to the AllQueriesCompleted event
-            public new void Add(string environmentId, EnvironmentQueryStatus targetEnvironment)
+            public new void Add(Model.Environment environment, EnvironmentQueryStatus targetEnvironment)
             {
                 targetEnvironment.AllEnvironmentQueriesCompleted += EnvironmentQueriesCompleted;
-                base.Add(environmentId, targetEnvironment);
+                base.Add(environment, targetEnvironment);
             }
 
             private void EnvironmentQueriesCompleted(object sender, EventArgs e)
@@ -153,7 +153,7 @@ namespace WhatBreaksIf
             btnStartQueries.Enabled = !string.IsNullOrEmpty(tbTargetUserEmail.Text);
         }
 
-        private void btnStartQueries_Click(object sender, EventArgs eventArgs)
+        private async void btnStartQueries_Click(object sender, EventArgs eventArgs)
         {
             pbMain.Style = ProgressBarStyle.Marquee;
             //pbMain.MarqueeAnimationSpeed = 30;
@@ -174,61 +174,99 @@ namespace WhatBreaksIf
             treeView1.Nodes.Clear();
             targetEnvironments.Clear();
 
+            AuthenticationResult auth;
+            EnvironmentList environments = new EnvironmentList();
+            string userid = string.Empty;
+
             LogInfo($"Will search the following for {targetUser}:" +
                 $" Flow Ownership: {(cbCheckFlowOwners.Checked ? "yes" : "no")}" +
                 $" Connection References: {(cbCheckConnectionReferences.Checked ? "yes" : "no")}" +
                 $" ...");
 
             // get all selected environments
-            LogInfo("Getting all selected environments....");
+            LogInfo("Getting all environments....");
 
-            // always add the current environment from the plugin connection
-            // TODO: Implement plugin that can handle multiple connections
-            targetEnvironments.Add(ConnectionDetail.EnvironmentId, new EnvironmentQueryStatus());
+            // Create a TaskCompletionSource to wait for the first WorkAsync to complete
+            var tcs = new TaskCompletionSource<bool>();
+
+            #region fetch environments
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Fetching Environments",
+                Work = (worker, args) =>
+                {
+                    var AuthGraphTask = API.AuthenticateAsync(AuthType.Graph);
+                    auth = AuthGraphTask.Result;
+
+                    var userTask = API.GetUserIdFromGraph(auth.AccessToken, targetUser);
+                    userid = userTask.Result;
+
+                    var AuthPATask = API.AuthenticateAsync(AuthType.PowerApps);
+                    auth = AuthPATask.Result;
+
+                    var EnvironmentsTask = API.GetAllEnvironmentsInTenantAsync(auth.AccessToken, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                    environments = EnvironmentsTask.Result;
+
+                    foreach (var environment in environments.value)
+                    {
+                        targetEnvironments.Add(environment, new EnvironmentQueryStatus());
+                    }
+                },
+                ProgressChanged = e =>
+                {
+
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    // Set the TaskCompletionSource result to signal completion
+                    tcs.SetResult(true);
+
+                },
+
+                //AsyncArgument = currentTargetEnvironment,
+                // Progress information panel size
+                MessageWidth = 340,
+                MessageHeight = 150
+            });
+            #endregion;
+
+            // Await the TaskCompletionSource task to wait for the first WorkAsync to complete
+            await tcs.Task;
 
             LogInfo($"Will query {targetEnvironments.Count} environments");
+
+
+            List<EnvironmentTreeNodeElement> environmentTreeNodes = new List<EnvironmentTreeNodeElement>();
+            List<DirectoryTreeNode> directoryTreeNodes = new List<DirectoryTreeNode>();
 
             // do this foreach of the environments
             foreach (var currentTargetEnvironment in targetEnvironments)
             {
                 // create environment node for the current environment
-                var environmentNode = new EnvironmentTreeNodeElement(UpdateNode, ConnectionDetail.ServerName, ConnectionDetail.EnvironmentId);
+                EnvironmentTreeNodeElement environmentNode = new EnvironmentTreeNodeElement(UpdateNode, currentTargetEnvironment.Key.properties.displayName, currentTargetEnvironment.Key.name);
+                environmentTreeNodes.Add(environmentNode);
 
                 LogInfo($"Processing environment {currentTargetEnvironment.Key}");
 
                 if (checkFlowOwners)
                 {
                     // create a directory node that holds the references to the flows so we know where in the UI to place them
-                    //var flowDirectoryNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
+                    var flowDirectoryNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
+                    directoryTreeNodes.Add(flowDirectoryNode);  
 
                     List<Model.Environment> filteredEnvironments = new List<Model.Environment>();
-                    List<EnvironmentTreeNodeElement> environmentTreeNodes = new List<EnvironmentTreeNodeElement>();
-                    List<DirectoryTreeNode> directoryTreeNodes = new List<DirectoryTreeNode>();
 
                     WorkAsync(new WorkAsyncInfo
                     {
                         Message = "Doing stuff..",
                         Work = (worker, args) =>
                         {
-                            var AuthGraphTask = API.AuthenticateAsync(AuthType.Graph);
-                            AuthenticationResult auth = AuthGraphTask.Result;
-
-                            //worker.ReportProgress(10, "Authentication PowerApps Complete");
-
-                            //LogInfo("Authentication PowerApps Complete.",new object[] { });
-
-                            var userTask = API.GetUserIdFromGraph(auth.AccessToken, targetUser, LogInfo);
-                            string userid = userTask.Result;
-
-                            var AuthPATask = API.AuthenticateAsync(AuthType.PowerApps);
-                            auth = AuthPATask.Result;
-
-                            var EnvironmentsTask = API.GetAllEnvironmentsInTenantAsync(auth.AccessToken, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
-                            EnvironmentList environments = EnvironmentsTask.Result;
-
-                            //worker.ReportProgress(20, "Got all environments in tenant");
-
-                            //LogInfo("Got all environments in tenant.");
+                            var targetEnvironment = (KeyValuePair<Model.Environment, EnvironmentQueryStatus>)args.Argument;
 
                             var AuthFlowTask = API.AuthenticateAsync(AuthType.Flow);
                             auth = AuthFlowTask.Result;
@@ -237,16 +275,21 @@ namespace WhatBreaksIf
 
                             //LogInfo("Authentication Flow Complete.");
 
-
-                            var flowsTask = API.GetAllFlows("", "", environments, auth.AccessToken);
+                            var flowsTask = API.GetAllFlowsInEnvironment("", targetEnvironment.Key.name, environments, auth.AccessToken);
                             environments = flowsTask.Result;
 
                             //worker.ReportProgress(40, "Get All Flows Completed");
 
                             //LogInfo("Get All Flows Completed.");
 
-                            var flowPermissionsTask = API.GetAllFlowPermissions(userid, "", environments, auth.AccessToken, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                            var flowPermissionsTask = API.GetAllFlowPermissions(userid, targetEnvironment.Key.name, environments, auth.AccessToken, (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
                             environments = flowPermissionsTask.Result;
+
+                            // set the query as completed after we are done
+                            targetEnvironment.Value.flowsQueryCompleted = true;
+
+                            // put the currentTargetEnvironment into the args.Result so we can access it in the PostWorkCallBack
+                            args.Result = targetEnvironment;
 
                             //worker.ReportProgress(50, "Get All Flows Permissions Completed");
 
@@ -281,31 +324,30 @@ namespace WhatBreaksIf
                             string environmentId = flowObj.EnvironmentId;
                             string environmentName = flowObj.EnvironmentName;
 
-                            DirectoryTreeNode directoryTreeNode = null;
-                            if (environmentTreeNodes.Count(node => node.EnvironmentId == environmentId) > 0)
-                            {
-                                //environmentNode = environmentTreeNodes.Single(node => node.EnvironmentId == environmentId);
-                                directoryTreeNode = directoryTreeNodes.Single(node => node.parentNodeElement.EnvironmentId == environmentId);
-                            }
-                            else
-                            {
-                                /*EnvironmentTreeNodeElement*/
-                                environmentNode = new EnvironmentTreeNodeElement(UpdateNode, environmentName, environmentId);
-                                directoryTreeNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
-                                environmentTreeNodes.Add(environmentNode);
-                                directoryTreeNodes.Add(directoryTreeNode);
-                            }
+                            //DirectoryTreeNode directoryTreeNode = null;
+                            //if (environmentTreeNodes.Count(node => node.EnvironmentId == environmentId) > 0)
+                            //{
+                            //environmentNode = environmentTreeNodes.Single(node => node.EnvironmentId == environmentId);
+                            DirectoryTreeNode directoryTreeNode = directoryTreeNodes.Single(node => node.parentNodeElement.EnvironmentId == environmentId);
+                            //}
+                            //else
+                            //{
+                            //    environmentNode = new EnvironmentTreeNodeElement(UpdateNode, environmentName, environmentId);
+                            //    directoryTreeNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
+                            //    environmentTreeNodes.Add(environmentNode);
+                            //    directoryTreeNodes.Add(directoryTreeNode);
+                            //}
 
-                            if (!string.IsNullOrEmpty(flowId))
-                            {
+                            //if (!string.IsNullOrEmpty(flowId))
+                            //{
                                 // create treenodeelement
                                 new FlowTreeNodeElement(UpdateNode,
-                                                        parentNodeElement: directoryTreeNode,
+                                                        parentNodeElement: flowDirectoryNode,
                                                         flowName: flowName,
                                                         flowId: flowId,
                                                         environmentId: environmentId
                                                         );
-                            }
+                            //}
                         },
                         PostWorkCallBack = (args) =>
                         {
@@ -319,16 +361,16 @@ namespace WhatBreaksIf
                             // The UI has been updated continuously while the queries were running and the event handler of the environment collection will handle UI after completion of everything
 
                             //For now, 1 big run of rendering. TODO: discuss if we want this or we want to go with the progresschanged option
-                            /*foreach (var environment in filteredEnvironments)
-                            {
-                                environmentNode = new EnvironmentTreeNodeElement(UpdateNode, environment.properties.displayName, environment.id);
-                                var directoryTreeNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
+                            //foreach (var environment in filteredEnvironments)
+                            //{
+                            //    environmentNode = new EnvironmentTreeNodeElement(UpdateNode, environment.properties.displayName, environment.id);
+                            //    var directoryTreeNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
 
-                                foreach (var flow in environment.flows)
-                                {
-                                    new FlowTreeNodeElement(UpdateNode, directoryTreeNode, flow.properties.displayName, flow.id, environment.id);
-                                }
-                            }*/
+                            //    foreach (var flow in environment.flows)
+                            //    {
+                            //        new FlowTreeNodeElement(UpdateNode, directoryTreeNode, flow.properties.displayName, flow.id, environment.id);
+                            //    }
+                            //}
                         },
                         AsyncArgument = currentTargetEnvironment,
                         // Progress information panel size
@@ -352,7 +394,7 @@ namespace WhatBreaksIf
 
                             GetAllConnectionReferencesOwnedByUserInEnvironment(
                                 userId: targetUser,
-                                targetEnvironmentId: currentTargetEnvironment.Key,
+                                targetEnvironmentId: currentTargetEnvironment.Key.name,
                                 ProgressChanged: (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
 
                             // set the query as completed after we are done
