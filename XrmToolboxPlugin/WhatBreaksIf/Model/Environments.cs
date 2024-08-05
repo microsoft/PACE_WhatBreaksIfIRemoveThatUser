@@ -208,8 +208,6 @@ namespace WhatBreaksIf.Model
         public string location { get; set; }
         public string name { get; set; }
         public Properties properties { get; set; }
-        public List<Flow> flows { get; set; }
-}
-
-
+        public List<Flow> flows { get; set; } = new List<Flow>();
+    }
 }

@@ -93,14 +93,16 @@ namespace WhatBreaksIf
         #endregion
 
         #region Graph calls
-        public static async Task<string> GetUserIdFromGraph(string accesstoken, string user)
+        public static async Task<string> GetUserIdFromGraph(string user)
         {
             string graphApiVersion = "1.6";
             string filter = $"startswith(userPrincipalName,'{user}') or startswith(displayName,'{user}')";
 
+            var auth = await AuthenticateAsync(AuthType.Graph);
+
             using (HttpClient client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accesstoken);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
                 string url = $"https://graph.windows.net/myorganization/users?$filter={filter}&api-version={graphApiVersion}";
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
@@ -121,14 +123,16 @@ namespace WhatBreaksIf
         #endregion
 
         #region PowerApps calls
-        public static async Task<EnvironmentList> GetAllEnvironmentsInTenantAsync(string accesstoken, Action<ProgressChangedEventArgs> ProgressChanged)
+        public static async Task<EnvironmentList> GetAllEnvironmentsInTenantAsync(Action<ProgressChangedEventArgs> ProgressChanged)
         {
             string apiversion = "2016-11-01";
             EnvironmentList environmentsList = new EnvironmentList();
 
+            var auth = await AuthenticateAsync(AuthType.PowerApps);
+
             using (HttpClient client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accesstoken);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
                 string url = "https://api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments?api-version=" + apiversion;
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
@@ -159,27 +163,36 @@ namespace WhatBreaksIf
         #endregion
 
         #region Flow Calls
-        public static async Task<EnvironmentList> GetAllFlowPermissions(string userId, string targetEnvironmentId, EnvironmentList environmentList, string accesstoken, Action<ProgressChangedEventArgs> ProgressChanged)
+        /// <summary>
+        /// Works through the targetEnvironment and adds the flow permissions under the list of flows in the property Environment.Flows
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="targetEnvironment"></param>
+        /// <param name="accesstoken"></param>
+        /// <param name="ProgressChanged"></param>
+        /// <returns></returns>
+        public static void AddFlowPermissionsToEnvironment(string userId, Model.Environment targetEnvironment, Action<ProgressChangedEventArgs> ProgressChanged)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
 
-
-            await Task.WhenAll(environmentList.value.Where(x => x.name == targetEnvironmentId).Select(async environment =>
+            if (targetEnvironment.flows != null)
             {
-                foreach (var flow in environment.flows)
+                foreach (var flow in targetEnvironment.flows)
                 {
+                    var auth = AuthenticateAsync(AuthType.PowerApps).Result;
+
                     FlowPermissionList flowPermissionList = new FlowPermissionList();
 
                     // Call the API for each environment
                     using (HttpClient client = new HttpClient())
                     {
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accesstoken);
-                        string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{environment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
-                        HttpResponseMessage response = await client.GetAsync(url);
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                        string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.id}/flows/{flow.name}/permissions?api-version={apiVersion}";
+                        HttpResponseMessage response = client.GetAsync(url).Result;
                         if (response.IsSuccessStatusCode)
                         {
-                            string responseContent = await response.Content.ReadAsStringAsync();
+                            string responseContent = response.Content.ReadAsStringAsync().Result;
                             flowPermissionList = JsonConvert.DeserializeObject<FlowPermissionList>(responseContent);
                             flow.permissions = flowPermissionList.value;
                         }
@@ -189,45 +202,46 @@ namespace WhatBreaksIf
                         }
                     }
 
-                    foreach (var permission in flow.permissions)
+                    if (flow.permissions != null)
                     {
-                        if (permission.properties.roleName == "Owner" &&
-                                        permission.properties.principal.id == userId)
+                        foreach (var permission in flow.permissions)
                         {
-                            var returnObj = new
+                            if (permission.properties.roleName == "Owner" &&
+                                            permission.properties.principal.id == userId)
                             {
-                                FlowName = flow.properties.displayName,
-                                FlowId = flow.name,
-                                EnvironmentId = environment.name,
-                                EnvironmentName = environment.properties.displayName,
-                            };
+                                var returnObj = new
+                                {
+                                    FlowName = flow.properties.displayName,
+                                    FlowId = flow.name,
+                                    EnvironmentId = targetEnvironment.name,
+                                    EnvironmentName = targetEnvironment.properties.displayName,
+                                };
 
-                            ProgressChanged(new ProgressChangedEventArgs(70, returnObj));
+                                ProgressChanged(new ProgressChangedEventArgs(70, returnObj));
+                            }
                         }
                     }
                 }
-            }));
-
-            return environmentList;
+            }
         }
 
-        public static async Task<EnvironmentList> GetAllFlowsInEnvironment(string userId, string targetEnvironmentId, EnvironmentList environments, string accesstoken)
+        public static void AddFlowsToEnvironment(string userId, Model.Environment targetEnvironment)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
 
-            //foreach (var environment in environments.value)
-            //{
             FlowList flowList = new FlowList();
+
+            var auth =  AuthenticateAsync(AuthType.Flow).Result;
 
             using (HttpClient client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accesstoken);
-                string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironmentId}/v2/flows?api-version={apiVersion}";
-                HttpResponseMessage response = await client.GetAsync(url);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironment.id}/v2/flows?api-version={apiVersion}";
+                HttpResponseMessage response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
                 {
-                    string responseContent = await response.Content.ReadAsStringAsync();
+                    string responseContent = response.Content.ReadAsStringAsync().Result;
                     flowList = JsonConvert.DeserializeObject<FlowList>(responseContent);
                 }
                 else
@@ -236,11 +250,8 @@ namespace WhatBreaksIf
                 }
             }
 
-            environments.value.Single(x => x.name == targetEnvironmentId).flows = flowList.value;
-            //environment.flows = flowList.value;
-            //}
-
-            return environments;
+            // attach flowlist to the current targetenvironment
+            targetEnvironment.flows = flowList.value;
         }
         #endregion
 
