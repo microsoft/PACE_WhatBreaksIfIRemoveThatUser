@@ -75,7 +75,7 @@ namespace WhatBreaksIf
             }
 
             private void EnvironmentQueriesCompleted(object sender, EventArgs e)
-            {
+            { 
                 // check whether all the environments in this collection are done and if they are, throw the event
                 if (this.All(x => x.Value.flowsQueryCompleted && x.Value.connectionRefsQueryCompleted))
                 {
@@ -233,11 +233,8 @@ namespace WhatBreaksIf
 
             LogInfo($"Will query {targetEnvironments.Count} environments");
 
-
             List<EnvironmentTreeNodeElement> environmentTreeNodes = new List<EnvironmentTreeNodeElement>();
             List<DirectoryTreeNode> directoryTreeNodes = new List<DirectoryTreeNode>();
-
-            // do the same again for connectionreferences
 
             // do this foreach of the environments
             foreach (var currentTargetEnvironment in targetEnvironments)
@@ -246,7 +243,7 @@ namespace WhatBreaksIf
                 EnvironmentTreeNodeElement environmentNode = new EnvironmentTreeNodeElement(UpdateNode, currentTargetEnvironment.Key.properties.displayName, currentTargetEnvironment.Key.name);
                 environmentTreeNodes.Add(environmentNode);
 
-                LogInfo($"Processing environment {currentTargetEnvironment.Key}");
+                LogInfo($"Processing environment {currentTargetEnvironment.Key.name}");
 
                 if (checkFlowOwners)
                 {
@@ -368,6 +365,7 @@ namespace WhatBreaksIf
                         MessageHeight = 150
                     });
                 }
+
             }
 
             // --- careful, all the stuff above runs async, everything below here will run immediately ----

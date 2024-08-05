@@ -180,7 +180,7 @@ namespace WhatBreaksIf
             {
                 foreach (var flow in targetEnvironment.flows)
                 {
-                    var auth = AuthenticateAsync(AuthType.PowerApps).Result;
+                    var auth = AuthenticateAsync(AuthType.Flow).Result;
 
                     FlowPermissionList flowPermissionList = new FlowPermissionList();
 
@@ -188,7 +188,7 @@ namespace WhatBreaksIf
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-                        string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.id}/flows/{flow.name}/permissions?api-version={apiVersion}";
+                        string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
                         HttpResponseMessage response = client.GetAsync(url).Result;
                         if (response.IsSuccessStatusCode)
                         {
@@ -237,7 +237,7 @@ namespace WhatBreaksIf
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-                string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironment.id}/v2/flows?api-version={apiVersion}";
+                string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironment.name}/v2/flows?api-version={apiVersion}";
                 HttpResponseMessage response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
                 {
