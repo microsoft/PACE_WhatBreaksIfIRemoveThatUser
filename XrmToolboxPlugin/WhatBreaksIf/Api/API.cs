@@ -300,7 +300,7 @@ namespace WhatBreaksIf
                         EnvironmentName = targetEnvironment.properties.displayName,
                     };
 
-                    ProgressChanged(new ProgressChangedEventArgs(70, returnObj));
+                    ProgressChanged(returnObj);
                 }
             }
 
