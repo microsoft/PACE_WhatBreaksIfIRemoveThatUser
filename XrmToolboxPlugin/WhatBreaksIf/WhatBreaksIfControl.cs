@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WhatBreaksIf.DTO;
+using WhatBreaksIf.Model;
 using WhatBreaksIf.TreeViewUI;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
@@ -175,65 +176,18 @@ namespace WhatBreaksIf
             targetEnvironments.Clear();
 
             //EnvironmentList environments = new EnvironmentList();
-            string userid = string.Empty;
 
             LogInfo($"Will search the following for {targetUser}:" +
                 $" Flow Ownership: {(cbCheckFlowOwners.Checked ? "yes" : "no")}" +
                 $" Connection References: {(cbCheckConnectionReferences.Checked ? "yes" : "no")}" +
                 $" ...");
 
-            // get all selected environments
-            LogInfo("Getting all environments....");
-
-            // Create a TaskCompletionSource to wait for the first WorkAsync to complete
-            var tcs = new TaskCompletionSource<bool>();
-
-            #region fetch environments
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = "Fetching Environments",
-                Work = (worker, args) =>
-                {
-                    var userTask = API.GetUserIdFromGraph(targetUser);
-                    userid = userTask.Result;
-
-                    var EnvironmentsTask = GetAllEnvironmentsInTenantAsync((progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
-                    var environments = EnvironmentsTask.Result;
-
-                    foreach (var environment in environments.value)
-                    {
-                        targetEnvironments.Add(environment, new EnvironmentQueryStatus());
-                    }
-                },
-                ProgressChanged = e =>
-                {
-
-                },
-                PostWorkCallBack = (args) =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-
-                    // Set the TaskCompletionSource result to signal completion
-                    tcs.SetResult(true);
-                },
-
-                //AsyncArgument = currentTargetEnvironment,
-                // Progress information panel size
-                MessageWidth = 340,
-                MessageHeight = 150
-            });
-            #endregion;
-
-            // Await the TaskCompletionSource task to wait for the first WorkAsync to complete
-            await tcs.Task;
 
             LogInfo($"Will query {targetEnvironments.Count} environments");
 
             List<EnvironmentTreeNodeElement> environmentTreeNodes = new List<EnvironmentTreeNodeElement>();
             List<DirectoryTreeNode> directoryTreeNodes = new List<DirectoryTreeNode>();
+            string userid = string.Empty;
 
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
@@ -614,5 +568,59 @@ namespace WhatBreaksIf
 
         #endregion
 
+        private void btnSelectEnvironments_Click(object sender, EventArgs eventArgs)
+        {
+            string userid = string.Empty;
+            var targetUser = tbTargetUserEmail.Text;
+
+            // get all selected environments
+            LogInfo("Getting all environments....");
+
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Fetching Environments",
+                Work = (worker, args) =>
+                {
+                    var userTask = API.GetUserIdFromGraph(targetUser);
+                    userid = userTask.Result;
+
+                    var EnvironmentsTask = GetAllEnvironmentsInTenantAsync((progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                    args.Result = EnvironmentsTask.Result; 
+                },
+                ProgressChanged = e =>
+                {
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    var environmentList =  (EnvironmentList)args.Result;
+
+                    using (var environmentSelectorForm = new EnvironmentSelector(environmentList.value))
+                    {
+                        var dialogResult = environmentSelectorForm.ShowDialog();
+                        if (dialogResult == DialogResult.OK)
+                        {
+                            foreach (var environment in environmentSelectorForm.SelectedEnvironments)
+                            {
+                                targetEnvironments.Add(environment, new EnvironmentQueryStatus());
+                            }
+                        }
+                        else
+                        {
+                        }
+                    }
+                },
+
+                //AsyncArgument = currentTargetEnvironment,
+                // Progress information panel size
+                MessageWidth = 340,
+                MessageHeight = 150
+            });
+            
+        }
     }
 }

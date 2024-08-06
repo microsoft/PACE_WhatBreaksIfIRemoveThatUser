@@ -1,4 +1,6 @@
-﻿namespace WhatBreaksIf
+﻿using WhatBreaksIf.CustomControls;
+
+namespace WhatBreaksIf
 {
     partial class WhatBreaksIfControl
     {
@@ -35,6 +37,7 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.treeView1 = new CustomTreeViewControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lbDebugOutput = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -45,7 +48,7 @@
             this.cbCheckConnectionReferences = new System.Windows.Forms.CheckBox();
             this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
-            this.treeView1 = new PersonalViewMigrationTool.CustomTreeViewControl();
+            this.btnSelectEnvironments = new System.Windows.Forms.Button();
             this.toolStripMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -121,6 +124,15 @@
             this.tabPage1.Text = "Overview";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // treeView1
+            // 
+            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView1.Location = new System.Drawing.Point(3, 3);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.ShowNodeToolTips = true;
+            this.treeView1.Size = new System.Drawing.Size(1052, 692);
+            this.treeView1.TabIndex = 1;
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.lbDebugOutput);
@@ -153,6 +165,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btnSelectEnvironments);
             this.panel1.Controls.Add(this.btnStartQueries);
             this.panel1.Controls.Add(this.btnExportToExcel);
             this.panel1.Controls.Add(this.pbMain);
@@ -201,7 +214,7 @@
             // tbTargetUserEmail
             // 
             this.tbTargetUserEmail.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.tbTargetUserEmail.Location = new System.Drawing.Point(10, 22);
+            this.tbTargetUserEmail.Location = new System.Drawing.Point(10, 79);
             this.tbTargetUserEmail.Name = "tbTargetUserEmail";
             this.tbTargetUserEmail.Placeholder = null;
             this.tbTargetUserEmail.Size = new System.Drawing.Size(274, 20);
@@ -214,7 +227,7 @@
             this.cbCheckConnectionReferences.AutoSize = true;
             this.cbCheckConnectionReferences.Checked = true;
             this.cbCheckConnectionReferences.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbCheckConnectionReferences.Location = new System.Drawing.Point(10, 85);
+            this.cbCheckConnectionReferences.Location = new System.Drawing.Point(10, 138);
             this.cbCheckConnectionReferences.Name = "cbCheckConnectionReferences";
             this.cbCheckConnectionReferences.Size = new System.Drawing.Size(172, 17);
             this.cbCheckConnectionReferences.TabIndex = 28;
@@ -226,7 +239,7 @@
             this.cbCheckFlowOwners.AutoSize = true;
             this.cbCheckFlowOwners.Checked = true;
             this.cbCheckFlowOwners.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbCheckFlowOwners.Location = new System.Drawing.Point(10, 62);
+            this.cbCheckFlowOwners.Location = new System.Drawing.Point(10, 115);
             this.cbCheckFlowOwners.Name = "cbCheckFlowOwners";
             this.cbCheckFlowOwners.Size = new System.Drawing.Size(135, 17);
             this.cbCheckFlowOwners.TabIndex = 27;
@@ -242,14 +255,15 @@
             this.lblWarning.TabIndex = 26;
             this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
-            // treeView1
+            // btnSelectEnvironments
             // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.Location = new System.Drawing.Point(3, 3);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.ShowNodeToolTips = true;
-            this.treeView1.Size = new System.Drawing.Size(1052, 692);
-            this.treeView1.TabIndex = 1;
+            this.btnSelectEnvironments.Location = new System.Drawing.Point(10, 3);
+            this.btnSelectEnvironments.Name = "btnSelectEnvironments";
+            this.btnSelectEnvironments.Size = new System.Drawing.Size(169, 27);
+            this.btnSelectEnvironments.TabIndex = 32;
+            this.btnSelectEnvironments.Text = "Select Environments";
+            this.btnSelectEnvironments.UseVisualStyleBackColor = true;
+            this.btnSelectEnvironments.Click += new System.EventHandler(this.btnSelectEnvironments_Click);
             // 
             // WhatBreaksIfControl
             // 
@@ -288,8 +302,9 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.ListBox lbDebugOutput;
-        private PersonalViewMigrationTool.CustomTreeViewControl treeView1;
+        private CustomTreeViewControl treeView1;
         private System.Windows.Forms.ProgressBar pbMain;
         private System.Windows.Forms.Button btnExportToExcel;
+        private System.Windows.Forms.Button btnSelectEnvironments;
     }
 }
