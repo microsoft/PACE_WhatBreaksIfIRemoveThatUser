@@ -82,6 +82,7 @@
     <Compile Include="EnvironmentSelector.Designer.cs">
       <DependentUpon>EnvironmentSelector.cs</DependentUpon>
     </Compile>
+    <Compile Include="ExcelExporter.cs" />
     <Compile Include="Model\ConnectionReferences.cs" />
     <Compile Include="Model\Environments.cs" />
     <Compile Include="Model\FlowPermissions.cs" />
