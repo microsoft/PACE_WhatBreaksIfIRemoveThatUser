@@ -1,13 +1,14 @@
 ﻿using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
-using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.ServiceModel.Configuration;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WhatBreaksIf.DTO;
@@ -64,24 +65,92 @@ namespace WhatBreaksIf
             /// <summary>
             /// This Event is thrown when the queries of all environments have been completed.
             /// </summary>
+            
             public event EventHandler AllEnvironmentsQueriesCompleted;
+            /// <summary>
+            /// This event is thrown when the underlying dictionary changes
+            /// </summary>
+            public event EventHandler CollectionChanged;
 
             public EnvironmentCollection() : base()
             { }
 
-            // implement our own add method so we can subscribe to the AllQueriesCompleted event
-            public new void Add(Model.Environment environment, EnvironmentQueryStatus targetEnvironment)
+            #region overrides
+
+            // these overrrides are necessary to implement our own observable event pattern
+
+            public new void Add(Model.Environment key, EnvironmentQueryStatus value)
             {
-                targetEnvironment.AllEnvironmentQueriesCompleted += EnvironmentQueriesCompleted;
-                base.Add(environment, targetEnvironment);
+                // call base method to add item to the dictionary
+                base.Add(key, value);
+
+                // invoke collection changed handlers if there are any
+                CollectionChanged?.Invoke(this, new EventArgs());
+
+                // raise environmentQueriesCompleted event if there are any handlers and if necessary
+                if (AllEnvironmentsQueriesCompleted != null)
+                {
+                    if(this.Values.All(x => x.flowsQueryCompleted && x.connectionRefsQueryCompleted))
+                    {
+                        AllEnvironmentsQueriesCompleted?.Invoke(this, new EventArgs());
+                    }
+                }
             }
+
+            public new void AddRange(IEnumerable<KeyValuePair<Model.Environment, EnvironmentQueryStatus>> items)
+            {
+                // call base method to add items to the dictionary
+                foreach (var item in items)
+                {
+                    base.Add(item.Key, item.Value);
+                }
+
+                // invoke collection changed handlers if there are any
+                CollectionChanged?.Invoke(this, new EventArgs());
+
+                // raise environmentQueriesCompleted event if there are any handlers and if necessary
+                if (AllEnvironmentsQueriesCompleted != null)
+                {
+                    if (this.Values.All(x => x.flowsQueryCompleted && x.connectionRefsQueryCompleted))
+                    {
+                        AllEnvironmentsQueriesCompleted?.Invoke(this, new EventArgs());
+                    }
+                }
+            }
+
+            public new void Clear()
+            {
+                // call base method to clear the dictionary
+                base.Clear();
+
+                // invoke collection changed handlers if there are any
+                CollectionChanged?.Invoke(this, new EventArgs());
+            }
+
+            public new bool Remove(Model.Environment key)
+            {
+                // call base method to remove the item from the dictionary
+                var result = base.Remove(key);
+
+                // invoke collection changed handlers if there are any
+                CollectionChanged?.Invoke(this, new EventArgs());
+
+                return result;
+            }
+
+            #endregion
+
 
             private void EnvironmentQueriesCompleted(object sender, EventArgs e)
             {
-                // check whether all the environments in this collection are done and if they are, throw the event
-                if (this.All(x => x.Value.flowsQueryCompleted && x.Value.connectionRefsQueryCompleted))
+                // check if handler is present before triggering
+                if (AllEnvironmentsQueriesCompleted != null)
                 {
-                    AllEnvironmentsQueriesCompleted?.Invoke(this, new EventArgs());
+                    // check whether all the environments in this collection are done and if they are, throw the event
+                    if (this.All(x => x.Value.flowsQueryCompleted && x.Value.connectionRefsQueryCompleted))
+                    {
+                        AllEnvironmentsQueriesCompleted?.Invoke(this, new EventArgs());
+                    }
                 }
             }
         }
@@ -104,11 +173,14 @@ namespace WhatBreaksIf
 
         public WhatBreaksIfControl()
         {
-            InitializeComponent();
 
             // subscribe to the event that tells us that all queries have been completed
             targetEnvironments.AllEnvironmentsQueriesCompleted += AllEnvironmentQueriesCompleted;
 
+            // subscribe to the event that the underlying list of target environments has changed
+            targetEnvironments.CollectionChanged += TargetEnvironments_CollectionChanged;
+
+            InitializeComponent();
         }
 
         #endregion
@@ -149,6 +221,29 @@ namespace WhatBreaksIf
         private void tsbClose_Click(object sender, EventArgs e)
         {
             CloseTool();
+        }
+
+        private void TargetEnvironments_CollectionChanged(object sender, EventArgs e)
+        {
+            if (!targetEnvironments.Any())
+            {
+                // there are no environments in our target list. Start and export buttons need to be disabled
+                btnExportToExcel.Enabled = false;
+                btnStartQueries.Enabled = false;
+
+                btnSelectEnvironments.Enabled = true;
+            }
+            else
+            {
+                // the list of targetenvironments is no longer empty, that means we need to enable the start button, but only if the target email adress is already there
+                if(!string.IsNullOrEmpty(tbTargetUserEmail.Text))
+                {
+                    btnStartQueries.Enabled = true;
+                }
+
+                // export button needs to be disabled, it will be enabled automatically when all queries have been completed
+                btnExportToExcel.Enabled = false;
+            }
         }
 
         private void tbTargetUserEmail_TextChanged(object sender, EventArgs e)
@@ -196,7 +291,7 @@ namespace WhatBreaksIf
                                 targetEnvironments.Add(environment, new EnvironmentQueryStatus());
                             }
                             // todo: move the tooltip stuff to an event - implement targetEnvironments to be observable
-                            tbSelectedEnvironments.Text = targetEnvironments.Count.ToString();
+                            tbSelectedEnvironments.Text = targetEnvironments.Count().ToString();
                             toolTip1.SetToolTip(tbSelectedEnvironments, string.Join(", ", targetEnvironments.Keys.Select(x => x.properties.displayName)));
                         }
                         else
@@ -206,7 +301,7 @@ namespace WhatBreaksIf
                             foreach (var environment in environmentList.value)
                             {
                                 targetEnvironments.Add(environment, new EnvironmentQueryStatus());
-                                tbSelectedEnvironments.Text = targetEnvironments.Count.ToString();
+                                tbSelectedEnvironments.Text = targetEnvironments.Count().ToString();
                                 toolTip1.SetToolTip(tbSelectedEnvironments, string.Join(", ", targetEnvironments.Keys.Select(x => x.properties.displayName)));
                             }
                         }
@@ -242,7 +337,7 @@ namespace WhatBreaksIf
                 $" Connection References: {(cbCheckConnectionReferences.Checked ? "yes" : "no")}" +
                 $" ...");
 
-            LogInfo($"Will query {targetEnvironments.Count} environments");
+            LogInfo($"Will query {targetEnvironments.Count()} environments");
 
             List<EnvironmentTreeNodeElement> environmentTreeNodes = new List<EnvironmentTreeNodeElement>();
             List<DirectoryTreeNode> directoryTreeNodes = new List<DirectoryTreeNode>();

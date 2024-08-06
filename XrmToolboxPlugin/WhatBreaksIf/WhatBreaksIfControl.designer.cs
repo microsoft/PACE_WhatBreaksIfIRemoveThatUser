@@ -193,13 +193,13 @@
             this.tbSelectedEnvironments.ReadOnly = true;
             this.tbSelectedEnvironments.Size = new System.Drawing.Size(43, 20);
             this.tbSelectedEnvironments.TabIndex = 34;
-            this.tbSelectedEnvironments.Text = "all";
+            this.tbSelectedEnvironments.Text = "none";
             this.tbSelectedEnvironments.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // lblSelectedEnvironments_description
             // 
             this.lblSelectedEnvironments_description.AutoSize = true;
-            this.lblSelectedEnvironments_description.Location = new System.Drawing.Point(0, 37);
+            this.lblSelectedEnvironments_description.Location = new System.Drawing.Point(2, 37);
             this.lblSelectedEnvironments_description.Name = "lblSelectedEnvironments_description";
             this.lblSelectedEnvironments_description.Size = new System.Drawing.Size(116, 13);
             this.lblSelectedEnvironments_description.TabIndex = 33;

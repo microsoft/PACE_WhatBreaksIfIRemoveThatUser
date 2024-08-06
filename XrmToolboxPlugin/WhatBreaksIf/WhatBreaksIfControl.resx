@@ -121,8 +121,9 @@
     <value>17, 17</value>
   </metadata>
   <data name="lblWarning.Text" xml:space="preserve">
-    <value>This tool will check for any Flows or ConnectionReferences owned by a specific user. Currently, only the environment that you are currently connected to is checked.
-Enter the email adress of the user you want to check for and press Start.
+    <value>This tool will check for any Flows or ConnectionReferences owned by a specific user.
+Click "Select Environments" first to load all the environments you currently have access to and either select some of them or all.
+Then, enter the email adress of the user you want to check for and press Start.
 
 
 Attention: This is an early version. 
