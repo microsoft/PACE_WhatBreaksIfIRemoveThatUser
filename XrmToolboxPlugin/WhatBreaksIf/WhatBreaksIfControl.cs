@@ -135,7 +135,6 @@ namespace WhatBreaksIf﻿
             }
         }
 
-
         // these delegates are used to update the UI from a different thread﻿
         private delegate void _updateLogWindowDelegate(string msg, params object[] args);
         private delegate void _updateTreeNodeDelegate(NodeUpdateObject nodeUpdateObject);
@@ -145,8 +144,6 @@ namespace WhatBreaksIf﻿
         private readonly EnvironmentCollection targetEnvironments = new EnvironmentCollection();
 
         private Settings mySettings;
-
-
 
         public WhatBreaksIfControl()
         {
@@ -158,7 +155,6 @@ namespace WhatBreaksIf﻿
             // subscribe to the event that the underlying list of target environments has changed﻿
             targetEnvironments.CollectionChanged += TargetEnvironments_CollectionChanged;
         }
-
 
         /// <summary>﻿
         /// This event occurs when the plugin is closed﻿
@@ -216,13 +212,28 @@ namespace WhatBreaksIf﻿
 
                 // export button needs to be disabled, it will be enabled automatically when all queries have been completed﻿
                 btnExportToExcel.Enabled = false;
+                tbSelectedEnvironments.Text = targetEnvironments.Count().ToString();
             }
         }
 
         private void tbTargetUserEmail_TextChanged(object sender, EventArgs e)
         {
-            // enable the button if the text is not empty﻿
-            btnStartQueries.Enabled = !string.IsNullOrEmpty(tbTargetUserEmail.Text);
+            // enable the button if the text is not empty﻿ and if targetenvironments have already been selected 
+            if (targetEnvironments.Any())
+            {
+                if (!string.IsNullOrEmpty(tbTargetUserEmail.Text))
+                {
+                    btnStartQueries.Enabled = true;
+                }
+                else
+                {
+                    btnStartQueries.Enabled = false;
+                }
+            }
+            else
+            {
+                btnStartQueries.Enabled = false;
+            }
         }
 
         private void btnSelectEnvironments_Click(object sender, EventArgs eventArgs)
@@ -263,7 +274,6 @@ namespace WhatBreaksIf﻿
                             {
                                 targetEnvironments.Add(environment, new EnvironmentQueryStatus());
                             }
-                            // todo: move the tooltip stuff to an event - implement targetEnvironments to be observable﻿
                             tbSelectedEnvironments.Text = targetEnvironments.Count().ToString();
                             toolTip1.SetToolTip(tbSelectedEnvironments, string.Join(", ", targetEnvironments.Keys.Select(x => x.properties.displayName)));
                         }
@@ -408,7 +418,6 @@ namespace WhatBreaksIf﻿
             bgw.RunWorkerAsync();
             // --- careful, all the stuff above runs async, everything below here will run immediately ----﻿
         }
-
 
         private void AllEnvironmentQueriesCompleted(object sender, EventArgs e)
         {
