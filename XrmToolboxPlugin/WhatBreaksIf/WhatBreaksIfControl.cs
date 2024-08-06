@@ -285,7 +285,7 @@ namespace WhatBreaksIf
                             string environmentId = flowObj.EnvironmentId;
                             string environmentName = flowObj.EnvironmentName;
 
-                            DirectoryTreeNode directoryTreeNode = directoryTreeNodes.Single(node => node.parentNodeElement.EnvironmentId == environmentId);
+                            DirectoryTreeNode directoryTreeNode = directoryTreeNodes.Single(node => node.parentNodeElement.EnvironmentId == environmentId && node.DirectoryName == "Flows");
 
                             // create treenodeelement
                             new FlowTreeNodeElement(UpdateNode,
@@ -314,6 +314,7 @@ namespace WhatBreaksIf
                 {
                     // create a directory node that holds the references to the connectionreferences so we know where in the UI to place them
                     var connectionReferencesDirectoryNode = new DirectoryTreeNode(UpdateNode, "Connection References", environmentNode);
+                    directoryTreeNodes.Add(connectionReferencesDirectoryNode);
 
                     WorkAsync(new WorkAsyncInfo
                     {
@@ -321,11 +322,11 @@ namespace WhatBreaksIf
                         Work = (worker, args) =>
                         {
                             // get the targetEnvironment from the args - since this is running multithreaded, we cannot be sure that currentTargetEnvironment is still the same
-                            var targetEnvironment = (KeyValuePair<string, EnvironmentQueryStatus>)args.Argument;
+                            var targetEnvironment = (KeyValuePair<Model.Environment, EnvironmentQueryStatus>)args.Argument;
 
-                            GetAllConnectionReferencesOwnedByUserInEnvironment(
-                                userId: targetUser,
-                                targetEnvironmentId: currentTargetEnvironment.Key.name,
+                            AddConnectionReferencesToEnvironment(
+                                userId: userid,
+                                targetEnvironment: targetEnvironment.Key,
                                 ProgressChanged: (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
 
                             // set the query as completed after we are done
@@ -355,7 +356,7 @@ namespace WhatBreaksIf
                                 MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                             // cast args.Result to the currentTargetEnvironment
-                            var targetEnvironmentResultObj = (KeyValuePair<string, EnvironmentQueryStatus>)args.Result;
+                            var targetEnvironmentResultObj = (KeyValuePair<Model.Environment, EnvironmentQueryStatus>)args.Result;
                             LogInfo($"Finished ConnectionReferences query for environment {targetEnvironmentResultObj.Key}.");
                             // The UI has been updated continuously while the queries were running and the event handler of the environment collection will handle UI after completion of everything
                         },

@@ -75,6 +75,7 @@
     </Compile>
     <Compile Include="DTO\NodeUpdateObject.cs" />
     <Compile Include="Api\API.cs" />
+    <Compile Include="Model\ConnectionReferences.cs" />
     <Compile Include="Model\Environments.cs" />
     <Compile Include="Model\FlowPermissions.cs" />
     <Compile Include="Model\FlowsInEnvironment.cs" />

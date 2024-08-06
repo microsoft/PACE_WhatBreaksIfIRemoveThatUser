@@ -255,23 +255,51 @@ namespace WhatBreaksIf
         }
         #endregion
 
-        private static void GetAllConnectionReferencesOwnedByUserInEnvironment(string userId, string environmentId, Action<ProgressChangedEventArgs> ProgressChanged)
+        public static void AddConnectionReferencesToEnvironment(string userId, Model.Environment targetEnvironment, Action<ProgressChangedEventArgs> ProgressChanged)
         {
-            // auth
+            string powerAppsEndpoint = "https://api.powerapps.com";
+            string apiVersion = "2016-11-01";
 
-            // call api
+            ConnectionReferencesList connectionReferencesList = new ConnectionReferencesList();
 
-            // report progress for every flow that is returned by the API
-            for (int i = 0; i < 10; i++)
+            var auth = AuthenticateAsync(AuthType.PowerApps).Result;
+
+            using (HttpClient client = new HttpClient())
             {
-                // wait 2 seconds for demo purposes
-                System.Threading.Thread.Sleep(2000);
-
-                var returnObj = new { Index = i, FlowName = $"ConnectionReference_XYZ{i}" };
-
-                // report progress
-                ProgressChanged(new ProgressChangedEventArgs(i * 10, returnObj));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                //string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironment.name}/v2/flows?api-version={apiVersion}";
+                string url = $"{powerAppsEndpoint}/providers/Microsoft.PowerApps/scopes/admin/environments/{targetEnvironment.name}/connections?api-version={apiVersion}";
+                HttpResponseMessage response = client.GetAsync(url).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = response.Content.ReadAsStringAsync().Result;
+                    connectionReferencesList = JsonConvert.DeserializeObject<ConnectionReferencesList>(responseContent);
+                }
+                else
+                {
+                    // Handle the error here
+                }
             }
+
+            //Report to UI
+            foreach (var connectionReference in connectionReferencesList.value)
+            {
+                if (connectionReference.properties.createdBy.id == userId)
+                {
+                    var returnObj = new
+                    {
+                        ConnectionReferenceName = connectionReference.name,
+                        ConnectionReferenceId = connectionReference.name,
+                        EnvironmentId = targetEnvironment.name,
+                        EnvironmentName = targetEnvironment.properties.displayName,
+                    };
+
+                    ProgressChanged(new ProgressChangedEventArgs(70, returnObj));
+                }
+            }
+
+            // attach flowlist to the current targetenvironment
+            targetEnvironment.connectionReferences = connectionReferencesList.value;
         }
     }
 }

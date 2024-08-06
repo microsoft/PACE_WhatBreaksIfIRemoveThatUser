@@ -209,5 +209,7 @@ namespace WhatBreaksIf.Model
         public string name { get; set; }
         public Properties properties { get; set; }
         public List<Flow> flows { get; set; } = new List<Flow>();
+
+        public List<ConnectionReference> connectionReferences { get; set; } = new List<ConnectionReference>();
     }
 }
