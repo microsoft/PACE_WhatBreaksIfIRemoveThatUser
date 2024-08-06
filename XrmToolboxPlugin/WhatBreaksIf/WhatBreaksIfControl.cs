@@ -1,17 +1,13 @@
 ﻿using McTools.Xrm.Connection;
-using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
-using Newtonsoft.Json;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WhatBreaksIf.DTO;
@@ -146,7 +142,6 @@ namespace WhatBreaksIf
             }
 
         }
-
         private void tsbClose_Click(object sender, EventArgs e)
         {
             CloseTool();
@@ -324,6 +319,74 @@ namespace WhatBreaksIf
                 btnStartQueries.Enabled = true;
             }
         }
+        private void btnExportToExcel_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog
+            {
+                Title = "Save an excel file",
+                Filter = "Excel files|*.xlsx"
+            };
+            saveFileDialog1.ShowDialog();
+
+            // If the file name is not an empty string open it for saving.
+            if (saveFileDialog1.FileName != "")
+            {
+                LogInfo("Exporting to {0}", saveFileDialog1.FileName);
+
+                // get all environments that have either flow or connection references
+
+                var environmentsWithFlows = targetEnvironments.Where(env => env.Key.flows.Any()).Select(x => x.Key).ToList();
+
+                using (var fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write))
+                {
+                    IWorkbook workbook = new XSSFWorkbook();
+
+                    // create a sheet for each environment
+                    foreach (var environment in environmentsWithFlows)
+                    {
+                        // create a sheet for that environment
+                        ISheet excelSheet = workbook.CreateSheet(environment.properties.displayName);
+
+
+                        List<string> columns = new List<string>() { "Type", "Id", "Name", "URL" };
+
+                        // create the header row
+                        IRow row = excelSheet.CreateRow(0);
+
+                        for (int columnIndex = 0; columnIndex < columns.Count; columnIndex++)
+                        {
+                            var columnName = columns[columnIndex];
+                            columns.Add(columnName);
+                            row.CreateCell(columnIndex).SetCellValue(columnName);
+                        }
+
+                        // create the rows
+
+                        for (int rowIndex = 1; rowIndex < environment.flows.Count; rowIndex++)
+                        {
+                            row = excelSheet.CreateRow(rowIndex);
+                            
+                            var currentFlow = environment.flows[rowIndex - 1];
+
+                            // type
+                            row.CreateCell(0).SetCellValue("Flow");
+
+                            // Id
+                            row.CreateCell(0).SetCellValue(currentFlow.id);
+
+                            // Name
+                            row.CreateCell(0).SetCellValue(currentFlow.name);
+
+                            // URL
+                            row.CreateCell(0).SetCellValue("not implemented yet :(");
+                        }
+                    }
+
+                    workbook.Write(fs);
+                }
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -551,44 +614,5 @@ namespace WhatBreaksIf
 
         #endregion
 
-        private void btnExportToExcel_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Title = "Save an excel file";
-            saveFileDialog1.ShowDialog();
-
-            // If the file name is not an empty string open it for saving.
-            if (saveFileDialog1.FileName != "")
-            {
-                using (var fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write))
-                {
-                    IWorkbook workbook = new XSSFWorkbook();
-                    ISheet excelSheet = workbook.CreateSheet("Sheet1");
-
-                    List<String> columns = new List<string>();
-                    IRow row = excelSheet.CreateRow(0);
-                    int columnIndex = 0;
-
-                    for (int i = 0; i < 10; i++)
-                    {
-                        columns.Add("Column " + columnIndex);
-                        row.CreateCell(columnIndex).SetCellValue("Column " + columnIndex);
-                        columnIndex++;
-                    }
-
-                    for (int rowIndex = 1; rowIndex < 10; rowIndex++)
-                    {
-                        row = excelSheet.CreateRow(rowIndex);
-                        int cellIndex = 0;
-                        foreach (String col in columns)
-                        {
-                            row.CreateCell(cellIndex).SetCellValue($"Row {rowIndex} Cell {cellIndex}");
-                            cellIndex++;
-                        }
-                    }
-                    workbook.Write(fs);
-                }
-            }
-        }
     }
 }
