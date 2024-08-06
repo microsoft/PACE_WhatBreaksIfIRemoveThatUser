@@ -71,7 +71,9 @@ namespace WhatBreaksIf
             public event EventHandler CollectionChanged;
 
             public EnvironmentCollection() : base()
-            { }
+            { 
+                this.AllEnvironmentsQueriesCompleted += EnvironmentQueriesCompleted;
+            }
 
             #region overrides
 
