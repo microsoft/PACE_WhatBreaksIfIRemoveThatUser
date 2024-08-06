@@ -33,6 +33,7 @@
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbClose = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbResetTool = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -51,13 +52,15 @@
             this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.tsbResetTool = new System.Windows.Forms.ToolStripButton();
+            this.tlpOverviewTab = new System.Windows.Forms.TableLayoutPanel();
+            this.rtbSidepanel = new System.Windows.Forms.RichTextBox();
             this.toolStripMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.tlpOverviewTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -85,6 +88,19 @@
             // 
             this.tssSeparator1.Name = "tssSeparator1";
             this.tssSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tsbResetTool
+            // 
+            this.tsbResetTool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbResetTool.Image = ((System.Drawing.Image)(resources.GetObject("tsbResetTool.Image")));
+            this.tsbResetTool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbResetTool.Name = "tsbResetTool";
+            this.tsbResetTool.Size = new System.Drawing.Size(71, 22);
+            this.tsbResetTool.Text = "Restart tool";
+            this.tsbResetTool.ToolTipText = "Click to reset the plugin to the initial state:\r\nRemoves the selected environment" +
+    "s, target user, log output and all Flows + Connection References that have been " +
+    "loaded.";
+            this.tsbResetTool.Click += new System.EventHandler(this.tsbResetTool_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -119,7 +135,7 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.treeView1);
+            this.tabPage1.Controls.Add(this.tlpOverviewTab);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -131,11 +147,13 @@
             // treeView1
             // 
             this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.Location = new System.Drawing.Point(3, 3);
+            this.treeView1.Location = new System.Drawing.Point(0, 0);
+            this.treeView1.Margin = new System.Windows.Forms.Padding(0);
             this.treeView1.Name = "treeView1";
             this.treeView1.ShowNodeToolTips = true;
-            this.treeView1.Size = new System.Drawing.Size(1052, 692);
+            this.treeView1.Size = new System.Drawing.Size(631, 692);
             this.treeView1.TabIndex = 1;
+            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
             // tabPage2
             // 
@@ -292,18 +310,33 @@
             this.lblWarning.TabIndex = 26;
             this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
-            // tsbResetTool
+            // tlpOverviewTab
             // 
-            this.tsbResetTool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbResetTool.Image = ((System.Drawing.Image)(resources.GetObject("tsbResetTool.Image")));
-            this.tsbResetTool.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbResetTool.Name = "tsbResetTool";
-            this.tsbResetTool.Size = new System.Drawing.Size(71, 22);
-            this.tsbResetTool.Text = "Restart tool";
-            this.tsbResetTool.ToolTipText = "Click to reset the plugin to the initial state:\r\nRemoves the selected environment" +
-    "s, target user, log output and all Flows + Connection References that have been " +
-    "loaded.";
-            this.tsbResetTool.Click += new System.EventHandler(this.tsbResetTool_Click);
+            this.tlpOverviewTab.ColumnCount = 2;
+            this.tlpOverviewTab.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
+            this.tlpOverviewTab.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            this.tlpOverviewTab.Controls.Add(this.treeView1, 0, 0);
+            this.tlpOverviewTab.Controls.Add(this.rtbSidepanel, 1, 0);
+            this.tlpOverviewTab.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpOverviewTab.Location = new System.Drawing.Point(3, 3);
+            this.tlpOverviewTab.Name = "tlpOverviewTab";
+            this.tlpOverviewTab.RowCount = 1;
+            this.tlpOverviewTab.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpOverviewTab.Size = new System.Drawing.Size(1052, 692);
+            this.tlpOverviewTab.TabIndex = 2;
+            // 
+            // rtbSidepanel
+            // 
+            this.rtbSidepanel.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.rtbSidepanel.CausesValidation = false;
+            this.rtbSidepanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbSidepanel.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rtbSidepanel.Location = new System.Drawing.Point(634, 3);
+            this.rtbSidepanel.Name = "rtbSidepanel";
+            this.rtbSidepanel.ReadOnly = true;
+            this.rtbSidepanel.Size = new System.Drawing.Size(415, 686);
+            this.rtbSidepanel.TabIndex = 2;
+            this.rtbSidepanel.Text = "";
             // 
             // WhatBreaksIfControl
             // 
@@ -322,6 +355,7 @@
             this.tabPage2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.tlpOverviewTab.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -350,5 +384,7 @@
         private System.Windows.Forms.TextBox tbSelectedEnvironments;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ToolStripButton tsbResetTool;
+        private System.Windows.Forms.TableLayoutPanel tlpOverviewTab;
+        private System.Windows.Forms.RichTextBox rtbSidepanel;
     }
 }

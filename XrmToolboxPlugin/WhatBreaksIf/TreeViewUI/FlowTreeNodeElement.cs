@@ -16,7 +16,7 @@ namespace WhatBreaksIf.TreeViewUI
 
         public string EnvironmentId { get; }
 
-        public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments{EnvironmentId}/solutions/~preferred/flows/{FlowId})"); }
+        public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments{EnvironmentId}/solutions/~preferred/flows/{FlowId}"); }
 
         public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
                                   DirectoryTreeNode parentNodeElement,

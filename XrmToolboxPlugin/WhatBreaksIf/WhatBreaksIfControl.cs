@@ -9,9 +9,11 @@ using System.Windows.Forms;
 using WhatBreaksIf.DTO;
 using WhatBreaksIf.Model;
 using WhatBreaksIf.TreeViewUI;
+using WhatBreaksIf.TreeViewUIElements;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 using static WhatBreaksIf.API;
+using Environment = System.Environment;
 
 namespace WhatBreaksIf﻿
 {
@@ -57,7 +59,6 @@ namespace WhatBreaksIf﻿
 
             public event EventHandler EnvironmentQueriesCompleted;
         }
-
         public class EnvironmentCollection : Dictionary<Model.Environment, EnvironmentQueryStatus>
         {
             /// <summary>﻿
@@ -141,6 +142,8 @@ namespace WhatBreaksIf﻿
         private readonly EnvironmentCollection targetEnvironments = new EnvironmentCollection();
 
         private Settings mySettings;
+
+        private readonly string sidePanelDefaultText = "Select environments and click start, then select any node to see the results here.";
 
         public WhatBreaksIfControl()
         {
@@ -238,6 +241,9 @@ namespace WhatBreaksIf﻿
             // clear the currently selected environments because we want to show a dialog that allows to user to make a selection﻿
             targetEnvironments.Clear();
 
+            // clear sidepanel just in case
+            rtbSidepanel.Text = sidePanelDefaultText;
+
             // get all selected environments﻿
             LogInfo("Getting all environments....");
 
@@ -308,6 +314,9 @@ namespace WhatBreaksIf﻿
             cbCheckConnectionReferences.Enabled = false;
             btnStartQueries.Enabled = false;
             btnSelectEnvironments.Enabled = false;
+
+            // clear sidepanel just in case
+            rtbSidepanel.Text = sidePanelDefaultText;
 
             // this might be not the first time that the user clicks the button, so we need to clean up﻿
             treeView1.Nodes.Clear();
@@ -477,6 +486,9 @@ namespace WhatBreaksIf﻿
 
             // log output box﻿
             lbDebugOutput.Items.Clear();
+
+            // sidepanel
+            rtbSidepanel.Text = sidePanelDefaultText;
         }
 
         /// <summary>﻿
@@ -636,5 +648,41 @@ namespace WhatBreaksIf﻿
             MessageBox.Show("hallo");
         }
 
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            // https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.treeview.afterselect?view=windowsdesktop-8.0&redirectedfrom=MSDN
+            // This event does not occur when the node is unselected. To detect whether the selection was cleared, you can test the TreeNode.IsSelected property.
+            if (e.Node.IsSelected)
+            {
+                // if this node has no tag, then do nothing
+                if (e.Node.Tag == null) return;
+
+                // check which kind of node this is
+                if (e.Node.Tag is FlowTreeNodeElement)
+                {
+                    var flowNode = e.Node.Tag as FlowTreeNodeElement;
+
+                    // get the flow details and display in the sidepanel
+                    var sidepanelText = $"Flow Name: {flowNode.FlowName}{Environment.NewLine}" +
+                        $"Flow Id: {flowNode.FlowId}{Environment.NewLine}" +
+                        $"Flow URI: {flowNode.FlowUri}{Environment.NewLine}" +
+                        $"Environment Id: {flowNode.EnvironmentId}";
+
+                    // set the sidepanel text
+                    rtbSidepanel.Text = sidepanelText;
+                }
+                else if (e.Node.Tag is ConnectionReferenceTreeNodeElement)
+                {
+                    var connectionReferenceNode = e.Node.Tag as ConnectionReferenceTreeNodeElement;
+
+                    // get the connection reference details and display in the sidepanel
+                    var sidepanelText = $"Connection Reference Name: {connectionReferenceNode.ConnectionReferenceName}{Environment.NewLine}" +
+                        $"Environment Id: {connectionReferenceNode.EnvironmentId}{Environment.NewLine}";
+
+                    // set the sidepanel text
+                    rtbSidepanel.Text = sidepanelText;
+                }
+            }
+        }
     }
 }
