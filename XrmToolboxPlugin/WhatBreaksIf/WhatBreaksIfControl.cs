@@ -1,8 +1,15 @@
 ﻿using McTools.Xrm.Connection;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -298,7 +305,7 @@ namespace WhatBreaksIf
                             }
 
                             LogInfo($"Finished processing environment {currentTargetEnvironment.Key.name}");
-                        }) ;
+                        });
             };
             bgw.RunWorkerAsync();
         }
@@ -500,7 +507,7 @@ namespace WhatBreaksIf
             if (lbDebugOutput.InvokeRequired)
             {
                 _updateLogWindowDelegate update = new _updateLogWindowDelegate(LogError);
-                lbDebugOutput.Invoke(update, text,  args);
+                lbDebugOutput.Invoke(update, text, args);
             }
             else
             {
@@ -543,5 +550,45 @@ namespace WhatBreaksIf
         }
 
         #endregion
+
+        private void btnExportToExcel_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Title = "Save an excel file";
+            saveFileDialog1.ShowDialog();
+
+            // If the file name is not an empty string open it for saving.
+            if (saveFileDialog1.FileName != "")
+            {
+                using (var fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write))
+                {
+                    IWorkbook workbook = new XSSFWorkbook();
+                    ISheet excelSheet = workbook.CreateSheet("Sheet1");
+
+                    List<String> columns = new List<string>();
+                    IRow row = excelSheet.CreateRow(0);
+                    int columnIndex = 0;
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        columns.Add("Column " + columnIndex);
+                        row.CreateCell(columnIndex).SetCellValue("Column " + columnIndex);
+                        columnIndex++;
+                    }
+
+                    for (int rowIndex = 1; rowIndex < 10; rowIndex++)
+                    {
+                        row = excelSheet.CreateRow(rowIndex);
+                        int cellIndex = 0;
+                        foreach (String col in columns)
+                        {
+                            row.CreateCell(cellIndex).SetCellValue($"Row {rowIndex} Cell {cellIndex}");
+                            cellIndex++;
+                        }
+                    }
+                    workbook.Write(fs);
+                }
+            }
+        }
     }
 }

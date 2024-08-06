@@ -189,13 +189,13 @@
             // 
             // btnExportToExcel
             // 
-            this.btnExportToExcel.Enabled = false;
             this.btnExportToExcel.Location = new System.Drawing.Point(131, 246);
             this.btnExportToExcel.Name = "btnExportToExcel";
             this.btnExportToExcel.Size = new System.Drawing.Size(75, 23);
             this.btnExportToExcel.TabIndex = 31;
             this.btnExportToExcel.Text = "Export";
             this.btnExportToExcel.UseVisualStyleBackColor = true;
+            this.btnExportToExcel.Click += new System.EventHandler(this.btnExportToExcel_Click);
             // 
             // pbMain
             // 
