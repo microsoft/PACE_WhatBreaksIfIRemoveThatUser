@@ -1,7 +1,4 @@
-﻿
-using WhatBreaksIf.CustomControls;
-
-namespace WhatBreaksIf
+﻿namespace WhatBreaksIf
 {
     partial class WhatBreaksIfControl
     {
@@ -39,7 +36,7 @@ namespace WhatBreaksIf
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.treeView1 = new WhatBreaksIf.CustomControls.CustomTreeViewControl();
+            this.treeView1 = new CustomTreeViewControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lbDebugOutput = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();

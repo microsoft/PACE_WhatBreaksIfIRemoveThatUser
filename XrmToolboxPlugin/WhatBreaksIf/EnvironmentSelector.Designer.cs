@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Windows.Controls;
-using WhatBreaksIf.CustomControls;
-
-namespace WhatBreaksIf
+﻿namespace WhatBreaksIf
 {
     partial class EnvironmentSelector
     {
