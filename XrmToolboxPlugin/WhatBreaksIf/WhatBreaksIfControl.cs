@@ -283,7 +283,7 @@ namespace WhatBreaksIf
                         var dialogResult = environmentSelectorForm.ShowDialog();
                         if (dialogResult == DialogResult.OK)
                         {
-                            LogInfo("Selected {0} environments", environmentSelectorForm.SelectedEnvironments.Count);
+                            LogInfo($"Selected {environmentSelectorForm.SelectedEnvironments.Count} environments");
                             foreach (var environment in environmentSelectorForm.SelectedEnvironments)
                             {
                                 targetEnvironments.Add(environment, new EnvironmentQueryStatus());
@@ -339,7 +339,6 @@ namespace WhatBreaksIf
 
             List<EnvironmentTreeNodeElement> environmentTreeNodes = new List<EnvironmentTreeNodeElement>();
             List<DirectoryTreeNode> directoryTreeNodes = new List<DirectoryTreeNode>();
-            string userid = string.Empty;
 
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
@@ -354,6 +353,11 @@ namespace WhatBreaksIf
                             EnvironmentTreeNodeElement environmentNode = new EnvironmentTreeNodeElement(UpdateNode, currentTargetEnvironment.Key.properties.displayName, currentTargetEnvironment.Key.name);
                             environmentTreeNodes.Add(environmentNode);
 
+                            var userTask = GetUserIdFromGraph(targetUser);
+                            var userid = userTask.Result;
+
+                            LogInfo($"Looking for {targetUser} with id {userid} in {currentTargetEnvironment.Key.name}");
+
                             LogInfo($"Processing environment {currentTargetEnvironment.Key.name}");
 
                             if (checkFlowOwners)
@@ -365,9 +369,7 @@ namespace WhatBreaksIf
                                 List<Model.Environment> filteredEnvironments = new List<Model.Environment>();
 
                                 AddFlowsToEnvironment(
-                                    userId: "",
-                                    targetEnvironment: currentTargetEnvironment.Key
-                                    );
+                                    targetEnvironment: currentTargetEnvironment.Key);
 
                                 AddFlowPermissionsToEnvironment(
                                     userId: userid,
@@ -395,7 +397,6 @@ namespace WhatBreaksIf
                                 // set the query as completed after we are done
                                 currentTargetEnvironment.Value.flowsQueryCompleted = true;
                             }
-
                             if (checkConnectionReferences)
                             {
                                 // create a directory node that holds the references to the connectionreferences so we know where in the UI to place them
@@ -404,7 +405,6 @@ namespace WhatBreaksIf
                                 // TODO :)
 
                                 currentTargetEnvironment.Value.connectionRefsQueryCompleted = true;
-
                             }
 
                             LogInfo($"Finished processing environment {currentTargetEnvironment.Key.name}");

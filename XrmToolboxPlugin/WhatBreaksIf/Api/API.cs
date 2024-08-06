@@ -225,7 +225,7 @@ namespace WhatBreaksIf
             }
         }
 
-        public static void AddFlowsToEnvironment(string userId, Model.Environment targetEnvironment)
+        public static void AddFlowsToEnvironment(Model.Environment targetEnvironment)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
