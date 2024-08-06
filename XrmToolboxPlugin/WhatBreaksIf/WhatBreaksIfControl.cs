@@ -142,7 +142,10 @@ namespace WhatBreaksIf
                 LogInfo("Settings found and loaded");
             }
 
+            // for some reason the designer keeps deleting this default text...
+            tbTargetUserEmail.Text = "Please enter the target user email address";
         }
+
         private void tsbClose_Click(object sender, EventArgs e)
         {
             CloseTool();
@@ -154,10 +157,69 @@ namespace WhatBreaksIf
             btnStartQueries.Enabled = !string.IsNullOrEmpty(tbTargetUserEmail.Text);
         }
 
-        private async void btnStartQueries_Click(object sender, EventArgs eventArgs)
+        private void btnSelectEnvironments_Click(object sender, EventArgs eventArgs)
+        {
+            // clear the currently selected environments because we want to show a dialog that allows to user to make a selection
+            targetEnvironments.Clear();
+
+            // get all selected environments
+            LogInfo("Getting all environments....");
+
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Fetching Environments",
+                Work = (worker, args) =>
+                {
+                    var EnvironmentsTask = GetAllEnvironmentsInTenantAsync((progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                    args.Result = EnvironmentsTask.Result;
+                },
+                ProgressChanged = e =>
+                {
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    var environmentList = (EnvironmentList)args.Result;
+
+                    using (var environmentSelectorForm = new EnvironmentSelector(environmentList.value))
+                    {
+                        var dialogResult = environmentSelectorForm.ShowDialog();
+                        if (dialogResult == DialogResult.OK)
+                        {
+                            LogInfo("Selected {0} environments", environmentSelectorForm.SelectedEnvironments.Count);
+                            foreach (var environment in environmentSelectorForm.SelectedEnvironments)
+                            {
+                                targetEnvironments.Add(environment, new EnvironmentQueryStatus());
+                            }
+                            // todo: move the tooltip stuff to an event - implement targetEnvironments to be observable
+                            tbSelectedEnvironments.Text = targetEnvironments.Count.ToString();
+                            toolTip1.SetToolTip(tbSelectedEnvironments, string.Join(", ", targetEnvironments.Keys.Select(x => x.properties.displayName)));
+                        }
+                        else
+                        {
+                            LogInfo("No environments selected, all will be used.");
+                            // add all environments to targetEnvironments because the user decided to not filter them
+                            foreach (var environment in environmentList.value)
+                            {
+                                targetEnvironments.Add(environment, new EnvironmentQueryStatus());
+                                tbSelectedEnvironments.Text = targetEnvironments.Count.ToString();
+                                toolTip1.SetToolTip(tbSelectedEnvironments, string.Join(", ", targetEnvironments.Keys.Select(x => x.properties.displayName)));
+                            }
+                        }
+                    }
+                },
+                MessageWidth = 340,
+                MessageHeight = 150
+            });
+        }
+
+        private void btnStartQueries_Click(object sender, EventArgs eventArgs)
         {
             pbMain.Style = ProgressBarStyle.Marquee;
-            //pbMain.MarqueeAnimationSpeed = 30;
 
             LogInfo("Starting....");
 
@@ -170,18 +232,15 @@ namespace WhatBreaksIf
             cbCheckFlowOwners.Enabled = false;
             cbCheckConnectionReferences.Enabled = false;
             btnStartQueries.Enabled = false;
+            btnSelectEnvironments.Enabled = false;
 
             // this might be not the first time that the user clicks the button, so we need to clean up
             treeView1.Nodes.Clear();
-            targetEnvironments.Clear();
-
-            //EnvironmentList environments = new EnvironmentList();
 
             LogInfo($"Will search the following for {targetUser}:" +
                 $" Flow Ownership: {(cbCheckFlowOwners.Checked ? "yes" : "no")}" +
                 $" Connection References: {(cbCheckConnectionReferences.Checked ? "yes" : "no")}" +
                 $" ...");
-
 
             LogInfo($"Will query {targetEnvironments.Count} environments");
 
@@ -258,6 +317,7 @@ namespace WhatBreaksIf
             };
             bgw.RunWorkerAsync();
         }
+       
         private void AllEnvironmentQueriesCompleted(object sender, EventArgs e)
         {
             // invoke if necessary - this event will likely be called from a background thread
@@ -273,6 +333,7 @@ namespace WhatBreaksIf
                 btnStartQueries.Enabled = true;
             }
         }
+
         private void btnExportToExcel_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog
@@ -568,59 +629,6 @@ namespace WhatBreaksIf
 
         #endregion
 
-        private void btnSelectEnvironments_Click(object sender, EventArgs eventArgs)
-        {
-            string userid = string.Empty;
-            var targetUser = tbTargetUserEmail.Text;
-
-            // get all selected environments
-            LogInfo("Getting all environments....");
-
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = "Fetching Environments",
-                Work = (worker, args) =>
-                {
-                    var userTask = API.GetUserIdFromGraph(targetUser);
-                    userid = userTask.Result;
-
-                    var EnvironmentsTask = GetAllEnvironmentsInTenantAsync((progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
-                    args.Result = EnvironmentsTask.Result; 
-                },
-                ProgressChanged = e =>
-                {
-                },
-                PostWorkCallBack = (args) =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-
-                    var environmentList =  (EnvironmentList)args.Result;
-
-                    using (var environmentSelectorForm = new EnvironmentSelector(environmentList.value))
-                    {
-                        var dialogResult = environmentSelectorForm.ShowDialog();
-                        if (dialogResult == DialogResult.OK)
-                        {
-                            foreach (var environment in environmentSelectorForm.SelectedEnvironments)
-                            {
-                                targetEnvironments.Add(environment, new EnvironmentQueryStatus());
-                            }
-                        }
-                        else
-                        {
-                        }
-                    }
-                },
-
-                //AsyncArgument = currentTargetEnvironment,
-                // Progress information panel size
-                MessageWidth = 340,
-                MessageHeight = 150
-            });
-            
-        }
+      
     }
 }

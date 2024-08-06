@@ -6,42 +6,32 @@ namespace WhatBreaksIf
 {
     public partial class EnvironmentSelector : Form
     {
-        private List<(string ColumnName, Func<Model.Environment, object> ValueLookup, Func<Model.Environment, string> DisplayStringLookup)> _columnMappingForenvironment;
 
         public List<Model.Environment> SelectedEnvironments
         {
             get
             {
-                var selectedItems = listView1.GetSelectedItems();
-                return selectedItems;
+                var selectedEnvironments = new List<Model.Environment>();
+                foreach (ListViewItem item in listView1.CheckedItems)
+                {
+                    selectedEnvironments.Add((Model.Environment)item.Tag);
+                }
+
+                return selectedEnvironments;
             }
         }
 
         public EnvironmentSelector(List<Model.Environment> availableEnvironments)
         {
-            _columnMappingForenvironment = new List<(
-                string ColumnName,
-                Func<Model.Environment, object> ValueLookup,
-                Func<Model.Environment, string> DisplayStringLookup)>
-            {
-                ("Name", LookupValue, LookupString)
-            };
-
             InitializeComponent();
 
-            listView1.AddRange(availableEnvironments);
+            foreach (var environment in availableEnvironments)
+            {
+                listView1.Items.Add(new ListViewItem(environment.properties.displayName) { Tag = environment });
+            }
+            listView1.Sort();
         }
 
-        private object LookupValue(Model.Environment environment)
-        {
-            // there might be a better object to return
-            return environment.name;
-        }
-
-        private string LookupString(Model.Environment environment)
-        {
-            return environment.properties.displayName;
-        }
 
         private void btnOk_Click(object sender, EventArgs e)
         {

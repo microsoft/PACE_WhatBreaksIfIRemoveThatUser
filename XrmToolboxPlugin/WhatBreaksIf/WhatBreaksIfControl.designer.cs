@@ -1,4 +1,5 @@
-﻿using WhatBreaksIf.CustomControls;
+﻿
+using WhatBreaksIf.CustomControls;
 
 namespace WhatBreaksIf
 {
@@ -30,6 +31,7 @@ namespace WhatBreaksIf
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WhatBreaksIfControl));
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbClose = new System.Windows.Forms.ToolStripButton();
@@ -37,10 +39,13 @@ namespace WhatBreaksIf
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.treeView1 = new CustomTreeViewControl();
+            this.treeView1 = new WhatBreaksIf.CustomControls.CustomTreeViewControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lbDebugOutput = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.tbSelectedEnvironments = new System.Windows.Forms.TextBox();
+            this.lblSelectedEnvironments_description = new System.Windows.Forms.Label();
+            this.btnSelectEnvironments = new System.Windows.Forms.Button();
             this.btnStartQueries = new System.Windows.Forms.Button();
             this.btnExportToExcel = new System.Windows.Forms.Button();
             this.pbMain = new System.Windows.Forms.ProgressBar();
@@ -48,7 +53,7 @@ namespace WhatBreaksIf
             this.cbCheckConnectionReferences = new System.Windows.Forms.CheckBox();
             this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
-            this.btnSelectEnvironments = new System.Windows.Forms.Button();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.toolStripMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -165,6 +170,8 @@ namespace WhatBreaksIf
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.tbSelectedEnvironments);
+            this.panel1.Controls.Add(this.lblSelectedEnvironments_description);
             this.panel1.Controls.Add(this.btnSelectEnvironments);
             this.panel1.Controls.Add(this.btnStartQueries);
             this.panel1.Controls.Add(this.btnExportToExcel);
@@ -179,6 +186,37 @@ namespace WhatBreaksIf
             this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
             this.panel1.Size = new System.Drawing.Size(344, 724);
             this.panel1.TabIndex = 12;
+            // 
+            // tbSelectedEnvironments
+            // 
+            this.tbSelectedEnvironments.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tbSelectedEnvironments.CausesValidation = false;
+            this.tbSelectedEnvironments.Location = new System.Drawing.Point(122, 35);
+            this.tbSelectedEnvironments.Name = "tbSelectedEnvironments";
+            this.tbSelectedEnvironments.ReadOnly = true;
+            this.tbSelectedEnvironments.Size = new System.Drawing.Size(43, 20);
+            this.tbSelectedEnvironments.TabIndex = 34;
+            this.tbSelectedEnvironments.Text = "all";
+            this.tbSelectedEnvironments.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // lblSelectedEnvironments_description
+            // 
+            this.lblSelectedEnvironments_description.AutoSize = true;
+            this.lblSelectedEnvironments_description.Location = new System.Drawing.Point(0, 37);
+            this.lblSelectedEnvironments_description.Name = "lblSelectedEnvironments_description";
+            this.lblSelectedEnvironments_description.Size = new System.Drawing.Size(116, 13);
+            this.lblSelectedEnvironments_description.TabIndex = 33;
+            this.lblSelectedEnvironments_description.Text = "selected environments:";
+            // 
+            // btnSelectEnvironments
+            // 
+            this.btnSelectEnvironments.Location = new System.Drawing.Point(3, 3);
+            this.btnSelectEnvironments.Name = "btnSelectEnvironments";
+            this.btnSelectEnvironments.Size = new System.Drawing.Size(169, 27);
+            this.btnSelectEnvironments.TabIndex = 32;
+            this.btnSelectEnvironments.Text = "Select Environments";
+            this.btnSelectEnvironments.UseVisualStyleBackColor = true;
+            this.btnSelectEnvironments.Click += new System.EventHandler(this.btnSelectEnvironments_Click);
             // 
             // btnStartQueries
             // 
@@ -255,16 +293,6 @@ namespace WhatBreaksIf
             this.lblWarning.TabIndex = 26;
             this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
-            // btnSelectEnvironments
-            // 
-            this.btnSelectEnvironments.Location = new System.Drawing.Point(10, 3);
-            this.btnSelectEnvironments.Name = "btnSelectEnvironments";
-            this.btnSelectEnvironments.Size = new System.Drawing.Size(169, 27);
-            this.btnSelectEnvironments.TabIndex = 32;
-            this.btnSelectEnvironments.Text = "Select Environments";
-            this.btnSelectEnvironments.UseVisualStyleBackColor = true;
-            this.btnSelectEnvironments.Click += new System.EventHandler(this.btnSelectEnvironments_Click);
-            // 
             // WhatBreaksIfControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -306,5 +334,8 @@ namespace WhatBreaksIf
         private System.Windows.Forms.ProgressBar pbMain;
         private System.Windows.Forms.Button btnExportToExcel;
         private System.Windows.Forms.Button btnSelectEnvironments;
+        private System.Windows.Forms.Label lblSelectedEnvironments_description;
+        private System.Windows.Forms.TextBox tbSelectedEnvironments;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

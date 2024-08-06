@@ -36,7 +36,7 @@ namespace WhatBreaksIf
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.lblSubHeader = new System.Windows.Forms.Label();
-            this.listView1 = new ListViewEx<Model.Environment>(_columnMappingForenvironment);
+            this.listView1 = new System.Windows.Forms.ListView();
             this.SuspendLayout();
             // 
             // lblHeader
@@ -51,22 +51,22 @@ namespace WhatBreaksIf
             // 
             // btnOk
             // 
-            this.btnOk.Location = new System.Drawing.Point(530, 397);
+            this.btnOk.Location = new System.Drawing.Point(480, 397);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(75, 23);
+            this.btnOk.Size = new System.Drawing.Size(118, 23);
             this.btnOk.TabIndex = 1;
-            this.btnOk.Text = "Ok";
+            this.btnOk.Text = "Use only selected";
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(449, 397);
+            this.btnCancel.Location = new System.Drawing.Point(399, 397);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 2;
-            this.btnCancel.Text = "Cancel";
+            this.btnCancel.Text = "Use all";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
@@ -81,14 +81,14 @@ namespace WhatBreaksIf
             // 
             // listView1
             // 
+            this.listView1.CheckBoxes = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(16, 79);
+            this.listView1.Location = new System.Drawing.Point(16, 73);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(569, 267);
+            this.listView1.Size = new System.Drawing.Size(582, 318);
             this.listView1.TabIndex = 4;
             this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.Details;
-            this.listView1.Sorting = System.Windows.Forms.SortOrder.Ascending;
+            this.listView1.View = System.Windows.Forms.View.List;
             // 
             // EnvironmentSelector
             // 
@@ -106,7 +106,7 @@ namespace WhatBreaksIf
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "EnvironmentSelector";
-            this.Text = "EnvironmentSelector";
+            this.Text = "Select target environments";
             this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -119,6 +119,6 @@ namespace WhatBreaksIf
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Label lblSubHeader;
-        private ListViewEx<Model.Environment> listView1;
+        private System.Windows.Forms.ListView listView1;
     }
 }

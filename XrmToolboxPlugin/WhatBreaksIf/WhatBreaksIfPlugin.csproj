@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -71,9 +72,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomControls\CustomTreeViewControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="CustomControls\ListViewEx.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="DTO\NodeUpdateObject.cs" />
