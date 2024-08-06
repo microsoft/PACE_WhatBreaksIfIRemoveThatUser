@@ -3,12 +3,10 @@ using Microsoft.Xrm.Sdk;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.ServiceModel.Configuration;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WhatBreaksIf.DTO;
@@ -405,6 +403,8 @@ namespace WhatBreaksIf
 
                                 // TODO :)
 
+                                currentTargetEnvironment.Value.connectionRefsQueryCompleted = true;
+
                             }
 
                             LogInfo($"Finished processing environment {currentTargetEnvironment.Key.name}");
@@ -412,7 +412,7 @@ namespace WhatBreaksIf
             };
             bgw.RunWorkerAsync();
         }
-       
+
         private void AllEnvironmentQueriesCompleted(object sender, EventArgs e)
         {
             // invoke if necessary - this event will likely be called from a background thread
@@ -724,6 +724,5 @@ namespace WhatBreaksIf
 
         #endregion
 
-      
     }
 }
