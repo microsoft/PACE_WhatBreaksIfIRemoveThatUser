@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using WhatBreaksIf.Model;
+using Parallel = System.Threading.Tasks.Parallel;
 
 namespace WhatBreaksIf
 {
@@ -178,50 +179,55 @@ namespace WhatBreaksIf
 
             if (targetEnvironment.flows != null)
             {
-                foreach (var flow in targetEnvironment.flows)
-                {
-                    var auth = AuthenticateAsync(AuthType.Flow).Result;
-
-                    FlowPermissionList flowPermissionList = new FlowPermissionList();
-
-                    // Call the API for each environment
-                    using (HttpClient client = new HttpClient())
+                Parallel.ForEach(
+                    source: targetEnvironment.flows,
+                    parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 5 },
+                    body: flow =>
                     {
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-                        string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
-                        HttpResponseMessage response = client.GetAsync(url).Result;
-                        if (response.IsSuccessStatusCode)
-                        {
-                            string responseContent = response.Content.ReadAsStringAsync().Result;
-                            flowPermissionList = JsonConvert.DeserializeObject<FlowPermissionList>(responseContent);
-                            flow.permissions = flowPermissionList.value;
-                        }
-                        else
-                        {
-                            // Handle the error here
-                        }
-                    }
+                        //foreach (var flow in targetEnvironment.flows)
+                        //{
+                        var auth = AuthenticateAsync(AuthType.Flow).Result;
 
-                    if (flow.permissions != null)
-                    {
-                        foreach (var permission in flow.permissions)
+                        FlowPermissionList flowPermissionList = new FlowPermissionList();
+
+                        // Call the API for each environment
+                        using (HttpClient client = new HttpClient())
                         {
-                            if (permission.properties.roleName == "Owner" &&
-                                            permission.properties.principal.id == userId)
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                            string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
+                            HttpResponseMessage response = client.GetAsync(url).Result;
+                            if (response.IsSuccessStatusCode)
                             {
-                                var returnObj = new
-                                {
-                                    FlowName = flow.properties.displayName,
-                                    FlowId = flow.name,
-                                    EnvironmentId = targetEnvironment.name,
-                                    EnvironmentName = targetEnvironment.properties.displayName,
-                                };
-
-                                ProgressChanged(returnObj);
+                                string responseContent = response.Content.ReadAsStringAsync().Result;
+                                flowPermissionList = JsonConvert.DeserializeObject<FlowPermissionList>(responseContent);
+                                flow.permissions = flowPermissionList.value;
+                            }
+                            else
+                            {
+                                // Handle the error here
                             }
                         }
-                    }
-                }
+
+                        if (flow.permissions != null)
+                        {
+                            foreach (var permission in flow.permissions)
+                            {
+                                if (permission.properties.roleName == "Owner" &&
+                                                permission.properties.principal.id == userId)
+                                {
+                                    var returnObj = new
+                                    {
+                                        FlowName = flow.properties.displayName,
+                                        FlowId = flow.name,
+                                        EnvironmentId = targetEnvironment.name,
+                                        EnvironmentName = targetEnvironment.properties.displayName,
+                                    };
+
+                                    ProgressChanged(returnObj);
+                                }
+                            }
+                        }
+                    });
             }
         }
 
@@ -232,7 +238,7 @@ namespace WhatBreaksIf
 
             FlowList flowList = new FlowList();
 
-            var auth =  AuthenticateAsync(AuthType.Flow).Result;
+            var auth = AuthenticateAsync(AuthType.Flow).Result;
 
             using (HttpClient client = new HttpClient())
             {
@@ -255,23 +261,51 @@ namespace WhatBreaksIf
         }
         #endregion
 
-        private static void GetAllConnectionReferencesOwnedByUserInEnvironment(string userId, string environmentId, Action<ProgressChangedEventArgs> ProgressChanged)
+        public static void AddConnectionReferencesToEnvironment(string userId, Model.Environment targetEnvironment, Action<object> ProgressChanged)
         {
-            // auth
+            string powerAppsEndpoint = "https://api.powerapps.com";
+            string apiVersion = "2016-11-01";
 
-            // call api
+            ConnectionReferencesList connectionReferencesList = new ConnectionReferencesList();
 
-            // report progress for every flow that is returned by the API
-            for (int i = 0; i < 10; i++)
+            var auth = AuthenticateAsync(AuthType.PowerApps).Result;
+
+            using (HttpClient client = new HttpClient())
             {
-                // wait 2 seconds for demo purposes
-                System.Threading.Thread.Sleep(2000);
-
-                var returnObj = new { Index = i, FlowName = $"ConnectionReference_XYZ{i}" };
-
-                // report progress
-                ProgressChanged(new ProgressChangedEventArgs(i * 10, returnObj));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                //string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironment.name}/v2/flows?api-version={apiVersion}";
+                string url = $"{powerAppsEndpoint}/providers/Microsoft.PowerApps/scopes/admin/environments/{targetEnvironment.name}/connections?api-version={apiVersion}";
+                HttpResponseMessage response = client.GetAsync(url).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = response.Content.ReadAsStringAsync().Result;
+                    connectionReferencesList = JsonConvert.DeserializeObject<ConnectionReferencesList>(responseContent);
+                }
+                else
+                {
+                    // Handle the error here
+                }
             }
+
+            //Report to UI
+            foreach (var connectionReference in connectionReferencesList.value)
+            {
+                if (connectionReference.properties.createdBy.id == userId)
+                {
+                    var returnObj = new
+                    {
+                        ConnectionReferenceName = connectionReference.name,
+                        ConnectionReferenceId = connectionReference.name,
+                        EnvironmentId = targetEnvironment.name,
+                        EnvironmentName = targetEnvironment.properties.displayName,
+                    };
+
+                    ProgressChanged(new ProgressChangedEventArgs(70, returnObj));
+                }
+            }
+
+            // attach flowlist to the current targetenvironment
+            targetEnvironment.connectionReferences = connectionReferencesList.value;
         }
     }
 }
