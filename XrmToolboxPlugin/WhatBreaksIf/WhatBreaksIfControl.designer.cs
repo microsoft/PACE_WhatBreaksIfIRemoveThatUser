@@ -51,6 +51,7 @@
             this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.tsbResetTool = new System.Windows.Forms.ToolStripButton();
             this.toolStripMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -64,7 +65,8 @@
             this.toolStripMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbClose,
-            this.tssSeparator1});
+            this.tssSeparator1,
+            this.tsbResetTool});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(1428, 25);
@@ -75,8 +77,8 @@
             // 
             this.tsbClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.tsbClose.Name = "tsbClose";
-            this.tsbClose.Size = new System.Drawing.Size(86, 22);
-            this.tsbClose.Text = "Close this tool";
+            this.tsbClose.Size = new System.Drawing.Size(40, 22);
+            this.tsbClose.Text = "Close";
             this.tsbClose.Click += new System.EventHandler(this.tsbClose_Click);
             // 
             // tssSeparator1
@@ -290,6 +292,19 @@
             this.lblWarning.TabIndex = 26;
             this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
+            // tsbResetTool
+            // 
+            this.tsbResetTool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbResetTool.Image = ((System.Drawing.Image)(resources.GetObject("tsbResetTool.Image")));
+            this.tsbResetTool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbResetTool.Name = "tsbResetTool";
+            this.tsbResetTool.Size = new System.Drawing.Size(71, 22);
+            this.tsbResetTool.Text = "Restart tool";
+            this.tsbResetTool.ToolTipText = "Click to reset the plugin to the initial state:\r\nRemoves the selected environment" +
+    "s, target user, log output and all Flows + Connection References that have been " +
+    "loaded.";
+            this.tsbResetTool.Click += new System.EventHandler(this.tsbResetTool_Click);
+            // 
             // WhatBreaksIfControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -334,5 +349,6 @@
         private System.Windows.Forms.Label lblSelectedEnvironments_description;
         private System.Windows.Forms.TextBox tbSelectedEnvironments;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolStripButton tsbResetTool;
     }
 }

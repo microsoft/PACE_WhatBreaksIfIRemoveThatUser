@@ -85,6 +85,11 @@
     <Compile Include="Model\Environments.cs" />
     <Compile Include="Model\FlowPermissions.cs" />
     <Compile Include="Model\FlowsInEnvironment.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="TreeViewUI\ConnectionReferenceTreeNodeElement.cs" />
     <Compile Include="TreeViewUI\EnvironmentTreeNodeElement.cs" />
     <Compile Include="TreeViewUI\FlowTreeNodeElement.cs" />
@@ -106,6 +111,10 @@
   <ItemGroup>
     <EmbeddedResource Include="EnvironmentSelector.resx">
       <DependentUpon>EnvironmentSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="WhatBreaksIfControl.resx">
       <DependentUpon>WhatBreaksIfControl.cs</DependentUpon>

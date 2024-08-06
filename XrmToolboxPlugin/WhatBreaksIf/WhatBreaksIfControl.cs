@@ -36,7 +36,7 @@ namespace WhatBreaksIf
                     // raise event and inform that all queries have been completed if necessary
                     if (_flowsQueryCompleted && connectionRefsQueryCompleted)
                     {
-                        AllEnvironmentQueriesCompleted?.Invoke(this, new EventArgs());
+                        EnvironmentQueriesCompleted?.Invoke(this, new EventArgs());
                     }
                 }
             }
@@ -50,12 +50,12 @@ namespace WhatBreaksIf
                     // raise event and inform that all queries have been completed if necessary
                     if (_flowsQueryCompleted && connectionRefsQueryCompleted)
                     {
-                        AllEnvironmentQueriesCompleted?.Invoke(this, new EventArgs());
+                        EnvironmentQueriesCompleted?.Invoke(this, new EventArgs());
                     }
                 }
             }
 
-            public event EventHandler AllEnvironmentQueriesCompleted;
+            public event EventHandler EnvironmentQueriesCompleted;
         }
 
         public class EnvironmentCollection : Dictionary<Model.Environment, EnvironmentQueryStatus>
@@ -65,6 +65,7 @@ namespace WhatBreaksIf
             /// </summary>
             
             public event EventHandler AllEnvironmentsQueriesCompleted;
+
             /// <summary>
             /// This event is thrown when the underlying dictionary changes
             /// </summary>
@@ -72,7 +73,7 @@ namespace WhatBreaksIf
 
             public EnvironmentCollection() : base()
             { 
-                this.AllEnvironmentsQueriesCompleted += EnvironmentQueriesCompleted;
+
             }
 
             #region overrides
@@ -87,14 +88,8 @@ namespace WhatBreaksIf
                 // invoke collection changed handlers if there are any
                 CollectionChanged?.Invoke(this, new EventArgs());
 
-                // raise environmentQueriesCompleted event if there are any handlers and if necessary
-                if (AllEnvironmentsQueriesCompleted != null)
-                {
-                    if(this.Values.All(x => x.flowsQueryCompleted && x.connectionRefsQueryCompleted))
-                    {
-                        AllEnvironmentsQueriesCompleted?.Invoke(this, new EventArgs());
-                    }
-                }
+                // subscribe to the event that tells us that this environment finished processing
+                value.EnvironmentQueriesCompleted += EnvironmentQueriesCompleted;
             }
 
             public new void AddRange(IEnumerable<KeyValuePair<Model.Environment, EnvironmentQueryStatus>> items)
@@ -102,19 +97,7 @@ namespace WhatBreaksIf
                 // call base method to add items to the dictionary
                 foreach (var item in items)
                 {
-                    base.Add(item.Key, item.Value);
-                }
-
-                // invoke collection changed handlers if there are any
-                CollectionChanged?.Invoke(this, new EventArgs());
-
-                // raise environmentQueriesCompleted event if there are any handlers and if necessary
-                if (AllEnvironmentsQueriesCompleted != null)
-                {
-                    if (this.Values.All(x => x.flowsQueryCompleted && x.connectionRefsQueryCompleted))
-                    {
-                        AllEnvironmentsQueriesCompleted?.Invoke(this, new EventArgs());
-                    }
+                    Add(item.Key, item.Value);
                 }
             }
 
@@ -135,6 +118,8 @@ namespace WhatBreaksIf
                 // invoke collection changed handlers if there are any
                 CollectionChanged?.Invoke(this, new EventArgs());
 
+                // TODO : unsubscribe from the event that tells us that this environment finished processing
+
                 return result;
             }
 
@@ -146,10 +131,10 @@ namespace WhatBreaksIf
                 // check if handler is present before triggering
                 if (AllEnvironmentsQueriesCompleted != null)
                 {
-                    // check whether all the environments in this collection are done and if they are, throw the event
+                    // check whether all environments in this collection have finished both flow and connection reference queries
                     if (this.All(x => x.Value.flowsQueryCompleted && x.Value.connectionRefsQueryCompleted))
                     {
-                        AllEnvironmentsQueriesCompleted?.Invoke(this, new EventArgs());
+                        AllEnvironmentsQueriesCompleted(this, new EventArgs());
                     }
                 }
             }
@@ -427,7 +412,6 @@ namespace WhatBreaksIf
                 LogInfo("All queries have been completed.");
                 pbMain.Style = ProgressBarStyle.Continuous;
                 btnExportToExcel.Enabled = true;
-                btnStartQueries.Enabled = true;
             }
         }
 
@@ -497,6 +481,32 @@ namespace WhatBreaksIf
                     workbook.Write(fs);
                 }
             }
+        }
+
+        private void tsbResetTool_Click(object sender, EventArgs e)
+        {   
+            // reset the tool and start over
+
+            // buttons
+            btnExportToExcel.Enabled = false;
+            btnStartQueries.Enabled = false;
+            btnSelectEnvironments.Enabled = true;
+
+            // textboxes
+            tbSelectedEnvironments.Text = "none";
+            tbTargetUserEmail.Text = "Please enter the target user email address";
+
+            // targetEnvironments
+            targetEnvironments.Clear();
+
+            // treeview
+            treeView1.Nodes.Clear();
+
+            // progressbar
+            pbMain.Style = ProgressBarStyle.Continuous;
+
+            // log output box
+            lbDebugOutput.Items.Clear();
         }
 
         #endregion
@@ -725,6 +735,7 @@ namespace WhatBreaksIf
         }
 
         #endregion
+
 
     }
 }
