@@ -63,7 +63,7 @@ namespace WhatBreaksIf
             /// <summary>
             /// This Event is thrown when the queries of all environments have been completed.
             /// </summary>
-            
+
             public event EventHandler AllEnvironmentsQueriesCompleted;
             /// <summary>
             /// This event is thrown when the underlying dictionary changes
@@ -88,7 +88,7 @@ namespace WhatBreaksIf
                 // raise environmentQueriesCompleted event if there are any handlers and if necessary
                 if (AllEnvironmentsQueriesCompleted != null)
                 {
-                    if(this.Values.All(x => x.flowsQueryCompleted && x.connectionRefsQueryCompleted))
+                    if (this.Values.All(x => x.flowsQueryCompleted && x.connectionRefsQueryCompleted))
                     {
                         AllEnvironmentsQueriesCompleted?.Invoke(this, new EventArgs());
                     }
@@ -234,7 +234,7 @@ namespace WhatBreaksIf
             else
             {
                 // the list of targetenvironments is no longer empty, that means we need to enable the start button, but only if the target email adress is already there
-                if(!string.IsNullOrEmpty(tbTargetUserEmail.Text))
+                if (!string.IsNullOrEmpty(tbTargetUserEmail.Text))
                 {
                     btnStartQueries.Enabled = true;
                 }
@@ -344,117 +344,91 @@ namespace WhatBreaksIf
             bgw.DoWork += (obj, arg) =>
             {
                 var parallelResult = Parallel.ForEach(
-                        source: targetEnvironments,
-                        parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 10 },
-                        body: currentTargetEnvironment =>
-                        {
-                            // this is the foreach that is running in parallel for each environment
-                            // create environment node for the current environment
-                            EnvironmentTreeNodeElement environmentNode = new EnvironmentTreeNodeElement(UpdateNode, currentTargetEnvironment.Key.properties.displayName, currentTargetEnvironment.Key.name);
-                            environmentTreeNodes.Add(environmentNode);
-
-                            var userTask = GetUserIdFromGraph(targetUser);
-                            var userid = userTask.Result;
-
-                            LogInfo($"Looking for {targetUser} with id {userid} in {currentTargetEnvironment.Key.name}");
-
-                            LogInfo($"Processing environment {currentTargetEnvironment.Key.name}");
-
-                            if (checkFlowOwners)
-                            {
-                                // create a directory node that holds the references to the flows so we know where in the UI to place them
-                                var flowDirectoryNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
-                                directoryTreeNodes.Add(flowDirectoryNode);
-
-                                List<Model.Environment> filteredEnvironments = new List<Model.Environment>();
-
-                                AddFlowsToEnvironment(
-                                    targetEnvironment: currentTargetEnvironment.Key);
-
-                                AddFlowPermissionsToEnvironment(
-                                    userId: userid,
-                                    targetEnvironment: currentTargetEnvironment.Key,
-                                    ProgressChanged: (flowObj) =>
-                                    {
-                                        // todo: maybe get rid of the dynamic and use a typed object
-                                        dynamic flowObjDyn = flowObj;
-                                        string flowName = flowObjDyn.FlowName;
-                                        string flowId = flowObjDyn.FlowId;
-                                        string environmentId = flowObjDyn.EnvironmentId;
-                                        string environmentName = flowObjDyn.EnvironmentName;
-
-                            DirectoryTreeNode directoryTreeNode = directoryTreeNodes.Single(node => node.parentNodeElement.EnvironmentId == environmentId && node.DirectoryName == "Flows");
-
-                                        // create treenodeelement
-                                        new FlowTreeNodeElement(UpdateNode,
-                                                                parentNodeElement: flowDirectoryNode,
-                                                                flowName: flowName,
-                                                                flowId: flowId,
-                                                                environmentId: environmentId
-                                                                );
-                                    });
-
-                if (checkConnectionReferences)
-                {
-                    // create a directory node that holds the references to the connectionreferences so we know where in the UI to place them
-                    var connectionReferencesDirectoryNode = new DirectoryTreeNode(UpdateNode, "Connection References", environmentNode);
-                    directoryTreeNodes.Add(connectionReferencesDirectoryNode);
-
-                    WorkAsync(new WorkAsyncInfo
+                    source: targetEnvironments,
+                    parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 10 },
+                    body: currentTargetEnvironment =>
                     {
-                        Message = "Doing stuff..",
-                        Work = (worker, args) =>
+                        // this is the foreach that is running in parallel for each environment
+                        // create environment node for the current environment
+                        EnvironmentTreeNodeElement environmentNode = new EnvironmentTreeNodeElement(UpdateNode, currentTargetEnvironment.Key.properties.displayName, currentTargetEnvironment.Key.name);
+                        environmentTreeNodes.Add(environmentNode);
+
+                        var userTask = GetUserIdFromGraph(targetUser);
+                        var userid = userTask.Result;
+
+                        LogInfo($"Looking for {targetUser} with id {userid} in {currentTargetEnvironment.Key.name}");
+
+                        LogInfo($"Processing environment {currentTargetEnvironment.Key.name}");
+
+                        if (checkFlowOwners)
                         {
-                            // get the targetEnvironment from the args - since this is running multithreaded, we cannot be sure that currentTargetEnvironment is still the same
-                            var targetEnvironment = (KeyValuePair<Model.Environment, EnvironmentQueryStatus>)args.Argument;
+                            // create a directory node that holds the references to the flows so we know where in the UI to place them
+                            var flowDirectoryNode = new DirectoryTreeNode(UpdateNode, "Flows", environmentNode);
+                            directoryTreeNodes.Add(flowDirectoryNode);
+
+                            List<Model.Environment> filteredEnvironments = new List<Model.Environment>();
+
+                            AddFlowsToEnvironment(
+                                targetEnvironment: currentTargetEnvironment.Key);
+
+                            AddFlowPermissionsToEnvironment(
+                                userId: userid,
+                                targetEnvironment: currentTargetEnvironment.Key,
+                                ProgressChanged: (flowObj) =>
+                                {
+                                    // todo: maybe get rid of the dynamic and use a typed object
+                                    dynamic flowObjDyn = flowObj;
+                                    string flowName = flowObjDyn.FlowName;
+                                    string flowId = flowObjDyn.FlowId;
+                                    string environmentId = flowObjDyn.EnvironmentId;
+                                    string environmentName = flowObjDyn.EnvironmentName;
+
+                                    //DirectoryTreeNode directoryTreeNode = directoryTreeNodes.Single(node => node.parentNodeElement.EnvironmentId == environmentId && node.DirectoryName == "Flows");
+
+                                    // create treenodeelement
+                                    new FlowTreeNodeElement(UpdateNode,
+                                                            parentNodeElement: flowDirectoryNode,
+                                                            flowName: flowName,
+                                                            flowId: flowId,
+                                                            environmentId: environmentId
+                                                            );
+                                });
+                        }
+
+                        if (checkConnectionReferences)
+                        {
+                            // create a directory node that holds the references to the connectionreferences so we know where in the UI to place them
+                            var connectionReferencesDirectoryNode = new DirectoryTreeNode(UpdateNode, "Connection References", environmentNode);
+                            directoryTreeNodes.Add(connectionReferencesDirectoryNode);
+
 
                             AddConnectionReferencesToEnvironment(
                                 userId: userid,
-                                targetEnvironment: targetEnvironment.Key,
-                                ProgressChanged: (progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                                targetEnvironment: currentTargetEnvironment.Key,
+                                ProgressChanged: (ConnrectionReferenceObj) =>
+                                {
+                                    dynamic connectionReferenceObj = ConnrectionReferenceObj;
+                                    string connectionReferenceName = connectionReferenceObj.ConnectionReferenceName;
+                                    string environmentId = connectionReferenceObj.EnvironmentId;
 
-                            // set the query as completed after we are done
-                            targetEnvironment.Value.connectionRefsQueryCompleted = true;
+                                    //DirectoryTreeNode directoryTreeNode = directoryTreeNodes.Single(node => node.parentNodeElement.EnvironmentId == environmentId && node.DirectoryName == "Flows");
 
-                            // put the currentTargetEnvironment into the args.Result so we can access it in the PostWorkCallBack
-                            args.Result = targetEnvironment;
-                        },
-                        ProgressChanged = e =>
-                        {
-                            // todo: maybe get rid of the dynamic and use a typed object
-                            dynamic connectionReferenceObj = e.UserState;
-                            string connectionReferenceName = connectionReferenceObj.ConnectionReferenceName;
-                            string environmentId = connectionReferenceObj.EnvironmentId;
+                                    // create treenodeelement
+                                    new ConnectionReferenceTreeNodeElement(UpdateNode,
+                                                            parentNodeElement: connectionReferencesDirectoryNode,
+                                                            connectionReferenceName: connectionReferenceName,
+                                                            environmentId: environmentId
+                                                            );
+                                });
+                        }
 
-                            // create treenodeelement
-                            new ConnectionReferenceTreeNodeElement(UpdateNode,
-                                                    parentNodeElement: connectionReferencesDirectoryNode,
-                                                    connectionReferenceName: connectionReferenceName,
-                                                    environmentId: environmentId
-                                                    );
-                        },
-                        PostWorkCallBack = (args) =>
-                        {
-                            if (args.Error != null)
-                            {
-                                MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-                            // cast args.Result to the currentTargetEnvironment
-                            var targetEnvironmentResultObj = (KeyValuePair<Model.Environment, EnvironmentQueryStatus>)args.Result;
-                            LogInfo($"Finished ConnectionReferences query for environment {targetEnvironmentResultObj.Key}.");
-                            // The UI has been updated continuously while the queries were running and the event handler of the environment collection will handle UI after completion of everything
-                        },
-                        AsyncArgument = currentTargetEnvironment,
-                        // Progress information panel size
-                        MessageWidth = 340,
-                        MessageHeight = 150
                     });
-                }
+            };
 
-            }
-
+            bgw.RunWorkerAsync();
             // --- careful, all the stuff above runs async, everything below here will run immediately ----
         }
+
 
         private void AllEnvironmentQueriesCompleted(object sender, EventArgs e)
         {
@@ -518,7 +492,7 @@ namespace WhatBreaksIf
                         for (int rowIndex = 1; rowIndex < environment.flows.Count; rowIndex++)
                         {
                             row = excelSheet.CreateRow(rowIndex);
-                            
+
                             var currentFlow = environment.flows[rowIndex - 1];
 
                             // type
