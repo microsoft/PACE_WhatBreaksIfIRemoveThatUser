@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace PersonalViewMigrationTool
+namespace WhatBreaksIf
 {
     // overriden TreeView to avoid a windows bug with doubleclicking checkboxes
     // https://stackoverflow.com/questions/6130297/c-how-to-avoid-treenode-check-from-happening-on-a-double-click-event

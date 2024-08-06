@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -70,11 +71,17 @@
     <Reference Include="System.Workflow.Runtime" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomTreeViewControl.cs">
+    <Compile Include="CustomControls\CustomTreeViewControl.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="DTO\NodeUpdateObject.cs" />
     <Compile Include="Api\API.cs" />
+    <Compile Include="EnvironmentSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EnvironmentSelector.Designer.cs">
+      <DependentUpon>EnvironmentSelector.cs</DependentUpon>
+    </Compile>
     <Compile Include="Model\ConnectionReferences.cs" />
     <Compile Include="Model\Environments.cs" />
     <Compile Include="Model\FlowPermissions.cs" />
@@ -98,6 +105,9 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="EnvironmentSelector.resx">
+      <DependentUpon>EnvironmentSelector.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WhatBreaksIfControl.resx">
       <DependentUpon>WhatBreaksIfControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -138,6 +148,9 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="NPOI">
+      <Version>2.7.1</Version>
     </PackageReference>
     <PackageReference Include="System.Runtime">
       <Version>4.3.1</Version>

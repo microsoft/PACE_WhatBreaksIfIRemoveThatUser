@@ -117,25 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="toolStripMenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <data name="lblWarning.Text" xml:space="preserve">
-    <value>This tool will check for any Flows or ConnectionReferences owned by a specific user.
-Click "Select Environments" first to load all the environments you currently have access to and either select some of them or all.
-Then, enter the email adress of the user you want to check for and press Start.
-
-
-Attention: This is an early version. 
-Use at your own risk and always test on a non-production system first.
-
-
-Remember to use accounts with admin privileges to enable 
-impersonation.
-
-</value>
-  </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>147, 17</value>
-  </metadata>
 </root>

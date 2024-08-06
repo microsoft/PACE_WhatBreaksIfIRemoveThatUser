@@ -171,7 +171,7 @@ namespace WhatBreaksIf
         /// <param name="accesstoken"></param>
         /// <param name="ProgressChanged"></param>
         /// <returns></returns>
-        public static void AddFlowPermissionsToEnvironment(string userId, Model.Environment targetEnvironment, Action<ProgressChangedEventArgs> ProgressChanged)
+        public static void AddFlowPermissionsToEnvironment(string userId, Model.Environment targetEnvironment, Action<object> ProgressChanged)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
@@ -217,7 +217,7 @@ namespace WhatBreaksIf
                                     EnvironmentName = targetEnvironment.properties.displayName,
                                 };
 
-                                ProgressChanged(new ProgressChangedEventArgs(70, returnObj));
+                                ProgressChanged(returnObj);
                             }
                         }
                     }
@@ -225,7 +225,7 @@ namespace WhatBreaksIf
             }
         }
 
-        public static void AddFlowsToEnvironment(string userId, Model.Environment targetEnvironment)
+        public static void AddFlowsToEnvironment(Model.Environment targetEnvironment)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
