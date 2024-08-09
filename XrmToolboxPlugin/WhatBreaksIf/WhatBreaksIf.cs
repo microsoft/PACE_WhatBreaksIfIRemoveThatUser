@@ -4,7 +4,6 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 
@@ -36,7 +35,7 @@ namespace WhatBreaksIf
         {
             // If you have external assemblies that you need to load, uncomment the following to 
             // hook into the event that will fire when an Assembly fails to resolve
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveEventHandler);
+             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveEventHandler);
         }
 
         /// <summary>
@@ -81,14 +80,5 @@ namespace WhatBreaksIf
 
             return loadAssembly;
         }
-
-        #region IAboutPlugin implementation
-
-        public void ShowAboutDialog()
-        {
-            MessageBox.Show(@"This is a sample tool", @"About Sample Tool", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        #endregion IAboutPlugin implementation
     }
 }
