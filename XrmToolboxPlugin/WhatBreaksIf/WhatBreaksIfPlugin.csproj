@@ -6,7 +6,7 @@
     <AssemblyName>WhatBreaksIf</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
-    <UseWPF>true</UseWPF>
+    <UseWPF>false</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <ItemGroup>
@@ -100,8 +100,9 @@
       <Version>1.2023.10.67</Version>
     </PackageReference>
   </ItemGroup>
-  <PropertyGroup>
-    <PostBuildEvent>IF NOT EXIST Plugins mkdir Plugins
-move /Y $(TargetFileName) Plugins</PostBuildEvent>
-  </PropertyGroup>
+  <PropertyGroup />
+	<Target Name="PreparePluginFolder" AfterTargets="PostBuildEvent">
+		<Message Text="Moving output to Plugins folder" Importance="high"></Message>
+		<Move SourceFiles="$(TargetDir)$(TargetName).dll;$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TargetDir)\Plugins\"></Move>
+	</Target>
 </Project>
