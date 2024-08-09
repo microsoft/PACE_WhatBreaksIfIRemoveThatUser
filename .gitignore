@@ -32,3 +32,4 @@ _ReSharper*/
 packages/
 output/
 /.vscode/settings.json
+/Properties/launchSettings.json

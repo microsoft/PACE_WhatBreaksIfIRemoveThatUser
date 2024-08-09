@@ -575,6 +575,9 @@ namespace WhatBreaksIf﻿
                             break;
                     }
 
+                    //Sort the Treeview
+                    treeView1.Sort();
+
                 }
                 catch (Exception ex)
                 {
