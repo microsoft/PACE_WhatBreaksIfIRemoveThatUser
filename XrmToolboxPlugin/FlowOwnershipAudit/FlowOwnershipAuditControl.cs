@@ -15,7 +15,7 @@ using Environment = System.Environment;
 
 namespace WhatBreaksIf﻿
 {
-    public partial class WhatBreaksIfControl : PluginControlBase, INoConnectionRequired, IAboutPlugin﻿, IGitHubPlugin, IHelpPlugin
+    public partial class FlowOwnershipAuditControl : PluginControlBase, INoConnectionRequired, IAboutPlugin﻿, IGitHubPlugin, IHelpPlugin
     {
         // helper class to hold information about the environment and the status of the queries﻿
         public class EnvironmentQueryStatus﻿
@@ -149,7 +149,7 @@ namespace WhatBreaksIf﻿
 
         public string HelpUrl => "https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser";
 
-        public WhatBreaksIfControl()
+        public FlowOwnershipAuditControl()
         {
             InitializeComponent();
 

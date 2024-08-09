@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WhatBreaksIf.Properties {
+namespace FlowOwnershipAudit.Properties {
     using System;
     
     

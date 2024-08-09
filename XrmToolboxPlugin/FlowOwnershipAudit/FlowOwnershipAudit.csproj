@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net481</TargetFramework>
     <OutputType>Library</OutputType>
-    <RootNamespace>WhatBreaksIf</RootNamespace>
-    <AssemblyName>WhatBreaksIf</AssemblyName>
+    <RootNamespace>FlowOwnershipAudit</RootNamespace>
+    <AssemblyName>FlowOwnershipAudit</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>false</UseWPF>
@@ -46,7 +46,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="WhatBreaksIfControl.cs">
+    <Compile Update="FlowOwnershipAuditControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>
@@ -85,7 +85,7 @@
   </ItemGroup>
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>XrmToolbox - What breaks if I disable this User Plugin</Title>
+    <Title>XrmToolbox - What breaks if I disable this User? Flow Ownership Audit Plugin</Title>
     <RepositoryUrl>https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Authors>femo1de</Authors>
@@ -93,9 +93,9 @@
 	<VersionSuffix>alpha</VersionSuffix>
 	<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 	<Company />
-	<Description>This is a plugin for XrmToolbox. The Plugin will help you to find any dependencies that still exist for a certain user like Flows or ConnectionReferences that are owned by a user.</Description>
+	<Description>This tool enables the efficient tracking and management of Microsoft Flows and connection references owned by individual users.</Description>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<PackageId>msftPACE.WhatBreaksIf</PackageId>
+	<PackageId>msftPACE.FlowOwnershipAudit</PackageId>
 	<IncludeSymbols>True</IncludeSymbols>
 	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
@@ -105,9 +105,9 @@
 	</Target>
 	<Target Name="PrepareDependencyFolder" AfterTargets="PreparePluginFolder">
 		<Message Text="Creating Dependencies folder" Importance="high"></Message>
-		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)WhatBreaksIf"></Copy>
-		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)WhatBreaksIf"></Copy>
-		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)WhatBreaksIf"></Copy>
+		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 	</Target>
 	<PropertyGroup>
 		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);GetMyPackageFiles</TargetsForTfmSpecificBuildOutput>
@@ -115,11 +115,11 @@
 	</PropertyGroup>
 	<Target Name="GetMyPackageFiles">
 		<ItemGroup>
-			<BuildOutputInPackage Include="$(OutputPath)WhatBreaksIf\ClosedXML.dll">
-				<TargetPath>WhatBreaksIf</TargetPath>
+			<BuildOutputInPackage Include="$(OutputPath)FlowOwnershipAudit\ClosedXML.dll">
+				<TargetPath>FlowOwnershipAudit</TargetPath>
 			</BuildOutputInPackage>
-			<BuildOutputInPackage Include="$(OutputPath)WhatBreaksIf\DocumentFormat.OpenXml.dll">
-				<TargetPath>WhatBreaksIf</TargetPath>
+			<BuildOutputInPackage Include="$(OutputPath)FlowOwnershipAudit\DocumentFormat.OpenXml.dll">
+				<TargetPath>FlowOwnershipAudit</TargetPath>
 			</BuildOutputInPackage>
 		</ItemGroup>
 	</Target>

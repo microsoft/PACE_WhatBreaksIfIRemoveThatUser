@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WhatBreaksIf")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("FlowOwnershipAudit")]
+[assembly: AssemblyDescription("This tool enables the efficient tracking and management of Microsoft Flows and connection references owned by individual users.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("MSFT Pace Setters 2024")]
-[assembly: AssemblyProduct("WhatBreaksIf")]
+[assembly: AssemblyCompany("MSFT Pace Setters (Felix Mora / Laurens Vandendriessche)")]
+[assembly: AssemblyProduct("FlowOwnershipAudit")]
 [assembly: AssemblyCopyright("Copyright ©  2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
