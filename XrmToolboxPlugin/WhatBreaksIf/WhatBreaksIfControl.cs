@@ -1,6 +1,4 @@
-﻿using McTools.Xrm.Connection;
-using Microsoft.Xrm.Sdk;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -9,7 +7,6 @@ using System.Windows.Forms;
 using WhatBreaksIf.DTO;
 using WhatBreaksIf.Model;
 using WhatBreaksIf.TreeViewUI;
-using WhatBreaksIf.TreeViewUIElements;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 using static WhatBreaksIf.API;
@@ -17,7 +14,7 @@ using Environment = System.Environment;
 
 namespace WhatBreaksIf﻿
 {
-    public partial class WhatBreaksIfControl : PluginControlBase, INoConnectionRequired, IAboutPlugin﻿, IGitHubPlugin
+    public partial class WhatBreaksIfControl : PluginControlBase, INoConnectionRequired, IAboutPlugin﻿, IGitHubPlugin, IHelpPlugin
     {
         // helper class to hold information about the environment and the status of the queries﻿
         public class EnvironmentQueryStatus﻿
@@ -149,6 +146,8 @@ namespace WhatBreaksIf﻿
 
         public string UserName => "microsoft";
 
+        public string HelpUrl => "https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser";
+
         public WhatBreaksIfControl()
         {
             InitializeComponent();
@@ -173,8 +172,6 @@ namespace WhatBreaksIf﻿
 
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
-            LogInfo("Hello world :) ");
-
             // Loads or creates the settings for the plugin﻿
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
             {
@@ -239,7 +236,7 @@ namespace WhatBreaksIf﻿
                 btnStartQueries.Enabled = false;
             }
         }
-
+        
         private void btnSelectEnvironments_Click(object sender, EventArgs eventArgs)
         {
             // clear the currently selected environments because we want to show a dialog that allows to user to make a selection﻿
@@ -428,7 +425,7 @@ namespace WhatBreaksIf﻿
             bgw.RunWorkerAsync();
             // --- careful, all the stuff above runs async, everything below here will run immediately ----﻿
         }
-
+        
         private void AllEnvironmentQueriesCompleted(object sender, EventArgs e)
         {
             // invoke if necessary - this event will likely be called from a background thread﻿
@@ -456,7 +453,7 @@ namespace WhatBreaksIf﻿
             // If the file name is not an empty string open it for saving.﻿
             if (saveFileDialog1.FileName != "")
             {
-                LogInfo("Exporting to {0}", saveFileDialog1.FileName);
+                LogInfo($"Exporting to {saveFileDialog1.FileName}");
 
                 using (ExcelExporter exporter = new ExcelExporter(targetEnvironments))
                 {
@@ -464,7 +461,6 @@ namespace WhatBreaksIf﻿
                 }
             }
         }
-
 
         private void tsbResetTool_Click(object sender, EventArgs e)
         {
@@ -493,20 +489,6 @@ namespace WhatBreaksIf﻿
 
             // sidepanel
             rtbSidepanel.Text = sidePanelDefaultText;
-        }
-
-        /// <summary>﻿
-        /// This event occurs when the connection has been updated in XrmToolBox﻿
-        ﻿/// </summary>﻿
-        public override void UpdateConnection(IOrganizationService newService, ConnectionDetail detail, string actionName, object parameter)
-        {
-            base.UpdateConnection(newService, detail, actionName, parameter);
-
-            if (mySettings != null && detail != null)
-            {
-                mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
-                LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
-            }
         }
 
         private void UpdateNode(NodeUpdateObject nodeUpdateObject)
