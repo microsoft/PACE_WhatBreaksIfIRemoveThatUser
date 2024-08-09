@@ -136,6 +136,30 @@
         nOccAdABIDXXE1nzAAAAAElFTkSuQmCC
 </value>
   </data>
+  <data name="tsbHelp.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAARDSURBVHhe7dxLbuNGFEZhAUnGBryDyJ565NcaOqvIrno7
+        yTRB1pSAHciAPokUq+oWSVXxAGfSrvvfB8fqw2Fnp5Bvr6+v/87xcDj8ZvFOPr974CiHbJvtXMHDLaVz
+        dI3HWVvn6wYPsTWdt1lcfOs6fzO46L3pPneLi9277nc3uEhruu+mcfhWde8t8rNDt+6ws0fYBA7am95j
+        VRyuV73LKjhU73qfRXGY3f/1TovgELvneq+q2Hz3ut6tCjbdndb7hWKz3Xl6xxAeHh6+22h3no+Pj9+9
+        ZzE22U3TexZh+FzNGXh+fv7Ld1vV2Qfe3t4u3s3VrCwMTdEs8f1WdE7xfYpmJWNgimaNYd1aOtcY1qVo
+        VhKGpWreLayf8ng8/mH9ieFvvp/S+ltYn6p5szgej/8YlKJ5KUTlXCMq231TfHp6+tu8mxiSqnmt4b6p
+        mjeJxTma2Rrum6OZo1iYo5mt4b45mnkVi3I1tzXcN1dzL7AgV3Nbw31zNfcCC3I1tzXcN1dzz/Bxqea3
+        gnuWav4XPizV/FZwz1LN/8HHx8fFw1Lt0QruWern5+flrXxUqvmt4b6lmh/awOxWce8Sza4b3ijuXeIy
+        wR3g/iXWDe0E9y8xPPRs0o7wDrnWC+wM75BrvcDO8A65xod1jPfINS6oc7xHrnFBneM9co0L6hzvkWtc
+        UOd4j1zjgjrHe+QaF9Q53iPXuKDO8R65xgV1jvfINS6oc7xHrmFB7+/v3X6UYXfvkWvYBxl00F7wDiXG
+        hnWKdygxNqxTvEOJw2/+/vQfc3XQXvAOuQ7fIjRw0GFbx/1LrBvaCe5fYpXQwbOJG8a9S60f3DjuXepX
+        cMmP4cc8m7xB3LfU4RtUbXAW3iDuW6r54Q0G7dEK7hmhPao0GbTPveN+UdrnBz6K0j73intFaZ8vfBip
+        ve6MX9wnUpt94cMa2nPrOH8N7XmGj2tp363hvLW07wUWXNOageF3cr6bozlr43y1tf9VLLqmNSd8l6p5
+        tbH/kjrLKBaOad0J35Vqfi7mrq3zTWLxmNad8F2u5pZi/lo6100MmNLaE75L1bwo7LOGzjQLQ6a09oTv
+        UjQrCvssrfPMxqBbWj/gm7maE439ltRZkjBsypeXl6vNfDdHM6Kx31I6RxaGTmntCd/d0vpo7LeEzpBN
+        yn9MY634Xg+Hw6/W1MC+tR1u6AxF2GBKa7eIM9fW/iHYZEzrtogz19TeodhsTOu2hvPW0r5VsOmY1m0J
+        Z62hPWvyk83HtHArOGe0w43sWR2HmNLatXG+SO21KA4TpX2isV+U9lkFh4rQHtHYL0J7rIrDlWp+NPYr
+        1fxN4JAlmh2N/Uo0e1M4bK7mRmO/XM3dLA6eqnnR2C9V8+4Cl0jRrGjsl6JZd4cLzdGMaOw3RzPuHhec
+        0tpo7Deltc3hwte0Jhr7XdOa5vEASx/Cvkv33zRrHWOtvjt3wn+UyMcQZzEfDgAAAABJRU5ErkJggg==
+</value>
+  </data>
   <data name="lblWarning.Text" xml:space="preserve">
     <value>This tool will check for any Flows or ConnectionReferences owned by a specific user.
 Click "Select Environments" first to load all the environments you currently have access to and either select some of them or all.

@@ -38,12 +38,17 @@
     <Compile Update="CustomControls\CustomTreeViewControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Update="WhatBreaksIfControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ClosedXML" Version="0.96.0"/>
+    <PackageReference Include="ClosedXML" Version="0.96.0" />
     <PackageReference Include="DockPanelSuite.ThemeVS2015">
       <Version>3.1.0</Version>
     </PackageReference>
@@ -68,6 +73,15 @@
     <PackageReference Include="XrmToolBoxPackage">
       <Version>1.2023.10.67</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -95,6 +109,7 @@
 	</Target>
 	<PropertyGroup>
 		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);GetMyPackageFiles</TargetsForTfmSpecificBuildOutput>
+		<PackageTags>XrmToolbox</PackageTags>
 	</PropertyGroup>
 	<Target Name="GetMyPackageFiles">
 		<ItemGroup>
@@ -104,7 +119,7 @@
 		</ItemGroup>
 	</Target>
 	<Target Name="DeleteDependenciesFromDebugFolder" AfterTargets="PrepareDependencyFolder">
-		<Message Text="Deleting dependencies from the local debug folder as they should have been moved to plugin subfolder. This is done so we can debug the dynamic loading of those dependencies"/>
-		<Delete Files="$(OutputPath)ClosedXML.dll"/>
+		<Message Text="Deleting dependencies from the local debug folder as they should have been moved to plugin subfolder. This is done so we can debug the dynamic loading of those dependencies" />
+		<Delete Files="$(OutputPath)ClosedXML.dll" />
 	</Target>
 </Project>

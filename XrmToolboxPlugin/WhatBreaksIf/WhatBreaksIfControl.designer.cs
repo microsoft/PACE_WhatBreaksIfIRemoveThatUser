@@ -34,10 +34,13 @@
             this.tsbClose = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbResetTool = new System.Windows.Forms.ToolStripButton();
+            this.tsbHelp = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tlpOverviewTab = new System.Windows.Forms.TableLayoutPanel();
             this.treeView1 = new CustomTreeViewControl();
+            this.rtbSidepanel = new System.Windows.Forms.RichTextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lbDebugOutput = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -52,15 +55,13 @@
             this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.tlpOverviewTab = new System.Windows.Forms.TableLayoutPanel();
-            this.rtbSidepanel = new System.Windows.Forms.RichTextBox();
             this.toolStripMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tlpOverviewTab.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.tlpOverviewTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -69,10 +70,11 @@
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbClose,
             this.tssSeparator1,
-            this.tsbResetTool});
+            this.tsbResetTool,
+            this.tsbHelp});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
-            this.toolStripMenu.Size = new System.Drawing.Size(1428, 25);
+            this.toolStripMenu.Size = new System.Drawing.Size(1428, 31);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
@@ -80,14 +82,14 @@
             // 
             this.tsbClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.tsbClose.Name = "tsbClose";
-            this.tsbClose.Size = new System.Drawing.Size(40, 22);
+            this.tsbClose.Size = new System.Drawing.Size(40, 28);
             this.tsbClose.Text = "Close";
             this.tsbClose.Click += new System.EventHandler(this.tsbClose_Click);
             // 
             // tssSeparator1
             // 
             this.tssSeparator1.Name = "tssSeparator1";
-            this.tssSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.tssSeparator1.Size = new System.Drawing.Size(6, 31);
             // 
             // tsbResetTool
             // 
@@ -95,12 +97,21 @@
             this.tsbResetTool.Image = ((System.Drawing.Image)(resources.GetObject("tsbResetTool.Image")));
             this.tsbResetTool.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbResetTool.Name = "tsbResetTool";
-            this.tsbResetTool.Size = new System.Drawing.Size(71, 22);
+            this.tsbResetTool.Size = new System.Drawing.Size(71, 28);
             this.tsbResetTool.Text = "Restart tool";
             this.tsbResetTool.ToolTipText = "Click to reset the plugin to the initial state:\r\nRemoves the selected environment" +
     "s, target user, log output and all Flows + Connection References that have been " +
     "loaded.";
             this.tsbResetTool.Click += new System.EventHandler(this.tsbResetTool_Click);
+            // 
+            // tsbHelp
+            // 
+            this.tsbHelp.Image = ((System.Drawing.Image)(resources.GetObject("tsbHelp.Image")));
+            this.tsbHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbHelp.Name = "tsbHelp";
+            this.tsbHelp.Size = new System.Drawing.Size(60, 28);
+            this.tsbHelp.Text = "Help";
+            this.tsbHelp.Click += new System.EventHandler(this.tsbHelp_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -111,13 +122,13 @@
             this.tableLayoutPanel1.Controls.Add(this.tabControl1, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 25);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 31);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1428, 736);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1428, 730);
             this.tableLayoutPanel1.TabIndex = 13;
             // 
             // tabControl1
@@ -129,7 +140,7 @@
             this.tabControl1.Name = "tabControl1";
             this.tableLayoutPanel1.SetRowSpan(this.tabControl1, 2);
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1066, 724);
+            this.tabControl1.Size = new System.Drawing.Size(1066, 718);
             this.tabControl1.TabIndex = 15;
             this.tabControl1.TabStop = false;
             // 
@@ -139,10 +150,25 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1058, 698);
+            this.tabPage1.Size = new System.Drawing.Size(1058, 692);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Overview";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tlpOverviewTab
+            // 
+            this.tlpOverviewTab.ColumnCount = 2;
+            this.tlpOverviewTab.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
+            this.tlpOverviewTab.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            this.tlpOverviewTab.Controls.Add(this.treeView1, 0, 0);
+            this.tlpOverviewTab.Controls.Add(this.rtbSidepanel, 1, 0);
+            this.tlpOverviewTab.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpOverviewTab.Location = new System.Drawing.Point(3, 3);
+            this.tlpOverviewTab.Name = "tlpOverviewTab";
+            this.tlpOverviewTab.RowCount = 1;
+            this.tlpOverviewTab.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpOverviewTab.Size = new System.Drawing.Size(1052, 686);
+            this.tlpOverviewTab.TabIndex = 2;
             // 
             // treeView1
             // 
@@ -151,9 +177,22 @@
             this.treeView1.Margin = new System.Windows.Forms.Padding(0);
             this.treeView1.Name = "treeView1";
             this.treeView1.ShowNodeToolTips = true;
-            this.treeView1.Size = new System.Drawing.Size(631, 692);
+            this.treeView1.Size = new System.Drawing.Size(631, 686);
             this.treeView1.TabIndex = 1;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
+            // 
+            // rtbSidepanel
+            // 
+            this.rtbSidepanel.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.rtbSidepanel.CausesValidation = false;
+            this.rtbSidepanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbSidepanel.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rtbSidepanel.Location = new System.Drawing.Point(634, 3);
+            this.rtbSidepanel.Name = "rtbSidepanel";
+            this.rtbSidepanel.ReadOnly = true;
+            this.rtbSidepanel.Size = new System.Drawing.Size(415, 680);
+            this.rtbSidepanel.TabIndex = 2;
+            this.rtbSidepanel.Text = "";
             // 
             // tabPage2
             // 
@@ -161,7 +200,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1058, 698);
+            this.tabPage2.Size = new System.Drawing.Size(1058, 692);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Log Output";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -181,7 +220,7 @@
             this.lbDebugOutput.Name = "lbDebugOutput";
             this.lbDebugOutput.ScrollAlwaysVisible = true;
             this.lbDebugOutput.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbDebugOutput.Size = new System.Drawing.Size(1052, 692);
+            this.lbDebugOutput.Size = new System.Drawing.Size(1052, 686);
             this.lbDebugOutput.TabIndex = 11;
             this.lbDebugOutput.TabStop = false;
             // 
@@ -201,7 +240,7 @@
             this.panel1.Location = new System.Drawing.Point(6, 6);
             this.panel1.Name = "panel1";
             this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
-            this.panel1.Size = new System.Drawing.Size(344, 724);
+            this.panel1.Size = new System.Drawing.Size(344, 718);
             this.panel1.TabIndex = 12;
             // 
             // tbSelectedEnvironments
@@ -310,34 +349,6 @@
             this.lblWarning.TabIndex = 26;
             this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
-            // tlpOverviewTab
-            // 
-            this.tlpOverviewTab.ColumnCount = 2;
-            this.tlpOverviewTab.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
-            this.tlpOverviewTab.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
-            this.tlpOverviewTab.Controls.Add(this.treeView1, 0, 0);
-            this.tlpOverviewTab.Controls.Add(this.rtbSidepanel, 1, 0);
-            this.tlpOverviewTab.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlpOverviewTab.Location = new System.Drawing.Point(3, 3);
-            this.tlpOverviewTab.Name = "tlpOverviewTab";
-            this.tlpOverviewTab.RowCount = 1;
-            this.tlpOverviewTab.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpOverviewTab.Size = new System.Drawing.Size(1052, 692);
-            this.tlpOverviewTab.TabIndex = 2;
-            // 
-            // rtbSidepanel
-            // 
-            this.rtbSidepanel.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.rtbSidepanel.CausesValidation = false;
-            this.rtbSidepanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.rtbSidepanel.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rtbSidepanel.Location = new System.Drawing.Point(634, 3);
-            this.rtbSidepanel.Name = "rtbSidepanel";
-            this.rtbSidepanel.ReadOnly = true;
-            this.rtbSidepanel.Size = new System.Drawing.Size(415, 686);
-            this.rtbSidepanel.TabIndex = 2;
-            this.rtbSidepanel.Text = "";
-            // 
             // WhatBreaksIfControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -352,10 +363,10 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tlpOverviewTab.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
-            this.tlpOverviewTab.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -386,5 +397,6 @@
         private System.Windows.Forms.ToolStripButton tsbResetTool;
         private System.Windows.Forms.TableLayoutPanel tlpOverviewTab;
         private System.Windows.Forms.RichTextBox rtbSidepanel;
+        private System.Windows.Forms.ToolStripButton tsbHelp;
     }
 }
