@@ -1,0 +1,15 @@
+{
+  "General": {
+    "OutputFile": "$(TargetDir)WhatBreaksIf.dll",
+    "InputAssemblies": [
+      "WhatBreaksIf.dll",
+      "ClosedXML.dll",
+      "DocumentFormat.OpenXml.dll",
+      "ExcelNumberFormat.dll"
+    ]
+  },
+  "Advanced": {
+    "AllowDuplicateType": null,
+    "UnionMerge": true
+  }
+}
