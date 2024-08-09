@@ -89,4 +89,19 @@
 		<Message Text="Copying output to Plugins folder" Importance="high"></Message>
 		<Copy SourceFiles="$(TargetDir)$(TargetName).dll;$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TargetDir)\Plugins\"></Copy>
 	</Target>
+	<Target Name="AddDependenciesToPluginFolder" AfterTargets="PreparePluginFolder">
+		<Message Text="Creating Dependencies folder in Plugin folder" Importance="high"></Message>
+		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)\Plugins\WhatBreaksIf"></Copy>
+	</Target>
+	<PropertyGroup>
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);GetMyPackageFiles</TargetsForTfmSpecificBuildOutput>
+	</PropertyGroup>
+	<Target Name="GetMyPackageFiles">
+		<ItemGroup>
+			<BuildOutputInPackage Include="$(OutputPath)Plugins\WhatBreaksIf\ClosedXML.dll">
+				<TargetPath>WhatBreaksIf</TargetPath>
+			</BuildOutputInPackage>
+		</ItemGroup>
+	</Target>
+	
 </Project>
