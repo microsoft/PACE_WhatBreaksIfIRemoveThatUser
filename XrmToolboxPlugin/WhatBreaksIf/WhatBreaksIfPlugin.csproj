@@ -80,9 +80,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>XrmToolbox - What breaks if I disable this User Plugin</Title>
@@ -106,6 +103,8 @@
 	<Target Name="PrepareDependencyFolder" AfterTargets="PreparePluginFolder">
 		<Message Text="Creating Dependencies folder" Importance="high"></Message>
 		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)WhatBreaksIf"></Copy>
+		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)WhatBreaksIf"></Copy>
+		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)WhatBreaksIf"></Copy>
 	</Target>
 	<PropertyGroup>
 		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);GetMyPackageFiles</TargetsForTfmSpecificBuildOutput>
@@ -116,10 +115,15 @@
 			<BuildOutputInPackage Include="$(OutputPath)WhatBreaksIf\ClosedXML.dll">
 				<TargetPath>WhatBreaksIf</TargetPath>
 			</BuildOutputInPackage>
+			<BuildOutputInPackage Include="$(OutputPath)WhatBreaksIf\DocumentFormat.OpenXml.dll">
+				<TargetPath>WhatBreaksIf</TargetPath>
+			</BuildOutputInPackage>
 		</ItemGroup>
 	</Target>
 	<Target Name="DeleteDependenciesFromDebugFolder" AfterTargets="PrepareDependencyFolder">
 		<Message Text="Deleting dependencies from the local debug folder as they should have been moved to plugin subfolder. This is done so we can debug the dynamic loading of those dependencies" />
 		<Delete Files="$(OutputPath)ClosedXML.dll" />
+		<Delete Files="$(OutputPath)DocumentFormat.OpenXml.dll" />
+		<Delete Files="$(OutputPath)ExcelNumberFormat.dll" />
 	</Target>
 </Project>
