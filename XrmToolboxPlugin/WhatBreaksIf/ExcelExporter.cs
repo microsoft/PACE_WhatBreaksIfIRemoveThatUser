@@ -33,7 +33,10 @@ namespace WhatBreaksIf﻿
                     {
                         string flowManagementEnvironment = "https://make.powerautomate.com/";
 
-                        var sheet = workbook.AddWorksheet(environment.properties.displayName);
+                        // take only the first 31 characters of the environment name for the worksheet name
+                        var worksheetName = (environment.properties.displayName.Length > 30) ? environment.properties.displayName.Substring(0,31) : environment.properties.displayName;
+
+                        var sheet = workbook.AddWorksheet(worksheetName);
 
                         sheet.Cell(1, 1).SetValue("Type");
                         sheet.Cell(1, 2).SetValue("Id");

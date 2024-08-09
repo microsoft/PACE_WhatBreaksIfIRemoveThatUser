@@ -17,7 +17,7 @@ using Environment = System.Environment;
 
 namespace WhatBreaksIf﻿
 {
-    public partial class WhatBreaksIfControl : PluginControlBase, INoConnectionRequired, IAboutPlugin﻿
+    public partial class WhatBreaksIfControl : PluginControlBase, INoConnectionRequired, IAboutPlugin﻿, IGitHubPlugin
     {
         // helper class to hold information about the environment and the status of the queries﻿
         public class EnvironmentQueryStatus﻿
@@ -144,6 +144,10 @@ namespace WhatBreaksIf﻿
         private Settings mySettings;
 
         private readonly string sidePanelDefaultText = "Select environments and click start, then select any node to see the results here.";
+
+        public string RepositoryName => "PACE_WhatBreaksIfIRemoveThatUser";
+
+        public string UserName => "microsoft";
 
         public WhatBreaksIfControl()
         {
@@ -645,7 +649,7 @@ namespace WhatBreaksIf﻿
 
         public void ShowAboutDialog()
         {
-            MessageBox.Show("hallo");
+            MessageBox.Show("");
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
@@ -683,6 +687,19 @@ namespace WhatBreaksIf﻿
                     rtbSidepanel.Text = sidepanelText;
                 }
             }
+        }
+
+        private void tsbHelp_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                text: "For help and to open a bug report, please click below to open GitHub.",
+                caption: "Help",
+                buttons: MessageBoxButtons.OK,
+                icon: MessageBoxIcon.Information,
+                defaultButton: MessageBoxDefaultButton.Button1,
+                options: 0,
+                helpFilePath: "https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser",
+                keyword: "GitHub");
         }
     }
 }
