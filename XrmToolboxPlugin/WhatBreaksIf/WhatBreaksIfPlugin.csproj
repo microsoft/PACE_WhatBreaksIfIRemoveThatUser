@@ -9,6 +9,9 @@
     <UseWPF>false</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
+	<PropertyGroup>
+		<EmbeddedResourceUseDependentUponConvention>true</EmbeddedResourceUseDependentUponConvention>
+	</PropertyGroup>
   <ItemGroup>
     <None Include="..\..\README.md">
       <Pack>True</Pack>

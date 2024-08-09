@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using WhatBreaksIf.DTO;
 using WhatBreaksIf.Model;
 using WhatBreaksIf.TreeViewUI;
+using WhatBreaksIfPlugin;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 using static WhatBreaksIf.API;
@@ -631,7 +632,10 @@ namespace WhatBreaksIf﻿
 
         public void ShowAboutDialog()
         {
-            MessageBox.Show("");
+            using (var f = new AboutForm())
+            {
+                f.ShowDialog();
+            }
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
@@ -674,8 +678,8 @@ namespace WhatBreaksIf﻿
         private void tsbHelp_Click(object sender, EventArgs e)
         {
             MessageBox.Show(
-                text: "For help and to open a bug report, please click below to open GitHub.",
-                caption: "Help",
+                text: "For help and to open a bug report, please click on Help below to open GitHub.",
+                caption: "GitHub",
                 buttons: MessageBoxButtons.OK,
                 icon: MessageBoxIcon.Information,
                 defaultButton: MessageBoxDefaultButton.Button1,
