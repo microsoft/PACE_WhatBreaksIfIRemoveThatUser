@@ -5,8 +5,9 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>This tool enables the efficient tracking and management of Microsoft Flows and connection references owned by individual users.</description>
 		<repository type="git" url="https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser"></repository>
+		<projectUrl>https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser</projectUrl>
 		<authors>Felix Mora, Laurens Vandendriessche</authors>
-		<version>0.1.0.0</version>
+		<version>0.1.1.0</version>
 		<license type="expression">GPL-3.0-or-later</license>
 		<readme>README.md</readme>
 		<id>msftPACE.FlowOwnershipAudit</id>
