@@ -84,7 +84,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>XrmToolbox - What breaks if I disable this User? Flow Ownership Audit Plugin</Title>
     <RepositoryUrl>https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -129,4 +129,7 @@
 		<Delete Files="$(OutputPath)DocumentFormat.OpenXml.dll" />
 		<Delete Files="$(OutputPath)ExcelNumberFormat.dll" />
 	</Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command=".\Nuget\nuget.exe pack .\Nuget\FlowOwnershipAudit.nuspec -OutputDirectory .\Nuget\Out" />
+  </Target>
 </Project>
