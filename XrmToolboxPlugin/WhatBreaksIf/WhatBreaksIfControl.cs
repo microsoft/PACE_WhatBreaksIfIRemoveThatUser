@@ -680,15 +680,10 @@ namespace WhatBreaksIf﻿
 
         private void tsbHelp_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(
-                text: "For help and to open a bug report, please click on Help below to open GitHub.",
-                caption: "GitHub",
-                buttons: MessageBoxButtons.OK,
-                icon: MessageBoxIcon.Information,
-                defaultButton: MessageBoxDefaultButton.Button1,
-                options: 0,
-                helpFilePath: "https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser",
-                keyword: "GitHub");
+            using (var f = new AboutForm())
+            {
+                f.ShowDialog();
+            }
         }
     }
 }
