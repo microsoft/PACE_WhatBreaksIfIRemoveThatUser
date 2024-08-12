@@ -1,4 +1,4 @@
-﻿namespace WhatBreaksIf
+﻿namespace FlowOwnershipAudit
 {
     partial class EnvironmentSelector
     {

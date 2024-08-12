@@ -1,6 +1,6 @@
-﻿using WhatBreaksIf.TreeViewUIElements;
+﻿using FlowOwnershipAudit.TreeViewUIElements;
 
-namespace WhatBreaksIf.DTO
+namespace FlowOwnershipAudit.DTO
 {
     // This object is only used to transfer data to update the UI, it is not meant to hold any data on itself
     internal class NodeUpdateObject

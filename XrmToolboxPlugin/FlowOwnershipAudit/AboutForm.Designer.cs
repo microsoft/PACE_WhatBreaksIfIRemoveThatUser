@@ -1,4 +1,4 @@
-﻿namespace WhatBreaksIfPlugin
+﻿namespace FlowOwnershipAudit
 {
     partial class AboutForm
     {

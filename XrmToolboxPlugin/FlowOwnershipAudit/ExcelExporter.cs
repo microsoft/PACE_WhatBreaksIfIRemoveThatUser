@@ -2,9 +2,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using static WhatBreaksIf.FlowOwnershipAuditControl;
+using static FlowOwnershipAudit.FlowOwnershipAuditControl;
 
-namespace WhatBreaksIf﻿
+namespace FlowOwnershipAudit
 {
     internal class ExcelExporter : IDisposable
     {

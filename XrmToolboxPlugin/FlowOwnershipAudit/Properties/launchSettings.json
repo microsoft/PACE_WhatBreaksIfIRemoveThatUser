@@ -2,7 +2,7 @@
   "profiles": {
     "DebugPlugin": {
       "commandName": "Executable",
-      "executablePath": "D:\\Code\\microsoft\\PACE_WhatBreaksIfIRemoveThatUser\\XrmToolboxPlugin\\WhatBreaksIf\\bin\\Debug\\net481\\XrmToolBox.exe",
+      "executablePath": "C:\\Users\\lavanden\\Repositories\\MS\\PACE_WhatBreaksIfIRemoveThatUser\\XrmToolboxPlugin\\FlowOwnershipAudit\\bin\\Debug\\net481\\XrmToolBox.exe",
       "commandLineArgs": "/overridepath:."
     }
   }

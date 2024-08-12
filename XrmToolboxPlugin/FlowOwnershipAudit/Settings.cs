@@ -1,4 +1,4 @@
-﻿namespace WhatBreaksIf
+﻿namespace FlowOwnershipAudit
 {
     /// <summary>
     /// This class can help you to store settings for your plugin

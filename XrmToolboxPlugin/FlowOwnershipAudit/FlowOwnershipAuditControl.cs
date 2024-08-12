@@ -4,16 +4,16 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WhatBreaksIf.DTO;
-using WhatBreaksIf.Model;
-using WhatBreaksIf.TreeViewUI;
-using WhatBreaksIfPlugin;
+using FlowOwnershipAudit.DTO;
+using FlowOwnershipAudit.Model;
+using FlowOwnershipAudit.TreeViewUI;
+using FlowOwnershipAudit;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
-using static WhatBreaksIf.API;
+using static FlowOwnershipAudit.API;
 using Environment = System.Environment;
 
-namespace WhatBreaksIf﻿
+namespace FlowOwnershipAudit
 {
     public partial class FlowOwnershipAuditControl : PluginControlBase, INoConnectionRequired, IAboutPlugin﻿, IGitHubPlugin, IHelpPlugin
     {

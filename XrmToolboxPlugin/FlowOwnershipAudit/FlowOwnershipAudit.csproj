@@ -13,7 +13,7 @@
 		<EmbeddedResourceUseDependentUponConvention>true</EmbeddedResourceUseDependentUponConvention>
 	</PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\README.md">
+    <None Include="..\..\README.md" Link="Nuget\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
@@ -83,22 +83,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <PropertyGroup>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <Title>XrmToolbox - What breaks if I disable this User? Flow Ownership Audit Plugin</Title>
-    <RepositoryUrl>https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <Authors>femo1de</Authors>
-	<VersionPrefix>0.1.0.0</VersionPrefix>
-	<VersionSuffix>alpha</VersionSuffix>
-	<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-	<Company />
-	<Description>This tool enables the efficient tracking and management of Microsoft Flows and connection references owned by individual users.</Description>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<PackageId>msftPACE.FlowOwnershipAudit</PackageId>
-	<IncludeSymbols>True</IncludeSymbols>
-	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
 	<Target Name="PreparePluginFolder" AfterTargets="PostBuildEvent">
 		<Message Text="Copying output to Plugins folder" Importance="high"></Message>
 		<Copy SourceFiles="$(TargetDir)$(TargetName).dll;$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TargetDir)\Plugins\"></Copy>
@@ -109,27 +93,14 @@
 		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 	</Target>
-	<PropertyGroup>
-		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);GetMyPackageFiles</TargetsForTfmSpecificBuildOutput>
-		<PackageTags>XrmToolbox</PackageTags>
-	</PropertyGroup>
-	<Target Name="GetMyPackageFiles">
-		<ItemGroup>
-			<BuildOutputInPackage Include="$(OutputPath)FlowOwnershipAudit\ClosedXML.dll">
-				<TargetPath>FlowOwnershipAudit</TargetPath>
-			</BuildOutputInPackage>
-			<BuildOutputInPackage Include="$(OutputPath)FlowOwnershipAudit\DocumentFormat.OpenXml.dll">
-				<TargetPath>FlowOwnershipAudit</TargetPath>
-			</BuildOutputInPackage>
-		</ItemGroup>
-	</Target>
 	<Target Name="DeleteDependenciesFromDebugFolder" AfterTargets="PrepareDependencyFolder">
 		<Message Text="Deleting dependencies from the local debug folder as they should have been moved to plugin subfolder. This is done so we can debug the dynamic loading of those dependencies" />
 		<Delete Files="$(OutputPath)ClosedXML.dll" />
 		<Delete Files="$(OutputPath)DocumentFormat.OpenXml.dll" />
 		<Delete Files="$(OutputPath)ExcelNumberFormat.dll" />
 	</Target>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File .\Nuget\UpdateVersion.ps1 -nuspecPath .\Nuget\FlowOwnershipAudit.nuspec -assemblyInfoPath .\Properties\AssemblyInfo.cs" />
     <Exec Command=".\Nuget\nuget.exe pack .\Nuget\FlowOwnershipAudit.nuspec -OutputDirectory .\Nuget\Out" />
   </Target>
 </Project>

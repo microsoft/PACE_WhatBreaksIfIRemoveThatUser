@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace WhatBreaksIfPlugin
+namespace FlowOwnershipAudit
 {
     public partial class AboutForm : Form
     {

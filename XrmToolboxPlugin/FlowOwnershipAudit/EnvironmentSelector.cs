@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace WhatBreaksIf
+namespace FlowOwnershipAudit
 {
     public partial class EnvironmentSelector : Form
     {

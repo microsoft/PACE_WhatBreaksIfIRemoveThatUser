@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using WhatBreaksIf.DTO;
-using WhatBreaksIf.TreeViewUIElements;
+using FlowOwnershipAudit.DTO;
+using FlowOwnershipAudit.TreeViewUIElements;
 
-namespace WhatBreaksIf.TreeViewUI
+namespace FlowOwnershipAudit.TreeViewUI
 {
     internal class ConnectionReferenceTreeNodeElement : TreeNodeElementBase
     {

@@ -1,4 +1,4 @@
-﻿namespace WhatBreaksIf
+﻿namespace FlowOwnershipAudit
 {
     partial class FlowOwnershipAuditControl
     {
@@ -349,7 +349,7 @@
             this.treeView1.TabIndex = 1;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
-            // WhatBreaksIfControl
+            // FlowOwnershipAuditControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
