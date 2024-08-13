@@ -89,15 +89,23 @@
 	</Target>
 	<Target Name="PrepareDependencyFolder" AfterTargets="PreparePluginFolder">
 		<Message Text="Creating Dependencies folder" Importance="high"></Message>
-		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
-		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
-		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)Microsoft.Identity.Client.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
+		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
 	</Target>
 	<Target Name="DeleteDependenciesFromDebugFolder" AfterTargets="PrepareDependencyFolder">
 		<Message Text="Deleting dependencies from the local debug folder as they should have been moved to plugin subfolder. This is done so we can debug the dynamic loading of those dependencies" />
 		<Delete Files="$(OutputPath)ClosedXML.dll" />
 		<Delete Files="$(OutputPath)DocumentFormat.OpenXml.dll" />
 		<Delete Files="$(OutputPath)ExcelNumberFormat.dll" />
+		<Delete Files="$(OutputPath)Microsoft.Identity.Client.dll" />
+		<Delete Files="$(OutputPath)Microsoft.Identity.Client.dll" />
+		<Delete Files="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" />
+		<Delete Files="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
 	</Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
     <Exec Command="powershell -ExecutionPolicy Bypass -File .\Nuget\UpdateVersion.ps1 -nuspecPath .\Nuget\FlowOwnershipAudit.nuspec -assemblyInfoPath .\Properties\AssemblyInfo.cs" />

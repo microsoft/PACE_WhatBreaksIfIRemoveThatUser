@@ -33,3 +33,4 @@ packages/
 output/
 /.vscode/settings.json
 /Properties/launchSettings.json
+/XrmToolboxPlugin/FlowOwnershipAudit/Properties/launchSettings.json

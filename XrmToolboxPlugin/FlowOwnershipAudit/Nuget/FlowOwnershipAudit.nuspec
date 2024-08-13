@@ -8,7 +8,7 @@
     </repository>
     <projectUrl>https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser</projectUrl>
     <authors>Felix Mora, Laurens Vandendriessche</authors>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <license type="expression">GPL-3.0-or-later</license>
     <readme>README.md</readme>
     <id>msftPACE.FlowOwnershipAudit</id>
@@ -19,8 +19,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\bin\Debug\net481\Plugins\FlowOwnershipAudit.dll" target="lib\net481\Plugins" />
-    <file src="..\bin\Debug\net481\FlowOwnershipAudit\**" target="lib\net481\FlowOwnershipAudit" />
+	<file src="..\bin\Debug\net481\Plugins\**" target="lib\net481\Plugins" />
     <file src="..\..\..\README.md" target="" />
     <file src="..\IMAGES\Icon_32x32.png" target="" />
   </files>
