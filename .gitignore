@@ -34,3 +34,4 @@ output/
 /.vscode/settings.json
 /Properties/launchSettings.json
 /XrmToolboxPlugin/FlowOwnershipAudit/Properties/launchSettings.json
+/XrmToolboxPlugin/FlowOwnershipAudit/Nuget/Out/*
