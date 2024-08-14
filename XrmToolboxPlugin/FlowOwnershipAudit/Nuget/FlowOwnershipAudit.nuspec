@@ -19,8 +19,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\bin\Debug\net481\Plugins\FlowOwnershipAudit.dll" target="lib\net481\Plugins" />
-    <file src="..\bin\Debug\net481\FlowOwnershipAudit\**" target="lib\net481\FlowOwnershipAudit" />
+	<file src="..\bin\Debug\net481\Plugins\**" target="lib\net481\Plugins" />
     <file src="..\..\..\README.md" target="" />
     <file src="..\IMAGES\Icon_32x32.png" target="" />
   </files>
