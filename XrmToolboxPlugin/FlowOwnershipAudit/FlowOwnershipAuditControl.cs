@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FlowOwnershipAudit.DTO;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUI;
-using FlowOwnershipAudit;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 using static FlowOwnershipAudit.API;
@@ -186,7 +186,7 @@ namespace FlowOwnershipAudit
             }
 
             // for some reason the designer keeps deleting this default text...﻿
-            tbTargetUserEmail.Text = "Please enter the target user email address";
+            tbTargetUserEmail.Text = "Please enter the target user principal name.";
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -264,7 +264,20 @@ namespace FlowOwnershipAudit
                 {
                     if (args.Error != null)
                     {
-                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                        // check if inner exception is MsalClientException
+                        if (args.Error.InnerException is Microsoft.Identity.Client.MsalClientException)
+                        {
+                            var msalClientException = (Microsoft.Identity.Client.MsalClientException)args.Error.InnerException;
+                            if (msalClientException.ErrorCode == "authentication_canceled")
+                            {
+                                // user canceled the login, this is not a problem, we just exit
+                                LogError("The user canceled the login screen.");
+                                return;
+                            }
+                        }
+                        // something bad happened
+                        ShowErrorDialog(args.Error.InnerException, allownewissue: true);
                     }
 
                     var environmentList = (EnvironmentList)args.Result;
@@ -272,6 +285,7 @@ namespace FlowOwnershipAudit
                     using (var environmentSelectorForm = new EnvironmentSelector(environmentList.value))
                     {
                         var dialogResult = environmentSelectorForm.ShowDialog();
+
                         if (dialogResult == DialogResult.OK)
                         {
                             LogInfo($"Selected {environmentSelectorForm.SelectedEnvironments.Count} environments");
@@ -294,6 +308,9 @@ namespace FlowOwnershipAudit
                             }
                         }
                     }
+
+                    // re-enable the email field because it might be disabled if the user clicked the restart button before
+                    tbTargetUserEmail.Enabled = true;
                 },
                 MessageWidth = 340,
                 MessageHeight = 150
@@ -336,6 +353,24 @@ namespace FlowOwnershipAudit
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
             {
+                string userid = string.Empty;
+
+                // get the user id from the graph api. This should be the same for all environments so we dont need to do it in the parallel loop
+                try
+                {
+                    var userTask = GetUserIdFromGraph(targetUser);
+                    userid = userTask.Result;
+                }
+                catch (Exception ex)
+                {
+                    // if we cant get the user id, we cant do anything. Log the error and throw it up
+                    // this could happen if the user is unable to authenticate or if the user canceled the login screen
+                    LogError("An error occurred while trying to get the user id from the graph api.");
+
+                    // exit the bgw, there is nothing we can do
+                    return;
+                }
+
                 var parallelResult = Parallel.ForEach(
                     source: targetEnvironments,
                     parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 10 },
@@ -345,13 +380,8 @@ namespace FlowOwnershipAudit
                         // create environment node for the current environment﻿
                         EnvironmentTreeNodeElement environmentNode = new EnvironmentTreeNodeElement(UpdateNode, currentTargetEnvironment.Key.properties.displayName, currentTargetEnvironment.Key.name);
                         environmentTreeNodes.Add(environmentNode);
-
-                        var userTask = GetUserIdFromGraph(targetUser);
-                        var userid = userTask.Result;
-
-                        LogInfo($"Looking for {targetUser} with id {userid} in {currentTargetEnvironment.Key.name}");
-
                         LogInfo($"Processing environment {currentTargetEnvironment.Key.name}");
+                        LogInfo($"Looking for {targetUser} with id {userid} in {currentTargetEnvironment.Key.name}");
 
                         if (checkFlowOwners)
                         {
@@ -421,6 +451,23 @@ namespace FlowOwnershipAudit
                             currentTargetEnvironment.Value.connectionRefsQueryCompleted = true;
                         }
                     });
+                arg.Result = parallelResult;
+                // TODO: error handling within individual tasks
+            };
+            bgw.RunWorkerCompleted += (obj, arg) =>
+            {
+                // worker completed. This means that the main operation is done, all environments have been queried and the treeview has been built
+
+                // check if the bgw ran into an error
+                if (arg.Error != null)
+                {
+                    LogError("An error occurred during the background worker operation.");
+                    LogError(arg.Error.Message);
+                    LogError(arg.Error.StackTrace);
+                }
+
+                // arg contains the parallelResult. we dont need it for now
+                var parallelResult = (ParallelLoopResult)arg.Result;
             };
 
             bgw.RunWorkerAsync();
@@ -429,6 +476,8 @@ namespace FlowOwnershipAudit
         
         private void AllEnvironmentQueriesCompleted(object sender, EventArgs e)
         {
+            // TODO if no environments have been loaded, this will never be called and the progressbar keeps on going forever
+
             // invoke if necessary - this event will likely be called from a background thread﻿
             if (treeView1.InvokeRequired)
             {
@@ -684,6 +733,12 @@ namespace FlowOwnershipAudit
             {
                 f.ShowDialog();
             }
+        }
+
+        private void rtbSidepanel_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            ProcessStartInfo sInfo = new ProcessStartInfo(e.LinkText);
+            Process.Start(sInfo);
         }
     }
 }

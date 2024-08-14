@@ -104,6 +104,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "EnvironmentSelector";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Select target environments";
             this.TopMost = true;
             this.ResumeLayout(false);

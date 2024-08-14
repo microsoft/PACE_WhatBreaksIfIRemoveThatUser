@@ -16,7 +16,7 @@ namespace FlowOwnershipAudit.TreeViewUI
 
         public string EnvironmentId { get; }
 
-        public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments{EnvironmentId}/solutions/~preferred/flows/{FlowId}"); }
+        public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments/{EnvironmentId}/solutions/~preferred/flows/{FlowId}"); }
 
         public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
                                   DirectoryTreeNode parentNodeElement,
@@ -45,6 +45,5 @@ namespace FlowOwnershipAudit.TreeViewUI
         internal override IEnumerable<TreeNodeElementBase> ChildObjects => throw new NotImplementedException();
 
         internal override TreeNodeElementBase Parent => _parentNodeElement;
-
     }
 }
