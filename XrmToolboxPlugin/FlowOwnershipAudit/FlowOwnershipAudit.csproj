@@ -96,6 +96,7 @@
 		<!--<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>-->
 		<Copy SourceFiles="$(OutputPath)Microsoft.Identity.Client.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
+    <Copy SourceFiles="$(OutputPath)System.Diagnostics.DiagnosticSource.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
 		<!--<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>-->
 		<Message Text="Deleting dependencies from the local debug folder as they should have been moved to plugin subfolder. This is done so we can debug the dynamic loading of those dependencies" />
 		<Delete Files="$(OutputPath)ClosedXML.dll" />
@@ -104,12 +105,12 @@
 		<Delete Files="$(OutputPath)Microsoft.Identity.Client.dll" />
 		<Delete Files="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" />
 		<Delete Files="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
+    <Delete Files="$(OutputPath)System.Diagnostics.DiagnosticSource.dll" />
 	</Target>
 	
 	<!--release config-->
 	<Target Name="PostBuild_Release" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
 		<Exec Command="echo starting post build events for Release target" />
-		<Exec Command="powershell -ExecutionPolicy Bypass -File .\Nuget\UpdateVersion.ps1 -nuspecPath .\Nuget\FlowOwnershipAudit.nuspec -assemblyInfoPath .\Properties\AssemblyInfo.cs" />
 		<Message Text="Copying output to Plugins folder" Importance="high"></Message>
 		<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFolder="$(TargetDir)\Plugins\"></Copy>
 		<Message Text="Creating Dependencies folder" Importance="high"></Message>
@@ -119,8 +120,13 @@
 		<!--<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>-->
 		<Copy SourceFiles="$(OutputPath)Microsoft.Identity.Client.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
+    <Copy SourceFiles="$(OutputPath)System.Diagnostics.DiagnosticSource.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
 		<!--<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>-->
 		<Exec Command="echo creating nuget package" />
 		<Exec Command=".\Nuget\nuget.exe pack .\Nuget\FlowOwnershipAudit.nuspec -OutputDirectory .\Nuget\Out" />
 	</Target>
+
+  <Target Name="PreBuild_Release" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)' == 'Release'">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File .\Nuget\UpdateVersion.ps1 -nuspecPath .\Nuget\FlowOwnershipAudit.nuspec -assemblyInfoPath .\Properties\AssemblyInfo.cs" />
+  </Target>
 </Project>
