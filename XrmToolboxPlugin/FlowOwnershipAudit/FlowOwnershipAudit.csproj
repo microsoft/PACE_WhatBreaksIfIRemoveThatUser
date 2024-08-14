@@ -93,7 +93,7 @@
 		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
-		<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
+		<!--<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>-->
 		<Copy SourceFiles="$(OutputPath)Microsoft.Identity.Client.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
@@ -117,7 +117,7 @@
 		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
-		<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
+		<!--<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>-->
 		<Copy SourceFiles="$(OutputPath)Microsoft.Identity.Client.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(TargetDir)Plugins\FlowOwnershipAudit"></Copy>
