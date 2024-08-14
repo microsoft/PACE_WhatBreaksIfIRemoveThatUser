@@ -104,6 +104,7 @@
 		<Delete Files="$(OutputPath)ExcelNumberFormat.dll" />
 		<Delete Files="$(OutputPath)Microsoft.Identity.Client.dll" />
 		<Delete Files="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" />
+		<Delete Files="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
 	</Target>
 	
 	<!--release config-->
