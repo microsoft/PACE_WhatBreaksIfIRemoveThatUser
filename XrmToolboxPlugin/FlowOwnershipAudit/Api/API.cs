@@ -1,9 +1,6 @@
 ﻿using Microsoft.Identity.Client;
 using Newtonsoft.Json;
-using NuGet.Protocol;
 using System;
-using System.Activities.Statements;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
