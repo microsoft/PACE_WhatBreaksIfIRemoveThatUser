@@ -186,7 +186,7 @@ namespace FlowOwnershipAudit
             }
 
             // for some reason the designer keeps deleting this default text...﻿
-            tbTargetUserEmail.Text = "Please enter the target user email address";
+            tbTargetUserEmail.Text = "Please enter the target user principal name.";
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -294,6 +294,9 @@ namespace FlowOwnershipAudit
                             }
                         }
                     }
+
+                    // re-enable the email field because it might be disabled if the user clicked the restart button before
+                    tbTargetUserEmail.Enabled = true;
                 },
                 MessageWidth = 340,
                 MessageHeight = 150
