@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FlowOwnershipAudit.DTO;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUI;
-using FlowOwnershipAudit;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 using static FlowOwnershipAudit.API;
@@ -285,6 +285,7 @@ namespace FlowOwnershipAudit
                     using (var environmentSelectorForm = new EnvironmentSelector(environmentList.value))
                     {
                         var dialogResult = environmentSelectorForm.ShowDialog();
+
                         if (dialogResult == DialogResult.OK)
                         {
                             LogInfo($"Selected {environmentSelectorForm.SelectedEnvironments.Count} environments");
@@ -732,6 +733,12 @@ namespace FlowOwnershipAudit
             {
                 f.ShowDialog();
             }
+        }
+
+        private void rtbSidepanel_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            ProcessStartInfo sInfo = new ProcessStartInfo(e.LinkText);
+            Process.Start(sInfo);
         }
     }
 }

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlowOwnershipAudit.Model
 {
@@ -51,7 +48,4 @@ namespace FlowOwnershipAudit.Model
         public FlowProperties properties { get; set; }
         public List<FlowPermission> permissions { get; set; }
     }
-
-
-
 }
