@@ -9,7 +9,7 @@
     <projectUrl>https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser</projectUrl>
     <authors>Felix Mora, Laurens Vandendriessche</authors>
     <version>0.1.14</version>
-    <license type="expression">GPL-3.0-or-later</license>
+    <license type="expression">MIT</license>
     <readme>README.md</readme>
     <id>msftPACE.FlowOwnershipAudit</id>
     <icon>Icon_32x32.png</icon>
