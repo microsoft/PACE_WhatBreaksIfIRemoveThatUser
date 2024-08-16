@@ -21,7 +21,7 @@ namespace FlowOwnershipAudit
         ExportMetadata("BackgroundColor", "Lavender"),
         ExportMetadata("PrimaryFontColor", "Black"),
         ExportMetadata("SecondaryFontColor", "Gray")]
-    public class FlowOwnershipAudit : PluginBase
+    public class FlowOwnershipAudit : PluginBase, INoConnectionRequired
     {
         public override IXrmToolBoxPluginControl GetControl()
         {
