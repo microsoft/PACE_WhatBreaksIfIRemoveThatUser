@@ -1,0 +1,1 @@
+Output files are generated in this folder when the Release build is triggered
