@@ -89,11 +89,11 @@
 		<Exec Command="echo starting post build events for Debug target" />
 		<Message Text="Copying output to Plugins folder" Importance="high"></Message>
 		<Copy SourceFiles="$(TargetDir)$(TargetName).dll;$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TargetDir)\Plugins\"></Copy>
-		<Message Text="Creating Dependencies folder" Importance="high"></Message>
+		<!--<Message Text="Creating Dependencies folder" Importance="high"></Message>
 		<Copy SourceFiles="$(OutputPath)ClosedXML.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)DocumentFormat.OpenXml.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)ExcelNumberFormat.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
-		<!--<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>-->
+		<Copy SourceFiles="$(OutputPath)microsoft.identitymodel.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.Identity.Client.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
 		<Copy SourceFiles="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(TargetDir)FlowOwnershipAudit"></Copy>
@@ -105,7 +105,7 @@
 		<Delete Files="$(OutputPath)Microsoft.Identity.Client.dll" />
 		<Delete Files="$(OutputPath)Microsoft.IdentityModel.Abstractions.dll" />
 		<Delete Files="$(OutputPath)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
-    <Delete Files="$(OutputPath)System.Diagnostics.DiagnosticSource.dll" />
+    <Delete Files="$(OutputPath)System.Diagnostics.DiagnosticSource.dll" />-->
 	</Target>
 	
 	<!--release config-->

@@ -186,7 +186,7 @@ namespace FlowOwnershipAudit
             }
 
             // for some reason the designer keeps deleting this default text...﻿
-            tbTargetUserEmail.Text = "Please enter the target user principal name.";
+            tbTargetUserEmail.Text = "Please enter the target user's principal name or object id.";
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -353,13 +353,16 @@ namespace FlowOwnershipAudit
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
             {
-                string userid = string.Empty;
+                Guid userid;
 
                 // get the user id from the graph api. This should be the same for all environments so we dont need to do it in the parallel loop
                 try
                 {
-                    var userTask = GetUserIdFromGraph(targetUser);
-                    userid = userTask.Result;
+                    if (!Guid.TryParse(targetUser, out userid))
+                    {
+                        var userTask = GetUserIdFromGraph(targetUser);
+                        userid = Guid.Parse(userTask.Result);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -393,7 +396,7 @@ namespace FlowOwnershipAudit
                                 targetEnvironment: currentTargetEnvironment.Key);
 
                             AddFlowPermissionsToEnvironment(
-                                userId: userid,
+                                userId: userid.ToString(),
                                 targetEnvironment: currentTargetEnvironment.Key,
                                 ProgressChanged: (flowObj) =>
                                 {
@@ -427,7 +430,7 @@ namespace FlowOwnershipAudit
                             directoryTreeNodes.Add(connectionReferencesDirectoryNode);
 
                             AddConnectionReferencesToEnvironment(
-                                userId: userid,
+                                userId: userid.ToString(),
                                 targetEnvironment: currentTargetEnvironment.Key,
                                 ProgressChanged: (ConnrectionReferenceObj) =>
                                 {
