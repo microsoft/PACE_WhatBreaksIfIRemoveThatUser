@@ -39,17 +39,19 @@
             // 
             this.lblHeader.AutoSize = true;
             this.lblHeader.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblHeader.Location = new System.Drawing.Point(12, 9);
+            this.lblHeader.Location = new System.Drawing.Point(18, 14);
+            this.lblHeader.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblHeader.Name = "lblHeader";
-            this.lblHeader.Size = new System.Drawing.Size(357, 20);
+            this.lblHeader.Size = new System.Drawing.Size(539, 29);
             this.lblHeader.TabIndex = 0;
             this.lblHeader.Text = "Please select the environments you want to query";
             // 
             // btnOk
             // 
-            this.btnOk.Location = new System.Drawing.Point(480, 397);
+            this.btnOk.Location = new System.Drawing.Point(677, 609);
+            this.btnOk.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(118, 23);
+            this.btnOk.Size = new System.Drawing.Size(177, 35);
             this.btnOk.TabIndex = 1;
             this.btnOk.Text = "Use only selected";
             this.btnOk.UseVisualStyleBackColor = true;
@@ -58,9 +60,10 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(399, 397);
+            this.btnCancel.Location = new System.Drawing.Point(555, 609);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.Size = new System.Drawing.Size(112, 35);
             this.btnCancel.TabIndex = 2;
             this.btnCancel.Text = "Use all";
             this.btnCancel.UseVisualStyleBackColor = true;
@@ -69,9 +72,10 @@
             // lblSubHeader
             // 
             this.lblSubHeader.AutoSize = true;
-            this.lblSubHeader.Location = new System.Drawing.Point(13, 41);
+            this.lblSubHeader.Location = new System.Drawing.Point(20, 63);
+            this.lblSubHeader.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSubHeader.Name = "lblSubHeader";
-            this.lblSubHeader.Size = new System.Drawing.Size(241, 13);
+            this.lblSubHeader.Size = new System.Drawing.Size(357, 20);
             this.lblSubHeader.TabIndex = 3;
             this.lblSubHeader.Text = "If no environments are selected, all will be queried";
             // 
@@ -80,9 +84,10 @@
             this.listView1.CheckBoxes = true;
             this.listView1.GridLines = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(16, 73);
+            this.listView1.Location = new System.Drawing.Point(24, 112);
+            this.listView1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(582, 318);
+            this.listView1.Size = new System.Drawing.Size(830, 487);
             this.listView1.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.listView1.TabIndex = 4;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -91,16 +96,17 @@
             // EnvironmentSelector
             // 
             this.AcceptButton = this.btnOk;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(610, 425);
+            this.ClientSize = new System.Drawing.Size(881, 653);
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.lblSubHeader);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.lblHeader);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "EnvironmentSelector";

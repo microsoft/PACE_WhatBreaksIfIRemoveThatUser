@@ -158,6 +158,10 @@ namespace FlowOwnershipAudit
 
             // subscribe to the event that the underlying list of target environments has changed﻿
             targetEnvironments.CollectionChanged += TargetEnvironments_CollectionChanged;
+
+            // subscribe to the event that the treeview node has been selected
+            tvTreeview.AfterCheck += treeView1_AfterCheck;
+
         }
 
         /// <summary>﻿
@@ -338,7 +342,7 @@ namespace FlowOwnershipAudit
             rtbSidepanel.Text = sidePanelDefaultText;
 
             // this might be not the first time that the user clicks the button, so we need to clean up﻿
-            treeView1.Nodes.Clear();
+            tvTreeview.Nodes.Clear();
 
             LogInfo($"Will search the following for {targetUser}:" +
                 $" Flow Ownership: {(cbCheckFlowOwners.Checked ? "yes" : "no")}" +
@@ -482,15 +486,16 @@ namespace FlowOwnershipAudit
             // TODO if no environments have been loaded, this will never be called and the progressbar keeps on going forever
 
             // invoke if necessary - this event will likely be called from a background thread﻿
-            if (treeView1.InvokeRequired)
+            if (tvTreeview.InvokeRequired)
             {
-                treeView1.Invoke(new EventHandler(AllEnvironmentQueriesCompleted), sender, e);
+                tvTreeview.Invoke(new EventHandler(AllEnvironmentQueriesCompleted), sender, e);
             }
             else
             {
                 LogInfo("All queries have been completed.");
                 pbMain.Style = ProgressBarStyle.Continuous;
                 btnExportToExcel.Enabled = true;
+                btnReassign.Enabled = true;
             }
         }
 
@@ -532,7 +537,7 @@ namespace FlowOwnershipAudit
             targetEnvironments.Clear();
 
             // treeview﻿
-            treeView1.Nodes.Clear();
+            tvTreeview.Nodes.Clear();
 
             // progressbar﻿
             pbMain.Style = ProgressBarStyle.Continuous;
@@ -547,9 +552,9 @@ namespace FlowOwnershipAudit
         private void UpdateNode(NodeUpdateObject nodeUpdateObject)
         {
             // because this might be called from a different thread﻿
-            if (treeView1.InvokeRequired)
+            if (tvTreeview.InvokeRequired)
             {
-                treeView1.Invoke(new _updateTreeNodeDelegate(UpdateNode), nodeUpdateObject);
+                tvTreeview.Invoke(new _updateTreeNodeDelegate(UpdateNode), nodeUpdateObject);
             }
             else
             {
@@ -558,7 +563,7 @@ namespace FlowOwnershipAudit
                     switch (nodeUpdateObject.UpdateReason)
                     {
                         case UpdateReason.AddedToList:
-                            var parentNode = treeView1.Nodes.Find(nodeUpdateObject.ParentNodeId, true).FirstOrDefault();
+                            var parentNode = tvTreeview.Nodes.Find(nodeUpdateObject.ParentNodeId, true).FirstOrDefault();
                             if (parentNode == null)
                             {
                                 // create a new top level node﻿
@@ -569,9 +574,9 @@ namespace FlowOwnershipAudit
                                     ForeColor = System.Drawing.Color.Black,
                                     Tag = nodeUpdateObject.TreeNodeElement,
                                     //ToolTipText = "n/a",﻿
-                                    Checked = true
+                                    Checked = false
                                 };
-                                treeView1.Nodes.Add(createNode);
+                                tvTreeview.Nodes.Add(createNode);
                                 createNode.Expand();
 
                             }
@@ -585,7 +590,7 @@ namespace FlowOwnershipAudit
                                     ForeColor = System.Drawing.Color.Black,
                                     Tag = nodeUpdateObject.TreeNodeElement,
                                     //ToolTipText = "n/a",﻿
-                                    Checked = true
+                                    Checked = false
                                 };
                                 parentNode.Nodes.Add(createNode);
                                 parentNode.Expand();
@@ -594,7 +599,7 @@ namespace FlowOwnershipAudit
 
                         // this is used so we can update nodes in the UI that are already there with additional details﻿
                         case UpdateReason.DetailsAdded:
-                            var updateNode = treeView1.Nodes.Find(nodeUpdateObject.NodeId, true).FirstOrDefault();
+                            var updateNode = tvTreeview.Nodes.Find(nodeUpdateObject.NodeId, true).FirstOrDefault();
                             updateNode.ForeColor = System.Drawing.Color.Black;
                             updateNode.Tag = nodeUpdateObject.TreeNodeElement;
                             //updateNode.ToolTipText = "n/a.";﻿
@@ -611,7 +616,7 @@ namespace FlowOwnershipAudit
                     }
 
                     //Sort the Treeview
-                    treeView1.Sort();
+                    tvTreeview.Sort();
 
                 }
                 catch (Exception ex)
@@ -742,6 +747,107 @@ namespace FlowOwnershipAudit
         {
             ProcessStartInfo sInfo = new ProcessStartInfo(e.LinkText);
             Process.Start(sInfo);
+        }
+
+        private List<TreeNode> GetCheckedNodes(TreeNodeCollection nodes)
+        {
+            List<TreeNode> checkedNodes = new List<TreeNode>();
+
+            foreach (TreeNode node in nodes)
+            {
+                if (node.Checked)
+                {
+                    checkedNodes.Add(node);
+                }
+
+                // Recursively check child nodes
+                checkedNodes.AddRange(GetCheckedNodes(node.Nodes));
+            }
+
+            return checkedNodes;
+        }
+
+        private void btnReassign_Click(object sender, EventArgs e)
+        {
+            using (var f = new ReAssignForm(GetCheckedNodes(tvTreeview.Nodes)))
+            {
+                f.ShowDialog();
+            }
+        }
+
+        //private void treeView1_AfterCheck(object sender, TreeViewEventArgs e)
+        //{
+        //    // Handle the event when a checkbox is checked or unchecked
+        //    var checkedNode = e.Node;
+
+        //    foreach (TreeNode node in checkedNode.Nodes)
+        //    {
+        //        node.Checked = checkedNode.Checked;
+
+        //        foreach (TreeNode subNode in node.Nodes)
+        //        {
+        //            subNode.Checked = checkedNode.Checked;
+        //        }
+        //    }
+
+        //    // if all nodes under the same parent are checked, check the parent            
+        //    if (checkedNode.Parent != null)
+        //    {
+        //        bool allSiblingsChecked = true;
+        //        foreach (TreeNode sibling in checkedNode.Parent.Nodes)
+        //        {
+        //            if (!sibling.Checked)
+        //            {
+        //                allSiblingsChecked = false;
+        //                break;
+        //            }
+        //        }
+        //        checkedNode.Parent.Checked = allSiblingsChecked;
+
+        //        // if all nodes under the same grandparent are checked, check the grandparent
+        //    }
+        //}
+
+        private void treeView1_AfterCheck(object sender, TreeViewEventArgs e)
+        {
+            if (e.Action != TreeViewAction.ByMouse) 
+                return;
+
+            // Handle the event when a checkbox is checked or unchecked
+            var checkedNode = e.Node;
+
+            // Update all child nodes
+            UpdateChildNodes(checkedNode, checkedNode.Checked);
+
+            // Update parent nodes
+            UpdateParentNodes(checkedNode);
+        }
+
+        private void UpdateChildNodes(TreeNode node, bool isChecked)
+        {
+            foreach (TreeNode childNode in node.Nodes)
+            {
+                childNode.Checked = isChecked;
+                UpdateChildNodes(childNode, isChecked);
+            }
+        }
+
+        private void UpdateParentNodes(TreeNode node)
+        {
+            if (node.Parent != null)
+            {
+                bool allSiblingsChecked = true;
+                foreach (TreeNode sibling in node.Parent.Nodes)
+                {
+                    if (!sibling.Checked)
+                    {
+                        allSiblingsChecked = false;
+                        break;
+                    }
+                }
+                node.Parent.Checked = allSiblingsChecked;
+                UpdateParentNodes(node.Parent);
+            }
         }
     }
 }

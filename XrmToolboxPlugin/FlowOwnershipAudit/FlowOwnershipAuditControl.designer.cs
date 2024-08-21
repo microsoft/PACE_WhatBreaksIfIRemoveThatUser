@@ -39,11 +39,12 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tlpOverviewTab = new System.Windows.Forms.TableLayoutPanel();
-            this.treeView1 = new CustomTreeViewControl();
+            this.tvTreeview = new CustomTreeViewControl();
             this.rtbSidepanel = new System.Windows.Forms.RichTextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lbDebugOutput = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnReassign = new System.Windows.Forms.Button();
             this.tbSelectedEnvironments = new System.Windows.Forms.TextBox();
             this.lblSelectedEnvironments_description = new System.Windows.Forms.Label();
             this.btnSelectEnvironments = new System.Windows.Forms.Button();
@@ -164,7 +165,7 @@
             this.tlpOverviewTab.ColumnCount = 2;
             this.tlpOverviewTab.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
             this.tlpOverviewTab.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
-            this.tlpOverviewTab.Controls.Add(this.treeView1, 0, 0);
+            this.tlpOverviewTab.Controls.Add(this.tvTreeview, 0, 0);
             this.tlpOverviewTab.Controls.Add(this.rtbSidepanel, 1, 0);
             this.tlpOverviewTab.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpOverviewTab.Location = new System.Drawing.Point(4, 5);
@@ -175,16 +176,17 @@
             this.tlpOverviewTab.Size = new System.Drawing.Size(1585, 1074);
             this.tlpOverviewTab.TabIndex = 2;
             // 
-            // treeView1
+            // tvTreeview
             // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.Location = new System.Drawing.Point(0, 0);
-            this.treeView1.Margin = new System.Windows.Forms.Padding(0);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.ShowNodeToolTips = true;
-            this.treeView1.Size = new System.Drawing.Size(951, 1074);
-            this.treeView1.TabIndex = 1;
-            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
+            this.tvTreeview.CheckBoxes = true;
+            this.tvTreeview.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tvTreeview.Location = new System.Drawing.Point(0, 0);
+            this.tvTreeview.Margin = new System.Windows.Forms.Padding(0);
+            this.tvTreeview.Name = "tvTreeview";
+            this.tvTreeview.ShowNodeToolTips = true;
+            this.tvTreeview.Size = new System.Drawing.Size(951, 1074);
+            this.tvTreeview.TabIndex = 1;
+            this.tvTreeview.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
             // rtbSidepanel
             // 
@@ -208,7 +210,7 @@
             this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPage2.Size = new System.Drawing.Size(1591, 1072);
+            this.tabPage2.Size = new System.Drawing.Size(1593, 1084);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Log Output";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -230,12 +232,13 @@
             this.lbDebugOutput.Name = "lbDebugOutput";
             this.lbDebugOutput.ScrollAlwaysVisible = true;
             this.lbDebugOutput.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbDebugOutput.Size = new System.Drawing.Size(1583, 1062);
+            this.lbDebugOutput.Size = new System.Drawing.Size(1585, 1074);
             this.lbDebugOutput.TabIndex = 11;
             this.lbDebugOutput.TabStop = false;
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btnReassign);
             this.panel1.Controls.Add(this.tbSelectedEnvironments);
             this.panel1.Controls.Add(this.lblSelectedEnvironments_description);
             this.panel1.Controls.Add(this.btnSelectEnvironments);
@@ -253,6 +256,18 @@
             this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
             this.panel1.Size = new System.Drawing.Size(517, 1117);
             this.panel1.TabIndex = 12;
+            // 
+            // btnReassign
+            // 
+            this.btnReassign.Enabled = false;
+            this.btnReassign.Location = new System.Drawing.Point(160, 379);
+            this.btnReassign.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnReassign.Name = "btnReassign";
+            this.btnReassign.Size = new System.Drawing.Size(190, 35);
+            this.btnReassign.TabIndex = 35;
+            this.btnReassign.Text = "Reassign";
+            this.btnReassign.UseVisualStyleBackColor = true;
+            this.btnReassign.Click += new System.EventHandler(this.btnReassign_Click);
             // 
             // tbSelectedEnvironments
             // 
@@ -303,10 +318,10 @@
             // btnExportToExcel
             // 
             this.btnExportToExcel.Enabled = false;
-            this.btnExportToExcel.Location = new System.Drawing.Point(196, 378);
+            this.btnExportToExcel.Location = new System.Drawing.Point(160, 424);
             this.btnExportToExcel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnExportToExcel.Name = "btnExportToExcel";
-            this.btnExportToExcel.Size = new System.Drawing.Size(112, 35);
+            this.btnExportToExcel.Size = new System.Drawing.Size(190, 35);
             this.btnExportToExcel.TabIndex = 31;
             this.btnExportToExcel.Text = "Export";
             this.btnExportToExcel.UseVisualStyleBackColor = true;
@@ -315,7 +330,7 @@
             // pbMain
             // 
             this.pbMain.Enabled = false;
-            this.pbMain.Location = new System.Drawing.Point(4, 457);
+            this.pbMain.Location = new System.Drawing.Point(6, 491);
             this.pbMain.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pbMain.Name = "pbMain";
             this.pbMain.Size = new System.Drawing.Size(507, 35);
@@ -409,7 +424,7 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.ListBox lbDebugOutput;
-        private CustomTreeViewControl treeView1;
+        private CustomTreeViewControl tvTreeview;
         private System.Windows.Forms.ProgressBar pbMain;
         private System.Windows.Forms.Button btnExportToExcel;
         private System.Windows.Forms.Button btnSelectEnvironments;
@@ -420,5 +435,6 @@
         private System.Windows.Forms.TableLayoutPanel tlpOverviewTab;
         private System.Windows.Forms.RichTextBox rtbSidepanel;
         private System.Windows.Forms.ToolStripButton tsbHelp;
+        private System.Windows.Forms.Button btnReassign;
     }
 }
