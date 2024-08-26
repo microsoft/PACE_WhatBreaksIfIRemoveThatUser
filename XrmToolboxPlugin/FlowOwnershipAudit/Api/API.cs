@@ -11,27 +11,6 @@ using Parallel = System.Threading.Tasks.Parallel;
 
 namespace FlowOwnershipAudit
 {
-
-    //Get-AdminFlowOwnerRole
-    //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/flows/{flowName}/permissions?api-version={apiVersion}" `
-
-    //Get Environment (by name)
-    //"https://{bapEndpoint}/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentName}?`$$expandParameter&api-version={apiVersion}"
-
-    //Get Environments (all environments)
-    //"https://{bapEndpoint}/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments?`$$expandParameter&api-version={apiVersion}"
-
-    //Get-AdminFlow (by environment, name)
-    //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/flows/{flowName}?api-version={apiVersion}&`$top={top}$($includeDeletedParam)"
-
-    //Get-AdminFlows (by environment)
-    //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/v2/flows?api-version={apiVersion}&`$top={top}$($includeDeletedParam)"
-
-    //Get-UsersOrGroupsFromGraph
-    //$GraphApiVersion = "1.6"
-    //"https://graph.windows.net/myorganization/users?filter={filter}&api-version={graphApiVersion}"
-    //"startswith(userPrincipalName,'$SearchString') or startswith(displayName,'$SearchString')"
-
     public static class API
     {
         static IPublicClientApplication app = null;
@@ -40,11 +19,12 @@ namespace FlowOwnershipAudit
         {
             PowerApps,
             Flow,
-            Graph
+            Graph,
+            Dataverse
         }
 
         #region Authentication
-        public static async Task<AuthenticationResult> AuthenticateAsync(AuthType authType)
+        public static async Task<AuthenticationResult> AuthenticateAsync(AuthType authType, string dataverseURI = "")
         {
             string[] scopes = null;
 
@@ -58,6 +38,9 @@ namespace FlowOwnershipAudit
                     break;
                 case AuthType.Graph:
                     scopes = new[] { "https://graph.windows.net//.default" };
+                    break;
+                case AuthType.Dataverse:
+                    scopes = new[] { $"{dataverseURI}/user_impersonation" };
                     break;
                 default:
                     return null;
@@ -157,6 +140,53 @@ namespace FlowOwnershipAudit
             }
 
             return environmentsList;
+        }
+
+        public static void AddConnectionReferencesToEnvironment(string userId, Model.Environment targetEnvironment, Action<object> ProgressChanged)
+        {
+            string powerAppsEndpoint = "https://api.powerapps.com";
+            string apiVersion = "2016-11-01";
+
+            ConnectionReferencesList connectionReferencesList = new ConnectionReferencesList();
+
+            var auth = AuthenticateAsync(AuthType.PowerApps).Result;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                //string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironment.name}/v2/flows?api-version={apiVersion}";
+                string url = $"{powerAppsEndpoint}/providers/Microsoft.PowerApps/scopes/admin/environments/{targetEnvironment.name}/connections?api-version={apiVersion}";
+                HttpResponseMessage response = client.GetAsync(url).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = response.Content.ReadAsStringAsync().Result;
+                    connectionReferencesList = JsonConvert.DeserializeObject<ConnectionReferencesList>(responseContent);
+                }
+                else
+                {
+                    // Handle the error here
+                }
+            }
+
+            //Report to UI
+            foreach (var connectionReference in connectionReferencesList.value)
+            {
+                if (connectionReference.properties.createdBy.id == userId)
+                {
+                    var returnObj = new
+                    {
+                        ConnectionReferenceName = connectionReference.name,
+                        ConnectionReferenceId = connectionReference.name,
+                        EnvironmentId = targetEnvironment.name,
+                        EnvironmentName = targetEnvironment.properties.displayName,
+                    };
+
+                    ProgressChanged(returnObj);
+                }
+            }
+
+            // attach flowlist to the current targetenvironment
+            targetEnvironment.connectionReferences = connectionReferencesList.value;
         }
         #endregion
 
@@ -258,51 +288,8 @@ namespace FlowOwnershipAudit
         }
         #endregion
 
-        public static void AddConnectionReferencesToEnvironment(string userId, Model.Environment targetEnvironment, Action<object> ProgressChanged)
-        {
-            string powerAppsEndpoint = "https://api.powerapps.com";
-            string apiVersion = "2016-11-01";
+        #region Dataverse Calls
 
-            ConnectionReferencesList connectionReferencesList = new ConnectionReferencesList();
-
-            var auth = AuthenticateAsync(AuthType.PowerApps).Result;
-
-            using (HttpClient client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-                //string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironment.name}/v2/flows?api-version={apiVersion}";
-                string url = $"{powerAppsEndpoint}/providers/Microsoft.PowerApps/scopes/admin/environments/{targetEnvironment.name}/connections?api-version={apiVersion}";
-                HttpResponseMessage response = client.GetAsync(url).Result;
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseContent = response.Content.ReadAsStringAsync().Result;
-                    connectionReferencesList = JsonConvert.DeserializeObject<ConnectionReferencesList>(responseContent);
-                }
-                else
-                {
-                    // Handle the error here
-                }
-            }
-
-            //Report to UI
-            foreach (var connectionReference in connectionReferencesList.value)
-            {
-                if (connectionReference.properties.createdBy.id == userId)
-                {
-                    var returnObj = new
-                    {
-                        ConnectionReferenceName = connectionReference.name,
-                        ConnectionReferenceId = connectionReference.name,
-                        EnvironmentId = targetEnvironment.name,
-                        EnvironmentName = targetEnvironment.properties.displayName,
-                    };
-
-                    ProgressChanged(returnObj);
-                }
-            }
-
-            // attach flowlist to the current targetenvironment
-            targetEnvironment.connectionReferences = connectionReferencesList.value;
-        }
+        #endregion
     }
 }

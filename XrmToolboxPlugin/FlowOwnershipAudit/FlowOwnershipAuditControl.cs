@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using FlowOwnershipAudit.DTO;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUI;
+using TreeViewUI;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
 using static FlowOwnershipAudit.API;
 using Environment = System.Environment;
 
@@ -70,7 +75,7 @@ namespace FlowOwnershipAudit
             public event EventHandler CollectionChanged;
 
             public EnvironmentCollection() : base()
-            {  }
+            { }
 
             // these overrrides are necessary to implement our own observable event pattern﻿
 
@@ -160,7 +165,10 @@ namespace FlowOwnershipAudit
             targetEnvironments.CollectionChanged += TargetEnvironments_CollectionChanged;
 
             // subscribe to the event that the treeview node has been selected
+            //tvTreeview.BeforeCheck += treeView1_BeforeCheck;
             tvTreeview.AfterCheck += treeView1_AfterCheck;
+            tvTreeview.DrawNode += treeView1_DrawNode;
+            tvTreeview.DrawMode = TreeViewDrawMode.OwnerDrawText;
 
         }
 
@@ -241,7 +249,7 @@ namespace FlowOwnershipAudit
                 btnStartQueries.Enabled = false;
             }
         }
-        
+
         private void btnSelectEnvironments_Click(object sender, EventArgs eventArgs)
         {
             // clear the currently selected environments because we want to show a dialog that allows to user to make a selection﻿
@@ -480,7 +488,7 @@ namespace FlowOwnershipAudit
             bgw.RunWorkerAsync();
             // --- careful, all the stuff above runs async, everything below here will run immediately ----﻿
         }
-        
+
         private void AllEnvironmentQueriesCompleted(object sender, EventArgs e)
         {
             // TODO if no environments have been loaded, this will never be called and the progressbar keeps on going forever
@@ -749,13 +757,14 @@ namespace FlowOwnershipAudit
             Process.Start(sInfo);
         }
 
+        #region treeview
         private List<TreeNode> GetCheckedNodes(TreeNodeCollection nodes)
         {
             List<TreeNode> checkedNodes = new List<TreeNode>();
 
             foreach (TreeNode node in nodes)
             {
-                if (node.Checked)
+                if (node.Checked && node.Tag.GetType() == typeof(FlowTreeNodeElement))
                 {
                     checkedNodes.Add(node);
                 }
@@ -775,42 +784,23 @@ namespace FlowOwnershipAudit
             }
         }
 
-        //private void treeView1_AfterCheck(object sender, TreeViewEventArgs e)
-        //{
-        //    // Handle the event when a checkbox is checked or unchecked
-        //    var checkedNode = e.Node;
+        private void treeView1_DrawNode(object sender, DrawTreeNodeEventArgs e)
+        {
+            var element = e.Node.Tag;
+            if (element != null 
+                && (element.GetType() == typeof(ConnectionReferenceTreeNodeElement) 
+                || (element.GetType() == typeof(DirectoryTreeNode) && e.Node.Text == "Connection References")))
+            {
+                e.Node.HideCheckBox();
+            }
 
-        //    foreach (TreeNode node in checkedNode.Nodes)
-        //    {
-        //        node.Checked = checkedNode.Checked;
-
-        //        foreach (TreeNode subNode in node.Nodes)
-        //        {
-        //            subNode.Checked = checkedNode.Checked;
-        //        }
-        //    }
-
-        //    // if all nodes under the same parent are checked, check the parent            
-        //    if (checkedNode.Parent != null)
-        //    {
-        //        bool allSiblingsChecked = true;
-        //        foreach (TreeNode sibling in checkedNode.Parent.Nodes)
-        //        {
-        //            if (!sibling.Checked)
-        //            {
-        //                allSiblingsChecked = false;
-        //                break;
-        //            }
-        //        }
-        //        checkedNode.Parent.Checked = allSiblingsChecked;
-
-        //        // if all nodes under the same grandparent are checked, check the grandparent
-        //    }
-        //}
+            TextRenderer.DrawText(e.Graphics, e.Node.Text, tvTreeview.Font,
+                      new Point(e.Node.Bounds.Left + 2, e.Node.Bounds.Top + 2), Color.Black);
+        }
 
         private void treeView1_AfterCheck(object sender, TreeViewEventArgs e)
         {
-            if (e.Action != TreeViewAction.ByMouse) 
+            if (e.Action != TreeViewAction.ByMouse)
                 return;
 
             // Handle the event when a checkbox is checked or unchecked
@@ -849,5 +839,6 @@ namespace FlowOwnershipAudit
                 UpdateParentNodes(node.Parent);
             }
         }
+        #endregion
     }
 }
