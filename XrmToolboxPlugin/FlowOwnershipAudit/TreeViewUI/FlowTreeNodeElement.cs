@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using FlowOwnershipAudit.DTO;
+using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUIElements;
 
 namespace FlowOwnershipAudit.TreeViewUI
@@ -10,33 +12,29 @@ namespace FlowOwnershipAudit.TreeViewUI
     {
         internal DirectoryTreeNode _parentNodeElement;
 
-        public string FlowName { get; }
+        public Flow Flow { get; }
 
-        public string FlowId { get; }
-
-        public string EnvironmentId { get; }
-
-        public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments/{EnvironmentId}/solutions/~preferred/flows/{FlowId}"); }
+        public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments/{Flow.properties.environment.name}/solutions/~preferred/flows/{Flow.name}"); }
 
         public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
                                   DirectoryTreeNode parentNodeElement,
-                                  string flowName,
-                                  string flowId,
-                                  string environmentId
+                                  //string flowName,
+                                  //string flowId,
+                                  //string environmentId,
+                                  Flow flow
                                  ) : base(updateNodeUiDelegate)
         {
             // ctor has been called, this means we need to call the update method to display the flow in the UI
             // TODO Implement logic for updating object that already exist
 
             _parentNodeElement = parentNodeElement;
-            FlowName = flowName;
-            FlowId = flowId;
-            EnvironmentId = environmentId;
+            Flow = flow;
+
             updateNodeUiDelegate(new NodeUpdateObject()
             {
                 TreeNodeElement = this,
                 ParentNodeId = (parentNodeElement != null) ? _parentNodeElement.ElementId.ToString() : null,
-                NodeText = FlowName,
+                NodeText = flow.properties.displayName,
                 UpdateReason = UpdateReason.AddedToList
             });
         }

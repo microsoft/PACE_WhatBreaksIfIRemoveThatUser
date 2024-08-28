@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using FlowOwnershipAudit.DTO;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUI;
 using TreeViewUI;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
 using static FlowOwnershipAudit.API;
 using Environment = System.Environment;
 
@@ -267,6 +264,7 @@ namespace FlowOwnershipAudit
                 Work = (worker, args) =>
                 {
                     var EnvironmentsTask = GetAllEnvironmentsInTenantAsync((progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
+                    
                     args.Result = EnvironmentsTask.Result;
                 },
                 ProgressChanged = e =>
@@ -413,18 +411,32 @@ namespace FlowOwnershipAudit
                                 ProgressChanged: (flowObj) =>
                                 {
                                     // todo: maybe get rid of the dynamic and use a typed object﻿
-                                    dynamic flowObjDyn = flowObj;
-                                    string flowName = flowObjDyn.FlowName;
-                                    string flowId = flowObjDyn.FlowId;
-                                    string environmentId = flowObjDyn.EnvironmentId;
-                                    string environmentName = flowObjDyn.EnvironmentName;
+                                    //FlowName = flow.properties.displayName,
+                                    //FlowId = flow.name,
+                                    //EnvironmentId = targetEnvironment.name,
+                                    //EnvironmentName = targetEnvironment.properties.displayName,
+                                    //dynamic flowObjDyn = flowObj;
+                                    //string flowName = flowObjDyn.FlowName;
+                                    //string flowId = flowObjDyn.FlowId;
+                                    //string environmentId = flowObjDyn.EnvironmentId;
+                                    //string environmentName = flowObjDyn.EnvironmentName;
+                                    //Flow flow = flowObjDyn.Flow;
+                                    Flow flow = flowObj as Flow;
 
                                     // create treenodeelement﻿
+                                    //new FlowTreeNodeElement(UpdateNode,
+                                    //                       parentNodeElement: flowDirectoryNode,
+                                    //                       flowName: flowName,
+                                    //                       flowId: flowId,
+                                    //                       environmentId: environmentId,
+                                    //                       flow: flow
+                                    //                       );
                                     new FlowTreeNodeElement(UpdateNode,
                                                            parentNodeElement: flowDirectoryNode,
-                                                           flowName: flowName,
-                                                           flowId: flowId,
-                                                           environmentId: environmentId﻿
+                                                           //flowName: flowName,
+                                                           //flowId: flowId,
+                                                           //environmentId: environmentId,
+                                                           flow: flow
                                                            );
                                 });
                             currentTargetEnvironment.Value.flowsQueryCompleted = true;
@@ -706,6 +718,31 @@ namespace FlowOwnershipAudit
             }
         }
 
+        private void tsbHelp_Click(object sender, EventArgs e)
+        {
+            using (var f = new AboutForm())
+            {
+                f.ShowDialog();
+            }
+        }
+
+        private void rtbSidepanel_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            ProcessStartInfo sInfo = new ProcessStartInfo(e.LinkText);
+            Process.Start(sInfo);
+        }
+
+        private void btnReassign_Click(object sender, EventArgs e)
+        {
+            var originalOwner = tbTargetUserEmail.Text;
+
+            using (var f = new ReAssignForm(GetCheckedNodes(tvTreeview.Nodes, new Dictionary<string, List<TreeNode>>()), originalOwner))
+            {
+                f.ShowDialog();
+            }
+        }
+
+        #region TreeView
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             // https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.treeview.afterselect?view=windowsdesktop-8.0&redirectedfrom=MSDN
@@ -721,10 +758,10 @@ namespace FlowOwnershipAudit
                     var flowNode = e.Node.Tag as FlowTreeNodeElement;
 
                     // get the flow details and display in the sidepanel
-                    var sidepanelText = $"Flow Name: {flowNode.FlowName}{Environment.NewLine}" +
-                        $"Flow Id: {flowNode.FlowId}{Environment.NewLine}" +
+                    var sidepanelText = $"Flow Name: {flowNode.Flow.properties.displayName}{Environment.NewLine}" +
+                        $"Flow Id: {flowNode.Flow.name}{Environment.NewLine}" +
                         $"Flow URI: {flowNode.FlowUri}{Environment.NewLine}" +
-                        $"Environment Id: {flowNode.EnvironmentId}";
+                        $"Environment Id: {flowNode.Flow.properties.environment.name}";
 
                     // set the sidepanel text
                     rtbSidepanel.Text = sidepanelText;
@@ -743,52 +780,37 @@ namespace FlowOwnershipAudit
             }
         }
 
-        private void tsbHelp_Click(object sender, EventArgs e)
+        private Dictionary<string, List<TreeNode>> GetCheckedNodes(TreeNodeCollection nodes, Dictionary<string, List<TreeNode>> checkedNodes)
         {
-            using (var f = new AboutForm())
-            {
-                f.ShowDialog();
-            }
-        }
-
-        private void rtbSidepanel_LinkClicked(object sender, LinkClickedEventArgs e)
-        {
-            ProcessStartInfo sInfo = new ProcessStartInfo(e.LinkText);
-            Process.Start(sInfo);
-        }
-
-        #region treeview
-        private List<TreeNode> GetCheckedNodes(TreeNodeCollection nodes)
-        {
-            List<TreeNode> checkedNodes = new List<TreeNode>();
-
             foreach (TreeNode node in nodes)
             {
                 if (node.Checked && node.Tag.GetType() == typeof(FlowTreeNodeElement))
                 {
-                    checkedNodes.Add(node);
+                    string url = targetEnvironments.Keys
+                                .Where(y => y.flows.Any(x => x.name == ((FlowTreeNodeElement)node.Tag).Flow.name))
+                                .Select(y => y.properties.linkedEnvironmentMetadata.instanceUrl)
+                                .FirstOrDefault();
+
+                    if (!checkedNodes.ContainsKey(url))
+                    {
+                        checkedNodes.Add(url, new List<TreeNode>());
+                    }
+
+                    checkedNodes[url].Add(node);
                 }
 
                 // Recursively check child nodes
-                checkedNodes.AddRange(GetCheckedNodes(node.Nodes));
+                GetCheckedNodes(node.Nodes, checkedNodes);                
             }
 
             return checkedNodes;
         }
 
-        private void btnReassign_Click(object sender, EventArgs e)
-        {
-            using (var f = new ReAssignForm(GetCheckedNodes(tvTreeview.Nodes)))
-            {
-                f.ShowDialog();
-            }
-        }
-
         private void treeView1_DrawNode(object sender, DrawTreeNodeEventArgs e)
         {
             var element = e.Node.Tag;
-            if (element != null 
-                && (element.GetType() == typeof(ConnectionReferenceTreeNodeElement) 
+            if (element != null
+                && (element.GetType() == typeof(ConnectionReferenceTreeNodeElement)
                 || (element.GetType() == typeof(DirectoryTreeNode) && e.Node.Text == "Connection References")))
             {
                 e.Node.HideCheckBox();

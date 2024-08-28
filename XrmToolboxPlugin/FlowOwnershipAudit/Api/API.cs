@@ -8,6 +8,9 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using FlowOwnershipAudit.Model;
 using Parallel = System.Threading.Tasks.Parallel;
+using System.Text;
+using System.Collections.Generic;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace FlowOwnershipAudit
 {
@@ -40,7 +43,7 @@ namespace FlowOwnershipAudit
                     scopes = new[] { "https://graph.windows.net//.default" };
                     break;
                 case AuthType.Dataverse:
-                    scopes = new[] { $"{dataverseURI}/user_impersonation" };
+                    scopes = new[] { $"{dataverseURI}/.default" };
                     break;
                 default:
                     return null;
@@ -211,29 +214,28 @@ namespace FlowOwnershipAudit
                     parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 5 },
                     body: flow =>
                     {
-                        //foreach (var flow in targetEnvironment.flows)
+                        //var auth = AuthenticateAsync(AuthType.Flow).Result;
+
+                        //FlowPermissionList flowPermissionList = new FlowPermissionList();
+
+                        //// Call the API for each environment
+                        //using (HttpClient client = new HttpClient())
                         //{
-                        var auth = AuthenticateAsync(AuthType.Flow).Result;
-
-                        FlowPermissionList flowPermissionList = new FlowPermissionList();
-
-                        // Call the API for each environment
-                        using (HttpClient client = new HttpClient())
-                        {
-                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-                            string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
-                            HttpResponseMessage response = client.GetAsync(url).Result;
-                            if (response.IsSuccessStatusCode)
-                            {
-                                string responseContent = response.Content.ReadAsStringAsync().Result;
-                                flowPermissionList = JsonConvert.DeserializeObject<FlowPermissionList>(responseContent);
-                                flow.permissions = flowPermissionList.value;
-                            }
-                            else
-                            {
-                                // Handle the error here
-                            }
-                        }
+                        //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                        //    string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
+                        //    HttpResponseMessage response = client.GetAsync(url).Result;
+                        //    if (response.IsSuccessStatusCode)
+                        //    {
+                        //        string responseContent = response.Content.ReadAsStringAsync().Result;
+                        //        flowPermissionList = JsonConvert.DeserializeObject<FlowPermissionList>(responseContent);
+                        //        flow.permissions = flowPermissionList.value;
+                        //    }
+                        //    else
+                        //    {
+                        //        // Handle the error here
+                        //    }
+                        //}
+                        GetFlowPermissons(flow);
 
                         if (flow.permissions != null)
                         {
@@ -242,15 +244,7 @@ namespace FlowOwnershipAudit
                                 if (permission.properties.roleName == "Owner" &&
                                                 permission.properties.principal.id == userId)
                                 {
-                                    var returnObj = new
-                                    {
-                                        FlowName = flow.properties.displayName,
-                                        FlowId = flow.name,
-                                        EnvironmentId = targetEnvironment.name,
-                                        EnvironmentName = targetEnvironment.properties.displayName,
-                                    };
-
-                                    ProgressChanged(returnObj);
+                                    ProgressChanged(flow);
                                 }
                             }
                         }
@@ -258,6 +252,10 @@ namespace FlowOwnershipAudit
             }
         }
 
+        /// <summary>
+        /// Adds the flows to the environment object
+        /// </summary>
+        /// <param name="targetEnvironment"></param>
         public static void AddFlowsToEnvironment(Model.Environment targetEnvironment)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
@@ -286,10 +284,191 @@ namespace FlowOwnershipAudit
             // attach flowlist to the current targetenvironment
             targetEnvironment.flows = flowList.value;
         }
+
+        private static void GetFlowPermissons(Flow flow)
+        {
+            string flowEndpoint = "https://api.flow.microsoft.com";
+            string apiVersion = "2016-11-01";
+
+            var auth = AuthenticateAsync(AuthType.Flow).Result;
+
+            FlowPermissionList flowPermissionList = new FlowPermissionList();
+
+            // Call the API for each environment
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                //string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
+                string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{flow.properties.environment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
+                HttpResponseMessage response = client.GetAsync(url).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = response.Content.ReadAsStringAsync().Result;
+                    flowPermissionList = JsonConvert.DeserializeObject<FlowPermissionList>(responseContent);
+                    flow.permissions = flowPermissionList.value;
+                }
+                else
+                {
+                    // Handle the error here
+                }
+            }
+        }
+
+        public static void UpdateFlowDetails(Flow flow)
+        {
+
+        }
+
         #endregion
 
         #region Dataverse Calls
+        /// <summary>
+        /// This method provides a way to grant access to a workflow in the Dataverse environment using the provided owner ID and workflow ID.
+        /// </summary>
+        /// <param name="environmentUrl"></param>
+        /// <param name="ownerId"></param>
+        /// <param name="workflowId"></param>
+        /// <returns></returns>
+        public static async Task GrantAccessAsync(string environmentUrl, string workflowId, string ownerId)
+        {
+            // Authenticate async against dataverse with an environmenturl
+            var auth = await AuthenticateAsync(AuthType.Dataverse, environmentUrl);
 
+            // Execute a grantaccessrequest over the rest api of the dataverse instance
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                string url = $"{environmentUrl}/api/data/v9.2/GrantAccess";
+
+                // Create the request body
+                var requestBody = new
+                {
+                    Target = new Dictionary<string, object>
+                    {
+                        { "workflowid", workflowId },
+                        { "@odata.type", "Microsoft.Dynamics.CRM.workflow" }
+                    },
+                    PrincipalAccess = new
+                    {
+                        Principal = new Dictionary<string, object>
+                        {
+                            { "ownerid", ownerId },
+                            { "@odata.type", "Microsoft.Dynamics.CRM.systemuser" }
+                        },
+
+                        AccessMask = "ReadAccess,WriteAccess,AppendAccess,AppendToAccess,CreateAccess,DeleteAccess,ShareAccess,AssignAccess"
+                    }
+                };
+
+                // Convert the request body to JSON
+                var jsonBody = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+                // Send the grantaccessrequest
+                HttpResponseMessage response = await client.PostAsync(url, content);
+                if (response.IsSuccessStatusCode)
+                {
+                    // Access granted successfully
+                }
+                else
+                {
+                    // Handle the error here
+                    string trace = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error granting access: {response.ReasonPhrase} {trace}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the owner of a workflow in the Dataverse environment.
+        /// </summary>
+        /// <param name="workflowId">The ID of the workflow.</param>
+        /// <param name="targetOwnerId">The ID of the owner.</param>
+        /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
+        public static async Task SetWorkflowOwnerAsync(string environmentUrl, string workflowId, string targetOwnerId)
+        {
+            var auth = await AuthenticateAsync(AuthType.Dataverse, environmentUrl);
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(environmentUrl);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                var method = "PATCH";
+                var httpVerb = new HttpMethod(method);
+
+                var requestBody = new Dictionary<string, object>
+                        {
+                            { "ownerid@odata.bind", $"/systemusers({targetOwnerId})" }
+                        };
+
+                var jsonBody = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+                var httpRequestMessage =
+                    new HttpRequestMessage(httpVerb, $"/api/data/v9.1/workflows({workflowId})")
+                    {
+                        Content = content
+                    };
+
+                var response = await client.SendAsync(httpRequestMessage);
+                if (response.IsSuccessStatusCode)
+                {
+                    // Owner set successfully
+                }
+                else
+                {
+                    // Handle the error here
+                    Console.WriteLine($"Error setting owner: {response.ReasonPhrase}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the system user ID from Dataverse based on the provided domain name.
+        /// </summary>
+        /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
+        /// <param name="domainname">The domain name of the user.</param>
+        /// <returns>The system user ID if found, otherwise String.Empty</returns>
+        public static async Task<string> GetSystemUserIdFromDataverse(string environmentUrl, string domainname)
+        {
+            try
+            {
+                var auth = await AuthenticateAsync(AuthType.Dataverse, environmentUrl);
+
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                    string url = $"{environmentUrl}/api/data/v9.1/systemusers?$filter=domainname eq '{domainname}' or internalemailaddress eq '{domainname}'&$select=systemuserid";
+
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseContent = await response.Content.ReadAsStringAsync();
+                        dynamic users = JsonConvert.DeserializeObject(responseContent);
+                        if (users.value.Count > 0)
+                        {
+                            string systemUserId = users.value[0].systemuserid;
+                            return systemUserId;
+                        }
+                        else
+                        {
+                            // Handle the case where no users are found
+                            return string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        // Handle the error here
+                        return string.Empty;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error " + ex.Message);
+                throw;
+            }
+        }
         #endregion
     }
 }
