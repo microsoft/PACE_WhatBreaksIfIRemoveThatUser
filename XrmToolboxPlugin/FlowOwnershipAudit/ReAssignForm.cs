@@ -48,15 +48,19 @@ namespace FlowOwnershipAudit
                                 // Get the flow object from the node
                                 Flow flow = ((FlowTreeNodeElement)node.Tag).Flow;
                                 // Set the owner of the flow to the target user
-                                SetWorkflowOwnerAsync(environmentFlows.Key, flow.properties.workflowEntityId, targetOwnerId);
+                                if (!SetWorkflowOwner(environmentFlows.Key, flow.properties.workflowEntityId, targetOwnerId))
+                                    return;
                                 // Grant access to the original user
-                                GrantAccessAsync(environmentFlows.Key, flow.properties.workflowEntityId, originalOwnerId);
+                                if(!GrantAccess(environmentFlows.Key, flow.properties.workflowEntityId, originalOwnerId))
+                                    return;
                                 // Update flow object
                                 GetFlowDetails(flow);
                                 GetFlowPermissons(flow);
-                                //TODO: Update the treeview
-
                                 //TODO: Report Progress on the UI. Progressbar or something?
+
+                                //TODO: Update the treeview. 
+
+
                             }
                         }
                     }

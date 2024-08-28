@@ -350,7 +350,7 @@ namespace FlowOwnershipAudit
         /// <param name="ownerId"></param>
         /// <param name="workflowId"></param>
         /// <returns></returns>
-        public static void GrantAccessAsync(string environmentUrl, string workflowId, string ownerId)
+        public static bool GrantAccess(string environmentUrl, string workflowId, string ownerId)
         {
             // Authenticate async against dataverse with an environmenturl
             var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
@@ -389,13 +389,14 @@ namespace FlowOwnershipAudit
                 HttpResponseMessage response = client.PostAsync(url, content).Result;
                 if (response.IsSuccessStatusCode)
                 {
-                    // Access granted successfully
+                    return true;
                 }
                 else
                 {
                     // Handle the error here
                     string trace = response.Content.ReadAsStringAsync().Result;
                     Console.WriteLine($"Error granting access: {response.ReasonPhrase} {trace}");
+                    return false;
                 }
             }
         }
@@ -406,7 +407,7 @@ namespace FlowOwnershipAudit
         /// <param name="workflowId">The ID of the workflow.</param>
         /// <param name="targetOwnerId">The ID of the owner.</param>
         /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
-        public static void SetWorkflowOwnerAsync(string environmentUrl, string workflowId, string targetOwnerId)
+        public static bool SetWorkflowOwner(string environmentUrl, string workflowId, string targetOwnerId)
         {
             var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
 
@@ -435,11 +436,13 @@ namespace FlowOwnershipAudit
                 if (response.IsSuccessStatusCode)
                 {
                     // Owner set successfully
+                    return true;
                 }
                 else
                 {
                     // Handle the error here
                     Console.WriteLine($"Error setting owner: {response.ReasonPhrase}");
+                    return false;
                 }
             }
         }
