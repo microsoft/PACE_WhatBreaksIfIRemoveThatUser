@@ -350,10 +350,10 @@ namespace FlowOwnershipAudit
         /// <param name="ownerId"></param>
         /// <param name="workflowId"></param>
         /// <returns></returns>
-        public static async Task GrantAccessAsync(string environmentUrl, string workflowId, string ownerId)
+        public static void GrantAccessAsync(string environmentUrl, string workflowId, string ownerId)
         {
             // Authenticate async against dataverse with an environmenturl
-            var auth = await AuthenticateAsync(AuthType.Dataverse, environmentUrl);
+            var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
 
             // Execute a grantaccessrequest over the rest api of the dataverse instance
             using (HttpClient client = new HttpClient())
@@ -386,7 +386,7 @@ namespace FlowOwnershipAudit
                 var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
                 // Send the grantaccessrequest
-                HttpResponseMessage response = await client.PostAsync(url, content);
+                HttpResponseMessage response = client.PostAsync(url, content).Result;
                 if (response.IsSuccessStatusCode)
                 {
                     // Access granted successfully
@@ -394,7 +394,7 @@ namespace FlowOwnershipAudit
                 else
                 {
                     // Handle the error here
-                    string trace = await response.Content.ReadAsStringAsync();
+                    string trace = response.Content.ReadAsStringAsync().Result;
                     Console.WriteLine($"Error granting access: {response.ReasonPhrase} {trace}");
                 }
             }
@@ -406,9 +406,9 @@ namespace FlowOwnershipAudit
         /// <param name="workflowId">The ID of the workflow.</param>
         /// <param name="targetOwnerId">The ID of the owner.</param>
         /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
-        public static async Task SetWorkflowOwnerAsync(string environmentUrl, string workflowId, string targetOwnerId)
+        public static void SetWorkflowOwnerAsync(string environmentUrl, string workflowId, string targetOwnerId)
         {
-            var auth = await AuthenticateAsync(AuthType.Dataverse, environmentUrl);
+            var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
 
             using (HttpClient client = new HttpClient())
             {
@@ -431,7 +431,7 @@ namespace FlowOwnershipAudit
                         Content = content
                     };
 
-                var response = await client.SendAsync(httpRequestMessage);
+                var response = client.SendAsync(httpRequestMessage).Result;
                 if (response.IsSuccessStatusCode)
                 {
                     // Owner set successfully
@@ -450,21 +450,21 @@ namespace FlowOwnershipAudit
         /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
         /// <param name="domainname">The domain name of the user.</param>
         /// <returns>The system user ID if found, otherwise String.Empty</returns>
-        public static async Task<string> GetSystemUserIdFromDataverse(string environmentUrl, string domainname)
+        public static string GetSystemUserIdFromDataverse(string environmentUrl, string domainname)
         {
             try
             {
-                var auth = await AuthenticateAsync(AuthType.Dataverse, environmentUrl);
+                var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
 
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
                     string url = $"{environmentUrl}/api/data/v9.1/systemusers?$filter=domainname eq '{domainname}' or internalemailaddress eq '{domainname}'&$select=systemuserid";
 
-                    HttpResponseMessage response = await client.GetAsync(url);
+                    HttpResponseMessage response = client.GetAsync(url).Result;
                     if (response.IsSuccessStatusCode)
                     {
-                        string responseContent = await response.Content.ReadAsStringAsync();
+                        string responseContent = response.Content.ReadAsStringAsync().Result;
                         dynamic users = JsonConvert.DeserializeObject(responseContent);
                         if (users.value.Count > 0)
                         {

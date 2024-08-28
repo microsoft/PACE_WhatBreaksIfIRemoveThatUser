@@ -35,8 +35,8 @@ namespace FlowOwnershipAudit
                 // get the user id from the graph api. This should be the same for all environments so we dont need to do it in the parallel loop
                 try
                 {
-                    string originalOwnerId = GetSystemUserIdFromDataverse(_selectedNodes.FirstOrDefault().Key, _orginalOwner).Result;
-                    string targetOwnerId = GetSystemUserIdFromDataverse(_selectedNodes.FirstOrDefault().Key, targetOwner).Result;
+                    string originalOwnerId = GetSystemUserIdFromDataverse(_selectedNodes.FirstOrDefault().Key, _orginalOwner);
+                    string targetOwnerId = GetSystemUserIdFromDataverse(_selectedNodes.FirstOrDefault().Key, targetOwner);
 
                     //TODO: Parallel.foreach
                     foreach (KeyValuePair<string, List<TreeNode>> environmentFlows in _selectedNodes)
@@ -48,9 +48,9 @@ namespace FlowOwnershipAudit
                                 // Get the flow object from the node
                                 Flow flow = ((FlowTreeNodeElement)node.Tag).Flow;
                                 // Set the owner of the flow to the target user
-                                await SetWorkflowOwnerAsync(environmentFlows.Key, flow.properties.workflowEntityId, targetOwnerId);
+                                SetWorkflowOwnerAsync(environmentFlows.Key, flow.properties.workflowEntityId, targetOwnerId);
                                 // Grant access to the original user
-                                await GrantAccessAsync(environmentFlows.Key, flow.properties.workflowEntityId, originalOwnerId);
+                                GrantAccessAsync(environmentFlows.Key, flow.properties.workflowEntityId, originalOwnerId);
                                 // Update flow object
                                 GetFlowDetails(flow);
                                 GetFlowPermissons(flow);
@@ -80,6 +80,7 @@ namespace FlowOwnershipAudit
             bgw.RunWorkerCompleted += (obj, arg) =>
             {
                 // worker completed. This means that the main operation is done, all environments have been queried and the treeview has been built
+                this.Close();
             };
 
             bgw.RunWorkerAsync();

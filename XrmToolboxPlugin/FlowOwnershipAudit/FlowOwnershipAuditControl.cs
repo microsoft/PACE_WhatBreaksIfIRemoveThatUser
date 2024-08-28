@@ -410,32 +410,10 @@ namespace FlowOwnershipAudit
                                 targetEnvironment: currentTargetEnvironment.Key,
                                 ProgressChanged: (flowObj) =>
                                 {
-                                    // todo: maybe get rid of the dynamic and use a typed object﻿
-                                    //FlowName = flow.properties.displayName,
-                                    //FlowId = flow.name,
-                                    //EnvironmentId = targetEnvironment.name,
-                                    //EnvironmentName = targetEnvironment.properties.displayName,
-                                    //dynamic flowObjDyn = flowObj;
-                                    //string flowName = flowObjDyn.FlowName;
-                                    //string flowId = flowObjDyn.FlowId;
-                                    //string environmentId = flowObjDyn.EnvironmentId;
-                                    //string environmentName = flowObjDyn.EnvironmentName;
-                                    //Flow flow = flowObjDyn.Flow;
                                     Flow flow = flowObj as Flow;
 
-                                    // create treenodeelement﻿
-                                    //new FlowTreeNodeElement(UpdateNode,
-                                    //                       parentNodeElement: flowDirectoryNode,
-                                    //                       flowName: flowName,
-                                    //                       flowId: flowId,
-                                    //                       environmentId: environmentId,
-                                    //                       flow: flow
-                                    //                       );
                                     new FlowTreeNodeElement(UpdateNode,
                                                            parentNodeElement: flowDirectoryNode,
-                                                           //flowName: flowName,
-                                                           //flowId: flowId,
-                                                           //environmentId: environmentId,
                                                            flow: flow
                                                            );
                                 });
