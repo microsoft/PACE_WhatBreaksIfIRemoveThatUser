@@ -11,6 +11,7 @@ using Parallel = System.Threading.Tasks.Parallel;
 using System.Text;
 using System.Collections.Generic;
 using DocumentFormat.OpenXml.Spreadsheet;
+using System.Activities.Statements;
 
 namespace FlowOwnershipAudit
 {
@@ -212,7 +213,7 @@ namespace FlowOwnershipAudit
                 Parallel.ForEach(
                     source: targetEnvironment.flows,
                     parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 5 },
-                    body: flow =>
+                    body: async flow =>
                     {
                         //var auth = AuthenticateAsync(AuthType.Flow).Result;
 
@@ -285,7 +286,7 @@ namespace FlowOwnershipAudit
             targetEnvironment.flows = flowList.value;
         }
 
-        private static void GetFlowPermissons(Flow flow)
+        public static void GetFlowPermissons(Flow flow)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
@@ -314,9 +315,29 @@ namespace FlowOwnershipAudit
             }
         }
 
-        public static void UpdateFlowDetails(Flow flow)
+        public static void GetFlowDetails(Flow flow)
         {
+            //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/flows/{flowName}?api-version={apiVersion}"
+            string flowEndpoint = "https://api.flow.microsoft.com";
+            string apiVersion = "2016-11-01";
 
+            var auth = AuthenticateAsync(AuthType.Flow).Result;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{flow.properties.environment.name}/flows/{flow.name}?api-version={apiVersion}";
+                HttpResponseMessage response = client.GetAsync(url).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = response.Content.ReadAsStringAsync().Result;
+                    flow = JsonConvert.DeserializeObject<Flow>(responseContent);
+                }
+                else
+                {
+                    // Handle the error here
+                }
+            }
         }
 
         #endregion
