@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.EMMA;
 using FlowOwnershipAudit.DTO;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUI;
@@ -145,11 +146,16 @@ namespace FlowOwnershipAudit
 
         private readonly string sidePanelDefaultText = "Select environments and click start, then select any node to see the results here.";
 
+        #region Properties
+
         public string RepositoryName => "PACE_WhatBreaksIfIRemoveThatUser";
 
         public string UserName => "microsoft";
 
         public string HelpUrl => "https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser";
+
+
+        #endregion
 
         public FlowOwnershipAuditControl()
         {
@@ -168,6 +174,8 @@ namespace FlowOwnershipAudit
             tvTreeview.DrawMode = TreeViewDrawMode.OwnerDrawText;
 
         }
+
+        #region Event Handlers
 
         /// <summary>﻿
         /// This event occurs when the plugin is closed﻿
@@ -547,6 +555,119 @@ namespace FlowOwnershipAudit
             rtbSidepanel.Text = sidePanelDefaultText;
         }
 
+        private void tsbHelp_Click(object sender, EventArgs e)
+        {
+            using (var f = new AboutForm())
+            {
+                f.ShowDialog();
+            }
+        }
+
+        private void rtbSidepanel_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            ProcessStartInfo sInfo = new ProcessStartInfo(e.LinkText);
+            Process.Start(sInfo);
+        }
+
+        private void btnReassign_Click(object sender, EventArgs e)
+        {
+            var originalOwner = tbTargetUserEmail.Text;
+
+            using (var f = new ReAssignForm())
+            {
+                f.ShowDialog();
+
+                if (f.DialogResult == DialogResult.OK)
+                {
+                    LogInfo($"Reassigning flows to {f.TargetOwner}...");
+
+                    // start the reassignment process in the background
+                    ReassignCheckedFlows(f.TargetOwner);
+                }
+                else
+                {
+                    LogInfo("Reassign canceled by the user.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reassigns the checked flows to the target owner
+        /// </summary>
+        /// <param name="targetOwnerId"></param>
+        /// <exception cref="Exception"></exception>
+        private void ReassignCheckedFlows(string targetOwnerId)
+        {
+            // TODO not a good practice to access the UI here...
+
+            var selectedNodes = tvTreeview.Nodes.Descendants().Where(x => x.Checked).ToList();
+
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += (obj, arg) =>
+            {
+                try
+                {
+                    // group nodes by environment
+                    var groupedNodes = selectedNodes.GroupBy(x => targetEnvironments.Keys
+                        .Where(y => y.flows.Any(z => z.name == ((FlowTreeNodeElement)x.Tag).Flow.name))
+                        .Select(y => y.properties.linkedEnvironmentMetadata.instanceUrl)
+                        .FirstOrDefault());
+
+                    // run reassignment in parallel per environment
+                    Parallel.ForEach(groupedNodes, (group) =>
+                    {
+                        var environmentUrl = group.Key;
+
+                        LogInfo("Reassigning flows in " + environmentUrl);
+
+                        // get flowTreeNodeElement from Tag
+                        foreach (var tag in group.Select(x => x.Tag as FlowTreeNodeElement))
+                        {
+                            // Get the flow object from the node
+                            Flow flow = tag.Flow;
+
+                            // Set the owner of the flow to the target user
+                            if (!SetWorkflowOwner(environmentUrl, flow.properties.workflowEntityId, targetOwnerId)) {
+                             
+                                // means something went wrong and we need to abort the current flow reassignment
+                                return;
+                            }
+                            // Grant access to the original user
+                            // TODO: getting original owner from the textbox is probably not a good idea, what if the user changed it before clicking the reassign button?
+                            if (!GrantAccess(environmentUrl, flow.properties.workflowEntityId, tbTargetUserEmail.Text))
+                            {
+                                // means something went wrong and we need to abort the current flow reassignment
+                                return;
+                            }
+
+                            // Update flow object
+                            GetFlowDetails(flow);
+                            GetFlowPermissons(flow);
+
+                            //TODO: Report Progress on the UI. Progressbar or something?
+
+                            //TODO: Update the treeview. 
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error reassigning");
+                }
+
+            };
+            bgw.RunWorkerCompleted += (obj, arg) =>
+            {
+                LogInfo("Reassigning completed.");
+            };
+
+            bgw.RunWorkerAsync();
+        }
+
+        #endregion
+
+        #region Methods
+
         private void UpdateNode(NodeUpdateObject nodeUpdateObject)
         {
             // because this might be called from a different thread﻿
@@ -696,29 +817,7 @@ namespace FlowOwnershipAudit
             }
         }
 
-        private void tsbHelp_Click(object sender, EventArgs e)
-        {
-            using (var f = new AboutForm())
-            {
-                f.ShowDialog();
-            }
-        }
-
-        private void rtbSidepanel_LinkClicked(object sender, LinkClickedEventArgs e)
-        {
-            ProcessStartInfo sInfo = new ProcessStartInfo(e.LinkText);
-            Process.Start(sInfo);
-        }
-
-        private void btnReassign_Click(object sender, EventArgs e)
-        {
-            var originalOwner = tbTargetUserEmail.Text;
-
-            using (var f = new ReAssignForm(GetCheckedNodes(tvTreeview.Nodes, new Dictionary<string, List<TreeNode>>()), originalOwner))
-            {
-                f.ShowDialog();
-            }
-        }
+        #endregion
 
         #region TreeView
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
@@ -756,32 +855,6 @@ namespace FlowOwnershipAudit
                     rtbSidepanel.Text = sidepanelText;
                 }
             }
-        }
-
-        private Dictionary<string, List<TreeNode>> GetCheckedNodes(TreeNodeCollection nodes, Dictionary<string, List<TreeNode>> checkedNodes)
-        {
-            foreach (TreeNode node in nodes)
-            {
-                if (node.Checked && node.Tag.GetType() == typeof(FlowTreeNodeElement))
-                {
-                    string url = targetEnvironments.Keys
-                                .Where(y => y.flows.Any(x => x.name == ((FlowTreeNodeElement)node.Tag).Flow.name))
-                                .Select(y => y.properties.linkedEnvironmentMetadata.instanceUrl)
-                                .FirstOrDefault();
-
-                    if (!checkedNodes.ContainsKey(url))
-                    {
-                        checkedNodes.Add(url, new List<TreeNode>());
-                    }
-
-                    checkedNodes[url].Add(node);
-                }
-
-                // Recursively check child nodes
-                GetCheckedNodes(node.Nodes, checkedNodes);                
-            }
-
-            return checkedNodes;
         }
 
         private void treeView1_DrawNode(object sender, DrawTreeNodeEventArgs e)

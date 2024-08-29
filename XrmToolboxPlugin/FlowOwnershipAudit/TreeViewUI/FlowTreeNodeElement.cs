@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using System.Linq;
+using System.Windows.Forms;
 using FlowOwnershipAudit.DTO;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUIElements;
@@ -43,5 +44,21 @@ namespace FlowOwnershipAudit.TreeViewUI
         internal override IEnumerable<TreeNodeElementBase> ChildObjects => throw new NotImplementedException();
 
         internal override TreeNodeElementBase Parent => _parentNodeElement;
+    }
+
+    internal static class TreeNodeExtensions
+    {
+        internal static IEnumerable<TreeNode> Descendants(this TreeNodeCollection c)
+        {
+            foreach (var node in c.OfType<TreeNode>())
+            {
+                yield return node;
+
+                foreach (var child in node.Nodes.Descendants())
+                {
+                    yield return child;
+                }
+            }
+        }
     }
 }
