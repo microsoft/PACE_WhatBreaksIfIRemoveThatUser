@@ -154,7 +154,6 @@ namespace FlowOwnershipAudit
 
         public string HelpUrl => "https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser";
 
-
         #endregion
 
         public FlowOwnershipAuditControl()
@@ -628,8 +627,13 @@ namespace FlowOwnershipAudit
 
                             // Set the owner of the flow to the target user
                             if (!SetWorkflowOwner(environmentUrl, flow.properties.workflowEntityId, targetOwnerId)) {
-                             
+
                                 // means something went wrong and we need to abort the current flow reassignment
+                                tag.updateNodeUi(new NodeUpdateObject()
+                                {
+                                    UpdateReason = UpdateReason.MigrationFailed,
+                                    NodeText = "Unable to reassign this flow to the target user."
+                                });
                                 return;
                             }
                             // Grant access to the original user
@@ -637,6 +641,11 @@ namespace FlowOwnershipAudit
                             if (!GrantAccess(environmentUrl, flow.properties.workflowEntityId, tbTargetUserEmail.Text))
                             {
                                 // means something went wrong and we need to abort the current flow reassignment
+                                tag.updateNodeUi(new NodeUpdateObject()
+                                {
+                                    UpdateReason = UpdateReason.MigrationFailed,
+                                    NodeText = "Unable to share this flow with the original owner after reassignment."
+                                });
                                 return;
                             }
 
@@ -646,7 +655,11 @@ namespace FlowOwnershipAudit
 
                             //TODO: Report Progress on the UI. Progressbar or something?
 
-                            //TODO: Update the treeview. 
+                           tag.updateNodeUi(new NodeUpdateObject()
+                           {
+                               UpdateReason = UpdateReason.MigrationSucceeded,
+                               NodeText = "Migration successful"
+                           });
                         }
                     });
                 }
@@ -679,6 +692,9 @@ namespace FlowOwnershipAudit
             {
                 try
                 {
+                    // this is the target node that needs to be updated
+                    var updateNode = tvTreeview.Nodes.Find(nodeUpdateObject.NodeId, true).FirstOrDefault();
+
                     switch (nodeUpdateObject.UpdateReason)
                     {
                         case UpdateReason.AddedToList:
@@ -690,14 +706,13 @@ namespace FlowOwnershipAudit
                                 {
                                     Name = nodeUpdateObject.NodeId,
                                     Text = nodeUpdateObject.NodeText,
-                                    ForeColor = System.Drawing.Color.Black,
+                                    ForeColor = Color.Black,
                                     Tag = nodeUpdateObject.TreeNodeElement,
                                     //ToolTipText = "n/a",﻿
                                     Checked = false
                                 };
                                 tvTreeview.Nodes.Add(createNode);
                                 createNode.Expand();
-
                             }
                             else
                             {
@@ -706,7 +721,7 @@ namespace FlowOwnershipAudit
                                 {
                                     Name = nodeUpdateObject.NodeId,
                                     Text = nodeUpdateObject.NodeText,
-                                    ForeColor = System.Drawing.Color.Black,
+                                    ForeColor = Color.Black,
                                     Tag = nodeUpdateObject.TreeNodeElement,
                                     //ToolTipText = "n/a",﻿
                                     Checked = false
@@ -715,21 +730,28 @@ namespace FlowOwnershipAudit
                                 parentNode.Expand();
                             }
                             break;
-
                         // this is used so we can update nodes in the UI that are already there with additional details﻿
                         case UpdateReason.DetailsAdded:
-                            var updateNode = tvTreeview.Nodes.Find(nodeUpdateObject.NodeId, true).FirstOrDefault();
-                            updateNode.ForeColor = System.Drawing.Color.Black;
+                            updateNode.ForeColor = Color.Black;
                             updateNode.Tag = nodeUpdateObject.TreeNodeElement;
                             //updateNode.ToolTipText = "n/a.";﻿
                             updateNode.Checked = true;
-
                             break;
-
                         case UpdateReason.RemovedFromList:
                             // not implemented﻿
                             break;
-
+                        case UpdateReason.MigrationSucceeded:
+                            updateNode.ForeColor = Color.Green;
+                            updateNode.ToolTipText = nodeUpdateObject.ToolTipText;
+                            updateNode.Checked = false;
+                            updateNode.HideCheckBox();
+                            break;
+                        case UpdateReason.MigrationFailed:
+                            updateNode.ForeColor = Color.Red;
+                            updateNode.ToolTipText = nodeUpdateObject.ToolTipText;
+                            updateNode.Checked = false;
+                            updateNode.HideCheckBox();
+                            break;
                         default:
                             break;
                     }
@@ -873,6 +895,7 @@ namespace FlowOwnershipAudit
 
         private void treeView1_AfterCheck(object sender, TreeViewEventArgs e)
         {
+            // TODO: no keyboard allowed?? :(
             if (e.Action != TreeViewAction.ByMouse)
                 return;
 
