@@ -681,7 +681,7 @@ namespace FlowOwnershipAudit
         #region Methods
         private List<TreeNode> GetSelectedNodes()
         {
-            return tvTreeview.Nodes.Descendants().Where(x => x.Checked).ToList();
+            return tvTreeview.Nodes.Descendants().Where(x => x.Checked && x.GetType() == typeof(FlowTreeNodeElement)).ToList();
         }
 
         private void UpdateNode(NodeUpdateObject nodeUpdateObject)
