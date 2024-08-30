@@ -1,6 +1,6 @@
 ﻿using FlowOwnershipAudit.TreeViewUIElements;
 
-namespace FlowOwnershipAudit.DTO
+namespace FlowOwnershipAudit
 {
     // This object is only used to transfer data to update the UI, it is not meant to hold any data on itself
     internal class NodeUpdateObject

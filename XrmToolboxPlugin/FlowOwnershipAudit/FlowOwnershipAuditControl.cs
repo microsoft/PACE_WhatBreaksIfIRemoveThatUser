@@ -6,8 +6,6 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.EMMA;
-using FlowOwnershipAudit.DTO;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUI;
 using TreeViewUI;
@@ -18,7 +16,7 @@ using Environment = System.Environment;
 
 namespace FlowOwnershipAudit
 {
-    public partial class FlowOwnershipAuditControl : PluginControlBase, INoConnectionRequired, IAboutPlugin﻿, IGitHubPlugin, IHelpPlugin
+    public partial class FlowOwnershipAuditControl : PluginControlBase, IAboutPlugin﻿, IGitHubPlugin, IHelpPlugin
     {
         // helper class to hold information about the environment and the status of the queries﻿
         public class EnvironmentQueryStatus﻿
@@ -581,7 +579,7 @@ namespace FlowOwnershipAudit
                     LogInfo($"Reassigning flows to {f.TargetOwner}...");
 
                     // start the reassignment process in the background
-                    ReassignCheckedFlows(f.TargetOwner);
+                    ReassignCheckedFlows(f.TargetOwner, GetSelectedNodes());
                 }
                 else
                 {
@@ -590,20 +588,24 @@ namespace FlowOwnershipAudit
             }
         }
 
+        private List<TreeNode> GetSelectedNodes()
+        {
+            return tvTreeview.Nodes.Descendants().Where(x => x.Checked).ToList();
+        }
+
         /// <summary>
         /// Reassigns the checked flows to the target owner
         /// </summary>
         /// <param name="targetOwnerId"></param>
         /// <exception cref="Exception"></exception>
-        private void ReassignCheckedFlows(string targetOwnerId)
+        private void ReassignCheckedFlows(string targetOwnerId, IList<TreeNode> selectedNodes)
         {
-            // TODO not a good practice to access the UI here...
-
-            var selectedNodes = tvTreeview.Nodes.Descendants().Where(x => x.Checked).ToList();
-
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
             {
+                // start progressbar
+                pbMain.Style = ProgressBarStyle.Marquee;
+
                 try
                 {
                     // group nodes by environment
@@ -653,8 +655,6 @@ namespace FlowOwnershipAudit
                             GetFlowDetails(flow);
                             GetFlowPermissons(flow);
 
-                            //TODO: Report Progress on the UI. Progressbar or something?
-
                            tag.updateNodeUi(new NodeUpdateObject()
                            {
                                UpdateReason = UpdateReason.MigrationSucceeded,
@@ -671,6 +671,8 @@ namespace FlowOwnershipAudit
             };
             bgw.RunWorkerCompleted += (obj, arg) =>
             {
+                // stop progressbar
+                pbMain.Style = ProgressBarStyle.Continuous;
                 LogInfo("Reassigning completed.");
             };
 

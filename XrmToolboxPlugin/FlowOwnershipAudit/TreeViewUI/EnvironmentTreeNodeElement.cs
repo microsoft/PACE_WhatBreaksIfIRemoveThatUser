@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FlowOwnershipAudit.DTO;
 using FlowOwnershipAudit.TreeViewUIElements;
 
 namespace FlowOwnershipAudit.TreeViewUI
