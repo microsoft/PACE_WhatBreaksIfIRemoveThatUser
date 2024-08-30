@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUI;
+using FlowOwnershipAudit.TreeViewUIElements;
 using TreeViewUI;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
@@ -570,7 +571,8 @@ namespace FlowOwnershipAudit
         {
             var originalOwner = tbTargetUserEmail.Text;
 
-            using (var f = new ReAssignForm())
+            // TODO: bad design to run that query just to get the count...
+            using (var f = new ReAssignForm(GetSelectedNodes().Count))
             {
                 f.ShowDialog();
 
@@ -586,11 +588,6 @@ namespace FlowOwnershipAudit
                     LogInfo("Reassign canceled by the user.");
                 }
             }
-        }
-
-        private List<TreeNode> GetSelectedNodes()
-        {
-            return tvTreeview.Nodes.Descendants().Where(x => x.Checked).ToList();
         }
 
         /// <summary>
@@ -631,7 +628,7 @@ namespace FlowOwnershipAudit
                             if (!SetWorkflowOwner(environmentUrl, flow.properties.workflowEntityId, targetOwnerId)) {
 
                                 // means something went wrong and we need to abort the current flow reassignment
-                                tag.updateNodeUi(new NodeUpdateObject()
+                                tag.updateNodeUi(new NodeUpdateObject(tag)
                                 {
                                     UpdateReason = UpdateReason.MigrationFailed,
                                     NodeText = "Unable to reassign this flow to the target user."
@@ -643,7 +640,7 @@ namespace FlowOwnershipAudit
                             if (!GrantAccess(environmentUrl, flow.properties.workflowEntityId, tbTargetUserEmail.Text))
                             {
                                 // means something went wrong and we need to abort the current flow reassignment
-                                tag.updateNodeUi(new NodeUpdateObject()
+                                tag.updateNodeUi(new NodeUpdateObject(tag)
                                 {
                                     UpdateReason = UpdateReason.MigrationFailed,
                                     NodeText = "Unable to share this flow with the original owner after reassignment."
@@ -655,7 +652,7 @@ namespace FlowOwnershipAudit
                             GetFlowDetails(flow);
                             GetFlowPermissons(flow);
 
-                           tag.updateNodeUi(new NodeUpdateObject()
+                           tag.updateNodeUi(new NodeUpdateObject(tag)
                            {
                                UpdateReason = UpdateReason.MigrationSucceeded,
                                NodeText = "Migration successful"
@@ -682,6 +679,10 @@ namespace FlowOwnershipAudit
         #endregion
 
         #region Methods
+        private List<TreeNode> GetSelectedNodes()
+        {
+            return tvTreeview.Nodes.Descendants().Where(x => x.Checked).ToList();
+        }
 
         private void UpdateNode(NodeUpdateObject nodeUpdateObject)
         {
@@ -736,6 +737,7 @@ namespace FlowOwnershipAudit
                         case UpdateReason.DetailsAdded:
                             updateNode.ForeColor = Color.Black;
                             updateNode.Tag = nodeUpdateObject.TreeNodeElement;
+                            updateNode.Text = nodeUpdateObject.NodeText;
                             //updateNode.ToolTipText = "n/a.";﻿
                             updateNode.Checked = true;
                             break;

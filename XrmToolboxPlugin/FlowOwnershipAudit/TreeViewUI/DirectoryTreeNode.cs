@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Windows.Navigation;
 using FlowOwnershipAudit.TreeViewUIElements;
 
 namespace FlowOwnershipAudit.TreeViewUI
@@ -11,8 +13,10 @@ namespace FlowOwnershipAudit.TreeViewUI
     internal class DirectoryTreeNode : TreeNodeElementBase
     {
         private readonly string directoryName;
+
         public EnvironmentTreeNodeElement parentNodeElement;
-        internal List<TreeNodeElementBase> childNodeElements { get; } = new List<TreeNodeElementBase>();
+
+        internal ObservableCollection<TreeNodeElementBase> ObservableChildNodes { get; } = new ObservableCollection<TreeNodeElementBase>();
 
         public DirectoryTreeNode(Action<NodeUpdateObject> updateNodeUi,
                                  string directoryName,
@@ -22,17 +26,25 @@ namespace FlowOwnershipAudit.TreeViewUI
             this.parentNodeElement = parentNodeElement;
 
             // ctor was called this means we have to add this node to the treeview 
-            updateNodeUi(new NodeUpdateObject()
+            updateNodeUi(new NodeUpdateObject(this)
             {
-                TreeNodeElement = this,
                 NodeText = directoryName,
                 UpdateReason = UpdateReason.AddedToList,
                 ParentNodeId = (parentNodeElement != null) ? parentNodeElement.ElementId : null
             });
+
+            // use event to count the child items and update the node text
+            ObservableChildNodes.CollectionChanged += (sender, e) =>
+            {
+                updateNodeUi(new NodeUpdateObject(this)
+                {
+                    NodeText = directoryName + $" ({ObservableChildNodes.Count})",
+                    UpdateReason = UpdateReason.DetailsAdded,
+                });
+            };
         }
 
-
-        internal override IEnumerable<TreeNodeElementBase> ChildObjects => childNodeElements;
+       internal override IEnumerable<TreeNodeElementBase> ChildObjects => ObservableChildNodes;
 
         internal override TreeNodeElementBase Parent => parentNodeElement;
 

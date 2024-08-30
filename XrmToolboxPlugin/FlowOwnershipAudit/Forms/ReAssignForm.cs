@@ -7,9 +7,11 @@ namespace FlowOwnershipAudit
     {
         public string TargetOwner { get; private set; }
 
-        public ReAssignForm()
+        public ReAssignForm(int numberOfSelectedFlows)
         {
             InitializeComponent();
+
+            lblHeader.Text = string.Format(lblHeader.Text, numberOfSelectedFlows);
         }
 
         private void ReAssignForm_Load(object sender, EventArgs e)

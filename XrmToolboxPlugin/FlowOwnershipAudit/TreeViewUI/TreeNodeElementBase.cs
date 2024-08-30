@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace FlowOwnershipAudit.TreeViewUIElements
 {
@@ -19,6 +21,21 @@ namespace FlowOwnershipAudit.TreeViewUIElements
             this.updateNodeUi = updateNodeUi;
             // generate a new guid for the element id
             ElementId = Guid.NewGuid().ToString();
+        }
+    }
+    internal static class TreeNodeExtensions
+    {
+        internal static IEnumerable<TreeNode> Descendants(this TreeNodeCollection c)
+        {
+            foreach (var node in c.OfType<TreeNode>())
+            {
+                yield return node;
+
+                foreach (var child in node.Nodes.Descendants())
+                {
+                    yield return child;
+                }
+            }
         }
     }
 }

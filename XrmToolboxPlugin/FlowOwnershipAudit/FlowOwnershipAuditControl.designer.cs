@@ -75,8 +75,8 @@
             this.tsbHelp});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
-            this.toolStripMenu.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
-            this.toolStripMenu.Size = new System.Drawing.Size(2142, 34);
+            this.toolStripMenu.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStripMenu.Size = new System.Drawing.Size(1428, 31);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
@@ -84,14 +84,14 @@
             // 
             this.tsbClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.tsbClose.Name = "tsbClose";
-            this.tsbClose.Size = new System.Drawing.Size(59, 29);
+            this.tsbClose.Size = new System.Drawing.Size(40, 28);
             this.tsbClose.Text = "Close";
             this.tsbClose.Click += new System.EventHandler(this.tsbClose_Click);
             // 
             // tssSeparator1
             // 
             this.tssSeparator1.Name = "tssSeparator1";
-            this.tssSeparator1.Size = new System.Drawing.Size(6, 34);
+            this.tssSeparator1.Size = new System.Drawing.Size(6, 31);
             // 
             // tsbResetTool
             // 
@@ -99,7 +99,7 @@
             this.tsbResetTool.Image = ((System.Drawing.Image)(resources.GetObject("tsbResetTool.Image")));
             this.tsbResetTool.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbResetTool.Name = "tsbResetTool";
-            this.tsbResetTool.Size = new System.Drawing.Size(107, 29);
+            this.tsbResetTool.Size = new System.Drawing.Size(71, 28);
             this.tsbResetTool.Text = "Restart tool";
             this.tsbResetTool.ToolTipText = "Click to reset the plugin to the initial state:\r\nRemoves the selected environment" +
     "s, target user, log output and all Flows + Connection References that have been " +
@@ -111,7 +111,7 @@
             this.tsbHelp.Image = ((System.Drawing.Image)(resources.GetObject("tsbHelp.Image")));
             this.tsbHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbHelp.Name = "tsbHelp";
-            this.tsbHelp.Size = new System.Drawing.Size(77, 29);
+            this.tsbHelp.Size = new System.Drawing.Size(60, 28);
             this.tsbHelp.Text = "Help";
             this.tsbHelp.Click += new System.EventHandler(this.tsbHelp_Click);
             // 
@@ -119,19 +119,18 @@
             // 
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 525F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 350F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.tabControl1, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 34);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 31);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(2142, 1137);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1428, 730);
             this.tableLayoutPanel1.TabIndex = 13;
             // 
             // tabControl1
@@ -139,23 +138,21 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(533, 10);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabControl1.Location = new System.Drawing.Point(356, 6);
             this.tabControl1.Name = "tabControl1";
             this.tableLayoutPanel1.SetRowSpan(this.tabControl1, 2);
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1601, 1117);
+            this.tabControl1.Size = new System.Drawing.Size(1067, 718);
             this.tabControl1.TabIndex = 15;
             this.tabControl1.TabStop = false;
             // 
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.tlpOverviewTab);
-            this.tabPage1.Location = new System.Drawing.Point(4, 29);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPage1.Size = new System.Drawing.Size(1593, 1084);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage1.Size = new System.Drawing.Size(1059, 692);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Overview";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -168,12 +165,11 @@
             this.tlpOverviewTab.Controls.Add(this.tvTreeview, 0, 0);
             this.tlpOverviewTab.Controls.Add(this.rtbSidepanel, 1, 0);
             this.tlpOverviewTab.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlpOverviewTab.Location = new System.Drawing.Point(4, 5);
-            this.tlpOverviewTab.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tlpOverviewTab.Location = new System.Drawing.Point(3, 3);
             this.tlpOverviewTab.Name = "tlpOverviewTab";
             this.tlpOverviewTab.RowCount = 1;
             this.tlpOverviewTab.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpOverviewTab.Size = new System.Drawing.Size(1585, 1074);
+            this.tlpOverviewTab.Size = new System.Drawing.Size(1053, 686);
             this.tlpOverviewTab.TabIndex = 2;
             // 
             // tvTreeview
@@ -184,7 +180,7 @@
             this.tvTreeview.Margin = new System.Windows.Forms.Padding(0);
             this.tvTreeview.Name = "tvTreeview";
             this.tvTreeview.ShowNodeToolTips = true;
-            this.tvTreeview.Size = new System.Drawing.Size(951, 1074);
+            this.tvTreeview.Size = new System.Drawing.Size(631, 686);
             this.tvTreeview.TabIndex = 1;
             this.tvTreeview.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
@@ -194,11 +190,10 @@
             this.rtbSidepanel.CausesValidation = false;
             this.rtbSidepanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.rtbSidepanel.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rtbSidepanel.Location = new System.Drawing.Point(955, 5);
-            this.rtbSidepanel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.rtbSidepanel.Location = new System.Drawing.Point(634, 3);
             this.rtbSidepanel.Name = "rtbSidepanel";
             this.rtbSidepanel.ReadOnly = true;
-            this.rtbSidepanel.Size = new System.Drawing.Size(626, 1064);
+            this.rtbSidepanel.Size = new System.Drawing.Size(416, 680);
             this.rtbSidepanel.TabIndex = 2;
             this.rtbSidepanel.Text = "";
             this.rtbSidepanel.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtbSidepanel_LinkClicked);
@@ -206,11 +201,10 @@
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.lbDebugOutput);
-            this.tabPage2.Location = new System.Drawing.Point(4, 29);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPage2.Size = new System.Drawing.Size(1593, 1084);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage2.Size = new System.Drawing.Size(1059, 700);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Log Output";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -225,14 +219,12 @@
             this.lbDebugOutput.ForeColor = System.Drawing.Color.White;
             this.lbDebugOutput.FormattingEnabled = true;
             this.lbDebugOutput.HorizontalScrollbar = true;
-            this.lbDebugOutput.ItemHeight = 20;
-            this.lbDebugOutput.Location = new System.Drawing.Point(4, 5);
-            this.lbDebugOutput.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.lbDebugOutput.MinimumSize = new System.Drawing.Size(749, 2);
+            this.lbDebugOutput.Location = new System.Drawing.Point(3, 3);
+            this.lbDebugOutput.MinimumSize = new System.Drawing.Size(500, 2);
             this.lbDebugOutput.Name = "lbDebugOutput";
             this.lbDebugOutput.ScrollAlwaysVisible = true;
             this.lbDebugOutput.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbDebugOutput.Size = new System.Drawing.Size(1585, 1074);
+            this.lbDebugOutput.Size = new System.Drawing.Size(1053, 694);
             this.lbDebugOutput.TabIndex = 11;
             this.lbDebugOutput.TabStop = false;
             // 
@@ -250,22 +242,21 @@
             this.panel1.Controls.Add(this.cbCheckFlowOwners);
             this.panel1.Controls.Add(this.lblWarning);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(8, 10);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.panel1.Location = new System.Drawing.Point(6, 6);
             this.panel1.Name = "panel1";
             this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
-            this.panel1.Size = new System.Drawing.Size(517, 1117);
+            this.panel1.Size = new System.Drawing.Size(344, 718);
             this.panel1.TabIndex = 12;
             // 
             // btnReassign
             // 
             this.btnReassign.Enabled = false;
-            this.btnReassign.Location = new System.Drawing.Point(160, 379);
-            this.btnReassign.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnReassign.Location = new System.Drawing.Point(10, 275);
             this.btnReassign.Name = "btnReassign";
-            this.btnReassign.Size = new System.Drawing.Size(190, 35);
+            this.btnReassign.Size = new System.Drawing.Size(127, 23);
             this.btnReassign.TabIndex = 35;
-            this.btnReassign.Text = "Reassign";
+            this.btnReassign.Text = "Reassign selected";
+            this.toolTip1.SetToolTip(this.btnReassign, "Open Dialog to reassign flows to another user.");
             this.btnReassign.UseVisualStyleBackColor = true;
             this.btnReassign.Click += new System.EventHandler(this.btnReassign_Click);
             // 
@@ -273,11 +264,10 @@
             // 
             this.tbSelectedEnvironments.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tbSelectedEnvironments.CausesValidation = false;
-            this.tbSelectedEnvironments.Location = new System.Drawing.Point(183, 54);
-            this.tbSelectedEnvironments.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbSelectedEnvironments.Location = new System.Drawing.Point(122, 35);
             this.tbSelectedEnvironments.Name = "tbSelectedEnvironments";
             this.tbSelectedEnvironments.ReadOnly = true;
-            this.tbSelectedEnvironments.Size = new System.Drawing.Size(64, 26);
+            this.tbSelectedEnvironments.Size = new System.Drawing.Size(43, 20);
             this.tbSelectedEnvironments.TabIndex = 34;
             this.tbSelectedEnvironments.Text = "none";
             this.tbSelectedEnvironments.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -285,19 +275,17 @@
             // lblSelectedEnvironments_description
             // 
             this.lblSelectedEnvironments_description.AutoSize = true;
-            this.lblSelectedEnvironments_description.Location = new System.Drawing.Point(3, 57);
-            this.lblSelectedEnvironments_description.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblSelectedEnvironments_description.Location = new System.Drawing.Point(2, 37);
             this.lblSelectedEnvironments_description.Name = "lblSelectedEnvironments_description";
-            this.lblSelectedEnvironments_description.Size = new System.Drawing.Size(172, 20);
+            this.lblSelectedEnvironments_description.Size = new System.Drawing.Size(116, 13);
             this.lblSelectedEnvironments_description.TabIndex = 33;
             this.lblSelectedEnvironments_description.Text = "selected environments:";
             // 
             // btnSelectEnvironments
             // 
-            this.btnSelectEnvironments.Location = new System.Drawing.Point(4, 5);
-            this.btnSelectEnvironments.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnSelectEnvironments.Location = new System.Drawing.Point(3, 3);
             this.btnSelectEnvironments.Name = "btnSelectEnvironments";
-            this.btnSelectEnvironments.Size = new System.Drawing.Size(254, 42);
+            this.btnSelectEnvironments.Size = new System.Drawing.Size(169, 27);
             this.btnSelectEnvironments.TabIndex = 32;
             this.btnSelectEnvironments.Text = "Select Environments";
             this.btnSelectEnvironments.UseVisualStyleBackColor = true;
@@ -306,45 +294,44 @@
             // btnStartQueries
             // 
             this.btnStartQueries.Enabled = false;
-            this.btnStartQueries.Location = new System.Drawing.Point(160, 334);
-            this.btnStartQueries.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnStartQueries.Location = new System.Drawing.Point(108, 246);
             this.btnStartQueries.Name = "btnStartQueries";
-            this.btnStartQueries.Size = new System.Drawing.Size(190, 35);
+            this.btnStartQueries.Size = new System.Drawing.Size(127, 23);
             this.btnStartQueries.TabIndex = 16;
-            this.btnStartQueries.Text = "Start";
+            this.btnStartQueries.Text = "Load Data";
+            this.toolTip1.SetToolTip(this.btnStartQueries, "Query the selected environments for flows and connection references that are owne" +
+        "d by a specific user.");
             this.btnStartQueries.UseVisualStyleBackColor = true;
             this.btnStartQueries.Click += new System.EventHandler(this.btnStartQueries_Click);
             // 
             // btnExportToExcel
             // 
             this.btnExportToExcel.Enabled = false;
-            this.btnExportToExcel.Location = new System.Drawing.Point(160, 424);
-            this.btnExportToExcel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnExportToExcel.Location = new System.Drawing.Point(214, 275);
             this.btnExportToExcel.Name = "btnExportToExcel";
-            this.btnExportToExcel.Size = new System.Drawing.Size(190, 35);
+            this.btnExportToExcel.Size = new System.Drawing.Size(127, 23);
             this.btnExportToExcel.TabIndex = 31;
-            this.btnExportToExcel.Text = "Export";
+            this.btnExportToExcel.Text = "Export to Excel";
+            this.toolTip1.SetToolTip(this.btnExportToExcel, "Export this information to Excel.");
             this.btnExportToExcel.UseVisualStyleBackColor = true;
             this.btnExportToExcel.Click += new System.EventHandler(this.btnExportToExcel_Click);
             // 
             // pbMain
             // 
             this.pbMain.Enabled = false;
-            this.pbMain.Location = new System.Drawing.Point(6, 491);
-            this.pbMain.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pbMain.Location = new System.Drawing.Point(4, 319);
             this.pbMain.Name = "pbMain";
-            this.pbMain.Size = new System.Drawing.Size(507, 35);
+            this.pbMain.Size = new System.Drawing.Size(338, 23);
             this.pbMain.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.pbMain.TabIndex = 30;
             // 
             // tbTargetUserEmail
             // 
             this.tbTargetUserEmail.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.tbTargetUserEmail.Location = new System.Drawing.Point(15, 122);
-            this.tbTargetUserEmail.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbTargetUserEmail.Location = new System.Drawing.Point(10, 79);
             this.tbTargetUserEmail.Name = "tbTargetUserEmail";
             this.tbTargetUserEmail.Placeholder = null;
-            this.tbTargetUserEmail.Size = new System.Drawing.Size(409, 26);
+            this.tbTargetUserEmail.Size = new System.Drawing.Size(274, 20);
             this.tbTargetUserEmail.TabIndex = 29;
             this.tbTargetUserEmail.Tag = true;
             this.tbTargetUserEmail.TextChanged += new System.EventHandler(this.tbTargetUserEmail_TextChanged);
@@ -354,10 +341,9 @@
             this.cbCheckConnectionReferences.AutoSize = true;
             this.cbCheckConnectionReferences.Checked = true;
             this.cbCheckConnectionReferences.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbCheckConnectionReferences.Location = new System.Drawing.Point(15, 212);
-            this.cbCheckConnectionReferences.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.cbCheckConnectionReferences.Location = new System.Drawing.Point(10, 138);
             this.cbCheckConnectionReferences.Name = "cbCheckConnectionReferences";
-            this.cbCheckConnectionReferences.Size = new System.Drawing.Size(252, 24);
+            this.cbCheckConnectionReferences.Size = new System.Drawing.Size(172, 17);
             this.cbCheckConnectionReferences.TabIndex = 28;
             this.cbCheckConnectionReferences.Text = "Check Connection References";
             this.cbCheckConnectionReferences.UseVisualStyleBackColor = true;
@@ -367,10 +353,9 @@
             this.cbCheckFlowOwners.AutoSize = true;
             this.cbCheckFlowOwners.Checked = true;
             this.cbCheckFlowOwners.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbCheckFlowOwners.Location = new System.Drawing.Point(15, 177);
-            this.cbCheckFlowOwners.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.cbCheckFlowOwners.Location = new System.Drawing.Point(10, 115);
             this.cbCheckFlowOwners.Name = "cbCheckFlowOwners";
-            this.cbCheckFlowOwners.Size = new System.Drawing.Size(196, 24);
+            this.cbCheckFlowOwners.Size = new System.Drawing.Size(135, 17);
             this.cbCheckFlowOwners.TabIndex = 27;
             this.cbCheckFlowOwners.Text = "Check Flow Ownership";
             this.cbCheckFlowOwners.UseVisualStyleBackColor = true;
@@ -378,22 +363,20 @@
             // lblWarning
             // 
             this.lblWarning.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblWarning.Location = new System.Drawing.Point(10, 595);
-            this.lblWarning.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblWarning.Location = new System.Drawing.Point(7, 387);
             this.lblWarning.Name = "lblWarning";
-            this.lblWarning.Size = new System.Drawing.Size(501, 372);
+            this.lblWarning.Size = new System.Drawing.Size(334, 242);
             this.lblWarning.TabIndex = 26;
             this.lblWarning.Text = resources.GetString("lblWarning.Text");
             // 
             // FlowOwnershipAuditControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.toolStripMenu);
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "FlowOwnershipAuditControl";
-            this.Size = new System.Drawing.Size(2142, 1171);
+            this.Size = new System.Drawing.Size(1428, 761);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();

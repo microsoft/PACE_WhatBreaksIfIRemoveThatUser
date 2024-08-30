@@ -17,9 +17,8 @@ namespace FlowOwnershipAudit.TreeViewUI
             EnvironmentId = environmentId;
 
             // constructor for the environment tree node was called, update the UI to display it. This needs to happen after the backing fields of the properties have been set!
-            updateNodeUi(new NodeUpdateObject()
+            updateNodeUi(new NodeUpdateObject(this)
             {
-                TreeNodeElement = this,
                 NodeText = EnvironmentName,
                 UpdateReason = UpdateReason.AddedToList
             });

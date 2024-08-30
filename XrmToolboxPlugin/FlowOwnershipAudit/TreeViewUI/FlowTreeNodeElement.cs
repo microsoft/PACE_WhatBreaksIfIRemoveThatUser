@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUIElements;
 
@@ -16,48 +14,28 @@ namespace FlowOwnershipAudit.TreeViewUI
 
         public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments/{Flow.properties.environment.name}/solutions/~preferred/flows/{Flow.name}"); }
 
-        public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
-                                  DirectoryTreeNode parentNodeElement,
-                                  //string flowName,
-                                  //string flowId,
-                                  //string environmentId,
-                                  Flow flow
-                                 ) : base(updateNodeUiDelegate)
-        {
-            // ctor has been called, this means we need to call the update method to display the flow in the UI
-            // TODO Implement logic for updating object that already exist
-
-            _parentNodeElement = parentNodeElement;
-            Flow = flow;
-
-            updateNodeUiDelegate(new NodeUpdateObject()
-            {
-                TreeNodeElement = this,
-                ParentNodeId = (parentNodeElement != null) ? _parentNodeElement.ElementId.ToString() : null,
-                NodeText = flow.properties.displayName,
-                UpdateReason = UpdateReason.AddedToList
-            });
-        }
-
         // right now we dont have any child objects, but we could have them in the future, for example to show connection references that sit under a flow
         internal override IEnumerable<TreeNodeElementBase> ChildObjects => throw new NotImplementedException();
 
         internal override TreeNodeElementBase Parent => _parentNodeElement;
-    }
 
-    internal static class TreeNodeExtensions
-    {
-        internal static IEnumerable<TreeNode> Descendants(this TreeNodeCollection c)
+        public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
+                                  DirectoryTreeNode parentNodeElement,
+                                  Flow flow
+                                 ) : base(updateNodeUiDelegate)
         {
-            foreach (var node in c.OfType<TreeNode>())
-            {
-                yield return node;
 
-                foreach (var child in node.Nodes.Descendants())
-                {
-                    yield return child;
-                }
-            }
+            _parentNodeElement = parentNodeElement;
+            Flow = flow;
+
+            _parentNodeElement.ObservableChildNodes.Add(this);
+            
+            updateNodeUiDelegate(new NodeUpdateObject(this)
+            {
+                ParentNodeId = (parentNodeElement != null) ? _parentNodeElement.ElementId.ToString() : null,
+                NodeText = flow.properties.displayName,
+                UpdateReason = UpdateReason.AddedToList
+            });
         }
     }
 }

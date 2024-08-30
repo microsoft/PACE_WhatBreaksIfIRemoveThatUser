@@ -9,9 +9,15 @@ namespace FlowOwnershipAudit
         internal string NodeId { get { return TreeNodeElement.ElementId; } }
         internal string ParentNodeId { get; set; }
         internal string NodeText { get; set; }
-        internal TreeNodeElementBase TreeNodeElement { get; set; }
+        internal TreeNodeElementBase TreeNodeElement { get; private set; }
         public string ToolTipText { get; set; }
+
+        public NodeUpdateObject(TreeNodeElementBase treeNodeElement)
+        {
+            TreeNodeElement = treeNodeElement;
+        }
     }
+    
 
     internal enum UpdateReason
     {
