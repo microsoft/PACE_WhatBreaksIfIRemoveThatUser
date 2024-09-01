@@ -739,7 +739,7 @@ namespace FlowOwnershipAudit
                             updateNode.Tag = nodeUpdateObject.TreeNodeElement;
                             updateNode.Text = nodeUpdateObject.NodeText;
                             //updateNode.ToolTipText = "n/a.";﻿
-                            updateNode.Checked = true;
+                            updateNode.Checked = false;
                             break;
                         case UpdateReason.RemovedFromList:
                             // not implemented﻿
@@ -888,7 +888,7 @@ namespace FlowOwnershipAudit
             var element = e.Node.Tag;
             if (element != null
                 && (element.GetType() == typeof(ConnectionReferenceTreeNodeElement)
-                || (element.GetType() == typeof(DirectoryTreeNode) && e.Node.Text == "Connection References")))
+                || (element.GetType() == typeof(DirectoryTreeNode) && e.Node.Text.IndexOf("Connection References") != -1 )))
             {
                 e.Node.HideCheckBox();
             }
