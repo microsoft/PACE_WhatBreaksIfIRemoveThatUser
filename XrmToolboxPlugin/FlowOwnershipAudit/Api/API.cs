@@ -449,9 +449,9 @@ namespace FlowOwnershipAudit
         /// Retrieves the system user ID from Dataverse based on the provided domain name.
         /// </summary>
         /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
-        /// <param name="domainname">The domain name of the user.</param>
+        /// <param name="userIdentifier">The domainname, internalemailaddress or azureactivedirectoryobjectid of the user.</param>
         /// <returns>The system user ID if found, otherwise String.Empty</returns>
-        public static string GetSystemUserIdFromDataverse(string environmentUrl, string domainname)
+        public static string GetSystemUserIdFromDataverse(string environmentUrl, string userIdentifier)
         {
             try
             {
@@ -460,7 +460,19 @@ namespace FlowOwnershipAudit
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-                    string url = $"{environmentUrl}/api/data/v9.1/systemusers?$filter=domainname eq '{domainname}' or internalemailaddress eq '{domainname}'&$select=systemuserid";
+
+                    // Check if userIdentifier is a GUID
+                    bool isGuid = Guid.TryParse(userIdentifier, out Guid userGuid);
+
+                    string url;
+                    if (isGuid)
+                    {
+                        url = $"{environmentUrl}/api/data/v9.1/systemusers?$filter=azureactivedirectoryobjectid eq '{userGuid}'&$select=systemuserid";
+                    }
+                    else
+                    {
+                        url = $"{environmentUrl}/api/data/v9.1/systemusers?$filter=domainname eq '{userIdentifier}' or internalemailaddress eq '{userIdentifier}'&$select=systemuserid";
+                    }
 
                     HttpResponseMessage response = client.GetAsync(url).Result;
                     if (response.IsSuccessStatusCode)

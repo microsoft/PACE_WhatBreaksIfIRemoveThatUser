@@ -270,7 +270,7 @@ namespace FlowOwnershipAudit
                 Work = (worker, args) =>
                 {
                     var EnvironmentsTask = GetAllEnvironmentsInTenantAsync((progress) => worker.ReportProgress(progress.ProgressPercentage, progress.UserState));
-                    
+
                     args.Result = EnvironmentsTask.Result;
                 },
                 ProgressChanged = e =>
@@ -595,14 +595,16 @@ namespace FlowOwnershipAudit
         /// </summary>
         /// <param name="targetOwnerId"></param>
         /// <exception cref="Exception"></exception>
-        private void ReassignCheckedFlows(string targetOwnerId, IList<TreeNode> selectedNodes)
+        private void ReassignCheckedFlows(string targetOwner, IList<TreeNode> selectedNodes)
         {
+            // start progressbar
+            pbMain.Style = ProgressBarStyle.Marquee;
+
+            //hjjujuèuvar orginalOwner = tbTargetUserEmail.Text;
+
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
             {
-                // start progressbar
-                pbMain.Style = ProgressBarStyle.Marquee;
-
                 try
                 {
                     // group nodes by environment
@@ -616,6 +618,11 @@ namespace FlowOwnershipAudit
                     {
                         var environmentUrl = group.Key;
 
+                        LogInfo("Get target systemuserid from dataverse");
+
+                        // Get target systemuserid from dataverse
+                        string targetOwnerId = GetSystemUserIdFromDataverse(environmentUrl, targetOwner);
+
                         LogInfo("Reassigning flows in " + environmentUrl);
 
                         // get flowTreeNodeElement from Tag
@@ -624,8 +631,12 @@ namespace FlowOwnershipAudit
                             // Get the flow object from the node
                             Flow flow = tag.Flow;
 
+                            // Take ownership information from the flow object
+                            string originalOwnerId = GetSystemUserIdFromDataverse(environmentUrl, flow.permissions.Where(x => x.properties.roleName == "Owner").FirstOrDefault().properties.principal.id);
+
                             // Set the owner of the flow to the target user
-                            if (!SetWorkflowOwner(environmentUrl, flow.properties.workflowEntityId, targetOwnerId)) {
+                            if (!SetWorkflowOwner(environmentUrl, flow.properties.workflowEntityId, targetOwnerId))
+                            {
 
                                 // means something went wrong and we need to abort the current flow reassignment
                                 tag.updateNodeUi(new NodeUpdateObject(tag)
@@ -636,8 +647,7 @@ namespace FlowOwnershipAudit
                                 return;
                             }
                             // Grant access to the original user
-                            // TODO: getting original owner from the textbox is probably not a good idea, what if the user changed it before clicking the reassign button?
-                            if (!GrantAccess(environmentUrl, flow.properties.workflowEntityId, tbTargetUserEmail.Text))
+                            if (!GrantAccess(environmentUrl, flow.properties.workflowEntityId, originalOwnerId))
                             {
                                 // means something went wrong and we need to abort the current flow reassignment
                                 tag.updateNodeUi(new NodeUpdateObject(tag)
@@ -652,11 +662,11 @@ namespace FlowOwnershipAudit
                             GetFlowDetails(flow);
                             GetFlowPermissons(flow);
 
-                           tag.updateNodeUi(new NodeUpdateObject(tag)
-                           {
-                               UpdateReason = UpdateReason.MigrationSucceeded,
-                               NodeText = "Migration successful"
-                           });
+                            tag.updateNodeUi(new NodeUpdateObject(tag)
+                            {
+                                UpdateReason = UpdateReason.MigrationSucceeded,
+                                NodeText = "Migration successful"
+                            });
                         }
                     });
                 }
@@ -681,7 +691,7 @@ namespace FlowOwnershipAudit
         #region Methods
         private List<TreeNode> GetSelectedNodes()
         {
-            return tvTreeview.Nodes.Descendants().Where(x => x.Checked && x.GetType() == typeof(FlowTreeNodeElement)).ToList();
+            return tvTreeview.Nodes.Descendants().Where(x => x.Checked && x.Tag.GetType() == typeof(FlowTreeNodeElement)).ToList();
         }
 
         private void UpdateNode(NodeUpdateObject nodeUpdateObject)
@@ -711,6 +721,7 @@ namespace FlowOwnershipAudit
                                     Text = nodeUpdateObject.NodeText,
                                     ForeColor = Color.Black,
                                     Tag = nodeUpdateObject.TreeNodeElement,
+                                    NodeFont = new Font(tvTreeview.Font, FontStyle.Regular),
                                     //ToolTipText = "n/a",﻿
                                     Checked = false
                                 };
@@ -725,6 +736,7 @@ namespace FlowOwnershipAudit
                                     Name = nodeUpdateObject.NodeId,
                                     Text = nodeUpdateObject.NodeText,
                                     ForeColor = Color.Black,
+                                    NodeFont = new Font(tvTreeview.Font, FontStyle.Regular),
                                     Tag = nodeUpdateObject.TreeNodeElement,
                                     //ToolTipText = "n/a",﻿
                                     Checked = false
@@ -736,24 +748,30 @@ namespace FlowOwnershipAudit
                         // this is used so we can update nodes in the UI that are already there with additional details﻿
                         case UpdateReason.DetailsAdded:
                             updateNode.ForeColor = Color.Black;
+                            updateNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Strikeout);
                             updateNode.Tag = nodeUpdateObject.TreeNodeElement;
                             updateNode.Text = nodeUpdateObject.NodeText;
                             //updateNode.ToolTipText = "n/a.";﻿
                             updateNode.Checked = false;
+                            updateNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Regular);
                             break;
                         case UpdateReason.RemovedFromList:
                             // not implemented﻿
                             break;
                         case UpdateReason.MigrationSucceeded:
                             updateNode.ForeColor = Color.Green;
+                            updateNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Strikeout);
                             updateNode.ToolTipText = nodeUpdateObject.ToolTipText;
                             updateNode.Checked = false;
+                            //TODO: does not work, needs to be handled in the draw method. Don't ask me why, it just does not work
                             updateNode.HideCheckBox();
                             break;
                         case UpdateReason.MigrationFailed:
                             updateNode.ForeColor = Color.Red;
+                            updateNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Strikeout);
                             updateNode.ToolTipText = nodeUpdateObject.ToolTipText;
                             updateNode.Checked = false;
+                            //TODO: does not work, needs to be handled in the draw method. Don't ask me why, it just does not work
                             updateNode.HideCheckBox();
                             break;
                         default:
@@ -888,19 +906,20 @@ namespace FlowOwnershipAudit
             var element = e.Node.Tag;
             if (element != null
                 && (element.GetType() == typeof(ConnectionReferenceTreeNodeElement)
-                || (element.GetType() == typeof(DirectoryTreeNode) && e.Node.Text.IndexOf("Connection References") != -1 )))
+                || (element.GetType() == typeof(DirectoryTreeNode) && e.Node.Text.IndexOf("Connection References") != -1)
+                ))
             {
                 e.Node.HideCheckBox();
             }
 
-            TextRenderer.DrawText(e.Graphics, e.Node.Text, tvTreeview.Font,
-                      new Point(e.Node.Bounds.Left + 2, e.Node.Bounds.Top + 2), Color.Black);
+            TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont,
+                      new Point(e.Node.Bounds.Left + 2, e.Node.Bounds.Top + 2), e.Node.ForeColor);
         }
 
         private void treeView1_AfterCheck(object sender, TreeViewEventArgs e)
         {
-            // TODO: no keyboard allowed?? :(
-            if (e.Action != TreeViewAction.ByMouse)
+            // If we do not check this, we end in an infinite loop
+            if (e.Action != TreeViewAction.ByMouse && e.Action != TreeViewAction.ByKeyboard)
                 return;
 
             // Handle the event when a checkbox is checked or unchecked
