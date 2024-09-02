@@ -203,9 +203,6 @@ namespace FlowOwnershipAudit
         /// <returns></returns>
         public static void AddFlowPermissionsToEnvironment(string userId, Model.Environment targetEnvironment, Action<object> ProgressChanged)
         {
-            string flowEndpoint = "https://api.flow.microsoft.com";
-            string apiVersion = "2016-11-01";
-
             if (targetEnvironment.flows != null)
             {
                 Parallel.ForEach(
@@ -213,27 +210,6 @@ namespace FlowOwnershipAudit
                     parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 5 },
                     body: async flow =>
                     {
-                        //var auth = AuthenticateAsync(AuthType.Flow).Result;
-
-                        //FlowPermissionList flowPermissionList = new FlowPermissionList();
-
-                        //// Call the API for each environment
-                        //using (HttpClient client = new HttpClient())
-                        //{
-                        //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-                        //    string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/environments/{targetEnvironment.name}/flows/{flow.name}/permissions?api-version={apiVersion}";
-                        //    HttpResponseMessage response = client.GetAsync(url).Result;
-                        //    if (response.IsSuccessStatusCode)
-                        //    {
-                        //        string responseContent = response.Content.ReadAsStringAsync().Result;
-                        //        flowPermissionList = JsonConvert.DeserializeObject<FlowPermissionList>(responseContent);
-                        //        flow.permissions = flowPermissionList.value;
-                        //    }
-                        //    else
-                        //    {
-                        //        // Handle the error here
-                        //    }
-                        //}
                         GetFlowPermissons(flow);
 
                         if (flow.permissions != null)
@@ -315,7 +291,6 @@ namespace FlowOwnershipAudit
 
         public static void GetFlowDetails(Flow flow)
         {
-            //"https://{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{environment}/flows/{flowName}?api-version={apiVersion}"
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
 

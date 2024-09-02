@@ -170,7 +170,6 @@ namespace FlowOwnershipAudit
             tvTreeview.AfterCheck += treeView1_AfterCheck;
             tvTreeview.DrawNode += treeView1_DrawNode;
             tvTreeview.DrawMode = TreeViewDrawMode.OwnerDrawText;
-
         }
 
         #region Event Handlers
@@ -753,12 +752,11 @@ namespace FlowOwnershipAudit
                         // this is used so we can update nodes in the UI that are already there with additional details﻿
                         case UpdateReason.DetailsAdded:
                             updateNode.ForeColor = Color.Black;
-                            updateNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Strikeout);
+                            updateNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Regular);
                             updateNode.Tag = nodeUpdateObject.TreeNodeElement;
                             updateNode.Text = nodeUpdateObject.NodeText;
                             //updateNode.ToolTipText = "n/a.";﻿
                             updateNode.Checked = false;
-                            updateNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Regular);
                             break;
                         case UpdateReason.RemovedFromList:
                             // not implemented﻿
@@ -910,6 +908,9 @@ namespace FlowOwnershipAudit
         {
             Debug.WriteLine($"{DateTime.Now} Drawing node {e.Node.Text}");
 
+            if (e.Node.Bounds.Height == 0)
+                return;
+
             var nodeTag = e.Node.Tag;
 
             if (nodeTag != null) // this node has a tag
@@ -944,6 +945,7 @@ namespace FlowOwnershipAudit
                 }
 
             }
+
             TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont, new Point(e.Node.Bounds.Left + 2, e.Node.Bounds.Top + 2), e.Node.ForeColor);
         }
 
