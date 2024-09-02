@@ -421,7 +421,10 @@ namespace FlowOwnershipAudit
                                     new FlowTreeNodeElement(UpdateNode,
                                                            parentNodeElement: flowDirectoryNode,
                                                            flow: flow
-                                                           );
+                                                           )
+                                    {
+                                        MigrationStatus = MigrationStatus.NotMigratedYet
+                                    };
                                 });
                             currentTargetEnvironment.Value.flowsQueryCompleted = true;
                         }
@@ -637,13 +640,13 @@ namespace FlowOwnershipAudit
                             // Set the owner of the flow to the target user
                             if (!SetWorkflowOwner(environmentUrl, flow.properties.workflowEntityId, targetOwnerId))
                             {
-
                                 // means something went wrong and we need to abort the current flow reassignment
                                 tag.updateNodeUi(new NodeUpdateObject(tag)
                                 {
                                     UpdateReason = UpdateReason.MigrationFailed,
                                     NodeText = "Unable to reassign this flow to the target user."
                                 });
+                                tag.MigrationStatus = MigrationStatus.MigrationFailed;
                                 return;
                             }
                             // Grant access to the original user
@@ -655,6 +658,7 @@ namespace FlowOwnershipAudit
                                     UpdateReason = UpdateReason.MigrationFailed,
                                     NodeText = "Unable to share this flow with the original owner after reassignment."
                                 });
+                                tag.MigrationStatus = MigrationStatus.MigrationFailed;
                                 return;
                             }
 
@@ -667,7 +671,8 @@ namespace FlowOwnershipAudit
                                 UpdateReason = UpdateReason.MigrationSucceeded,
                                 NodeText = "Migration successful"
                             });
-                        }
+                            tag.MigrationStatus = MigrationStatus.MigrationSuccessful;
+                            }
                     });
                 }
                 catch (Exception ex)
@@ -903,17 +908,43 @@ namespace FlowOwnershipAudit
 
         private void treeView1_DrawNode(object sender, DrawTreeNodeEventArgs e)
         {
-            var element = e.Node.Tag;
-            if (element != null
-                && (element.GetType() == typeof(ConnectionReferenceTreeNodeElement)
-                || (element.GetType() == typeof(DirectoryTreeNode) && e.Node.Text.IndexOf("Connection References") != -1)
-                ))
-            {
-                e.Node.HideCheckBox();
-            }
+            Debug.WriteLine($"{DateTime.Now} Drawing node {e.Node.Text}");
 
-            TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont,
-                      new Point(e.Node.Bounds.Left + 2, e.Node.Bounds.Top + 2), e.Node.ForeColor);
+            var nodeTag = e.Node.Tag;
+
+            if (nodeTag != null) // this node has a tag
+            {
+                // this is a connection reference node or it is a directory tree node that belongs to a connection reference branch - those should never have a checkbox because we dont migrate them now
+                if ((nodeTag.GetType() == typeof(ConnectionReferenceTreeNodeElement) 
+                    || (nodeTag.GetType() == typeof(DirectoryTreeNode) && e.Node.Text.IndexOf("Connection References") != -1)))
+                {
+                    e.Node.HideCheckBox();
+                }
+                else
+                {
+                    // this is any other node that has a tag - use the tag content to determine whether a checkbox should be drawn or not
+                    var flowNodeTag = e.Node.Tag as FlowTreeNodeElement;
+                    if (flowNodeTag != null)
+                    {
+
+                        // the only valid reason for us to show a checkbox is because an item has not been migrated yet
+                        switch (flowNodeTag.MigrationStatus)
+                        {
+                            case MigrationStatus.MigrationFailed:
+                            case MigrationStatus.MigrationSuccessful:
+                                Debug.WriteLine($"{DateTime.Now} Hiding checkbox for {e.Node.Text} because migration state of this item is: {flowNodeTag.MigrationStatus}");
+                                e.Node.HideCheckBox();
+                                break;
+                            case MigrationStatus.NotMigratedYet:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+
+            }
+            TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont, new Point(e.Node.Bounds.Left + 2, e.Node.Bounds.Top + 2), e.Node.ForeColor);
         }
 
         private void treeView1_AfterCheck(object sender, TreeViewEventArgs e)
@@ -959,5 +990,6 @@ namespace FlowOwnershipAudit
             }
         }
         #endregion
+
     }
 }
