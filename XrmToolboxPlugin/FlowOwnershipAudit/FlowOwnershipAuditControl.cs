@@ -141,7 +141,7 @@ namespace FlowOwnershipAudit
         // todo watch out for thread safety issues﻿
         private readonly EnvironmentCollection targetEnvironments = new EnvironmentCollection();
 
-        private Settings mySettings;
+        //private Settings mySettings;
 
         private readonly string sidePanelDefaultText = "Select environments and click start, then select any node to see the results here.";
 
@@ -167,6 +167,7 @@ namespace FlowOwnershipAudit
 
             // subscribe to the event that the treeview node has been selected
             //tvTreeview.BeforeCheck += treeView1_BeforeCheck;
+            tvTreeview.AfterSelect += treeView1_AfterSelect;
             tvTreeview.AfterCheck += treeView1_AfterCheck;
             tvTreeview.DrawNode += treeView1_DrawNode;
             tvTreeview.DrawMode = TreeViewDrawMode.OwnerDrawText;
@@ -182,13 +183,13 @@ namespace FlowOwnershipAudit
         private void MyPluginControl_OnCloseTool(object sender, EventArgs e)
         {
             // Before leaving, save the settings﻿
-            SettingsManager.Instance.Save(GetType(), mySettings);
+            //SettingsManager.Instance.Save(GetType(), mySettings);
         }
 
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
             // Loads or creates the settings for the plugin﻿
-            if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
+            /*if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
             {
                 mySettings = new Settings();
 
@@ -197,7 +198,7 @@ namespace FlowOwnershipAudit
             else
             {
                 LogInfo("Settings found and loaded");
-            }
+            }*/
 
             // for some reason the designer keeps deleting this default text...﻿
             tbTargetUserEmail.Text = "Please enter the target user's principal name or object id.";
@@ -992,6 +993,5 @@ namespace FlowOwnershipAudit
             }
         }
         #endregion
-
     }
 }
