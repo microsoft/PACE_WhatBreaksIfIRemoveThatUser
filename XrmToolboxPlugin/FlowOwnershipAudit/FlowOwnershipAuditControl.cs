@@ -144,8 +144,6 @@ namespace FlowOwnershipAudit
         // todo watch out for thread safety issues﻿
         private readonly EnvironmentCollection targetEnvironments = new EnvironmentCollection();
 
-        //private Settings mySettings;
-
         private readonly string sidePanelDefaultText = "Select environments and click start, then select any node to see the results here.";
 
         #region Properties
