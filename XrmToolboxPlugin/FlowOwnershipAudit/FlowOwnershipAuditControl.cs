@@ -194,24 +194,11 @@ namespace FlowOwnershipAudit
         /// <param name="e"></param>﻿
         private void MyPluginControl_OnCloseTool(object sender, EventArgs e)
         {
-            // Before leaving, save the settings﻿
-            //SettingsManager.Instance.Save(GetType(), mySettings);
+
         }
 
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
-            // Loads or creates the settings for the plugin﻿
-            /*if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
-            {
-                mySettings = new Settings();
-
-                LogWarning("Settings not found => a new settings file has been created!");
-            }
-            else
-            {
-                LogInfo("Settings found and loaded");
-            }*/
-
             // for some reason the designer keeps deleting this default text...﻿
             tbTargetUserEmail.Text = "Please enter the target user's principal name or object id.";
         }
