@@ -175,6 +175,8 @@ namespace FlowOwnershipAudit
             {
                 if (connectionReference.properties.createdBy.id == userId)
                 {
+                    connectionReference.isOwnedByX = true;
+
                     var returnObj = new
                     {
                         ConnectionReferenceName = connectionReference.name,
@@ -219,6 +221,7 @@ namespace FlowOwnershipAudit
                                 if (permission.properties.roleName == "Owner" &&
                                                 permission.properties.principal.id == userId)
                                 {
+                                    flow.isOwnedByX = true;
                                     ProgressChanged(flow);
                                 }
                             }

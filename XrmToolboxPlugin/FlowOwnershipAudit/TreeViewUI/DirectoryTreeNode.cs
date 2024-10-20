@@ -34,14 +34,14 @@ namespace FlowOwnershipAudit.TreeViewUI
             });
 
             // use event to count the child items and update the node text
-            ObservableChildNodes.CollectionChanged += (sender, e) =>
-            {
-                updateNodeUi(new NodeUpdateObject(this)
-                {
-                    NodeText = directoryName + $" ({ObservableChildNodes.Count})",
-                    UpdateReason = UpdateReason.DetailsAdded,
-                });
-            };
+            //ObservableChildNodes.CollectionChanged += (sender, e) =>
+            //{
+            //    updateNodeUi(new NodeUpdateObject(this)
+            //    {
+            //        NodeText = directoryName + $" ({ObservableChildNodes.Count})",
+            //        UpdateReason = UpdateReason.DetailsAdded,
+            //    });
+            //};
         }
 
        internal override IEnumerable<TreeNodeElementBase> ChildObjects => ObservableChildNodes;

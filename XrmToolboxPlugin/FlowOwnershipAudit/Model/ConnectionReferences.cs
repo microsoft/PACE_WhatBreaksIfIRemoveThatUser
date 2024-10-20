@@ -95,6 +95,7 @@ namespace FlowOwnershipAudit.Model
         public string id { get; set; }
         public string type { get; set; }
         public ConnectionReferencesProperties properties { get; set; }
+        public bool isOwnedByX { get; set; }
     }
 
     public class ConnectionReferencesValues

@@ -334,7 +334,6 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.tableLayoutPanel1);
-            this.splitContainer2.Panel2.Enabled = false;
             this.splitContainer2.Size = new System.Drawing.Size(1567, 1084);
             this.splitContainer2.SplitterDistance = 674;
             this.splitContainer2.TabIndex = 3;
@@ -360,18 +359,19 @@
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 300F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 400F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.Size = new System.Drawing.Size(889, 1084);
             this.tableLayoutPanel1.TabIndex = 6;
             // 
             // lvComponentCount
             // 
+            this.lvComponentCount.AutoArrange = false;
             this.lvComponentCount.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvComponentCount.HideSelection = false;
             this.lvComponentCount.Location = new System.Drawing.Point(3, 3);
             this.lvComponentCount.Name = "lvComponentCount";
-            this.lvComponentCount.Size = new System.Drawing.Size(883, 294);
+            this.lvComponentCount.Size = new System.Drawing.Size(883, 394);
             this.lvComponentCount.TabIndex = 3;
             this.lvComponentCount.UseCompatibleStateImageBehavior = false;
             // 
@@ -381,12 +381,13 @@
             this.rtbSidepanel.CausesValidation = false;
             this.rtbSidepanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.rtbSidepanel.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rtbSidepanel.Location = new System.Drawing.Point(3, 303);
+            this.rtbSidepanel.Location = new System.Drawing.Point(3, 403);
             this.rtbSidepanel.Name = "rtbSidepanel";
             this.rtbSidepanel.ReadOnly = true;
-            this.rtbSidepanel.Size = new System.Drawing.Size(883, 778);
+            this.rtbSidepanel.Size = new System.Drawing.Size(883, 678);
             this.rtbSidepanel.TabIndex = 2;
             this.rtbSidepanel.Text = "";
+            this.rtbSidepanel.Enabled = false;
             // 
             // tabPage2
             // 

@@ -47,5 +47,6 @@ namespace FlowOwnershipAudit.Model
         public string type { get; set; }
         public FlowProperties properties { get; set; }
         public List<FlowPermission> permissions { get; set; }
+        public bool isOwnedByX { get; set; }
     }
 }

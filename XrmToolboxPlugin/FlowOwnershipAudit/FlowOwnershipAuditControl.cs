@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using FlowOwnershipAudit.Model;
 using FlowOwnershipAudit.TreeViewUI;
@@ -14,6 +15,7 @@ using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 using static FlowOwnershipAudit.API;
 using Environment = System.Environment;
+using ListViewItem = System.Windows.Forms.ListViewItem;
 
 namespace FlowOwnershipAudit
 {
@@ -136,6 +138,7 @@ namespace FlowOwnershipAudit
         // these delegates are used to update the UI from a different thread﻿
         private delegate void _updateLogWindowDelegate(string msg, params object[] args);
         private delegate void _updateTreeNodeDelegate(NodeUpdateObject nodeUpdateObject);
+        private delegate void _updateListviewDelegate(ListViewItem listViewItem);
 
         // this list will contain the target environments that we query as well as the status of their respective queries﻿
         // todo watch out for thread safety issues﻿
@@ -171,6 +174,15 @@ namespace FlowOwnershipAudit
             tvTreeview.AfterCheck += treeView1_AfterCheck;
             tvTreeview.DrawNode += treeView1_DrawNode;
             tvTreeview.DrawMode = TreeViewDrawMode.OwnerDrawText;
+
+            //Add Columns to listview control
+            lvComponentCount.View = View.Details;
+            lvComponentCount.GridLines = true;
+            lvComponentCount.Scrollable = true;
+            lvComponentCount.Sorting = SortOrder.Ascending;
+            lvComponentCount.Columns.Add("Component type", 200, HorizontalAlignment.Left);
+            lvComponentCount.Columns.Add("Count", 100, HorizontalAlignment.Left);
+
         }
 
         #region Event Handlers
@@ -397,8 +409,10 @@ namespace FlowOwnershipAudit
                     {
                         // this is the foreach that is running in parallel for each environment﻿
                         // create environment node for the current environment﻿
+                        ListViewGroup group = new ListViewGroup(currentTargetEnvironment.Key.properties.displayName, HorizontalAlignment.Left);
                         EnvironmentTreeNodeElement environmentNode = new EnvironmentTreeNodeElement(UpdateNode, currentTargetEnvironment.Key.properties.displayName, currentTargetEnvironment.Key.name);
                         environmentTreeNodes.Add(environmentNode);
+
                         LogInfo($"Processing environment {currentTargetEnvironment.Key.name}");
                         LogInfo($"Looking for {targetUser} with id {userid} in {currentTargetEnvironment.Key.name}");
 
@@ -427,6 +441,12 @@ namespace FlowOwnershipAudit
                                     };
                                 });
                             currentTargetEnvironment.Value.flowsQueryCompleted = true;
+
+                            ListViewItem Item = new ListViewItem(new string[]
+                            {"Flows",
+                            currentTargetEnvironment.Key.flows.Where(x=> x.isOwnedByX).Count().ToString()});
+                            Item.Group = group;
+                            UpdateListView(Item);
                         }
                         else
                         {
@@ -458,6 +478,12 @@ namespace FlowOwnershipAudit
                                 });
 
                             currentTargetEnvironment.Value.connectionRefsQueryCompleted = true;
+
+                            ListViewItem Item = new ListViewItem(new string[]
+                            {"Connection References",
+                            currentTargetEnvironment.Key.connectionReferences.Where(x=> x.isOwnedByX).Count().ToString()});
+                            Item.Group = group;
+                            UpdateListView(Item);
                         }
                         else
                         {
@@ -554,6 +580,9 @@ namespace FlowOwnershipAudit
 
             // sidepanel
             rtbSidepanel.Text = sidePanelDefaultText;
+
+            // listview
+            lvComponentCount.Clear();
         }
 
         private void tsbHelp_Click(object sender, EventArgs e)
@@ -602,8 +631,6 @@ namespace FlowOwnershipAudit
         {
             // start progressbar
             pbMain.Style = ProgressBarStyle.Marquee;
-
-            //hjjujuèuvar orginalOwner = tbTargetUserEmail.Text;
 
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
@@ -672,7 +699,7 @@ namespace FlowOwnershipAudit
                                 NodeText = "Migration successful"
                             });
                             tag.MigrationStatus = MigrationStatus.MigrationSuccessful;
-                            }
+                        }
                     });
                 }
                 catch (Exception ex)
@@ -697,6 +724,23 @@ namespace FlowOwnershipAudit
         private List<TreeNode> GetSelectedNodes()
         {
             return tvTreeview.Nodes.Descendants().Where(x => x.Checked && x.Tag.GetType() == typeof(FlowTreeNodeElement)).ToList();
+        }
+
+        private void UpdateListView(ListViewItem listViewItem)
+        {
+            if (lvComponentCount.InvokeRequired)
+            {
+                lvComponentCount.Invoke(new _updateListviewDelegate(UpdateListView), listViewItem);
+            }
+            else
+            {
+                lvComponentCount.Items.Add(listViewItem);
+
+                if (!lvComponentCount.Groups.Contains(listViewItem.Group))
+                {
+                    lvComponentCount.Groups.Add(listViewItem.Group);
+                }
+            }
         }
 
         private void UpdateNode(NodeUpdateObject nodeUpdateObject)
@@ -917,7 +961,7 @@ namespace FlowOwnershipAudit
             if (nodeTag != null) // this node has a tag
             {
                 // this is a connection reference node or it is a directory tree node that belongs to a connection reference branch - those should never have a checkbox because we dont migrate them now
-                if ((nodeTag.GetType() == typeof(ConnectionReferenceTreeNodeElement) 
+                if ((nodeTag.GetType() == typeof(ConnectionReferenceTreeNodeElement)
                     || (nodeTag.GetType() == typeof(DirectoryTreeNode) && e.Node.Text.IndexOf("Connection References") != -1)))
                 {
                     e.Node.HideCheckBox();
