@@ -307,12 +307,15 @@ namespace FlowOwnershipAudit
             }
         }
 
-        public static void GetFlowDetails(Flow flow, Action<object> ProgressChanged = null)
+        public static void GetFlowDetails(Model.Environment targetEnvironment, Flow flow, Action<object> ProgressChanged = null)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
 
             var auth = AuthenticateAsync(AuthType.Flow).Result;
+
+            //Get the Flow object that we want to update
+            Flow flowToUpdate = targetEnvironment.flows.Single(x => x.name == flow.name);
 
             using (HttpClient client = new HttpClient())
             {
@@ -322,13 +325,14 @@ namespace FlowOwnershipAudit
                 HttpResponseMessage response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
                 {
+                    
                     string responseContent = response.Content.ReadAsStringAsync().Result;
-                    flow = JsonConvert.DeserializeObject<Flow>(responseContent);
+                    //flow = JsonConvert.DeserializeObject<Flow>(responseContent);
 
                     var flowDynamic = JsonConvert.DeserializeObject<dynamic>(responseContent);
-                    foreach (var test in flowDynamic.properties.connectionReferences.Children())
+                    foreach (var connectionReferences in flowDynamic.properties.connectionReferences.Children())
                     {
-                        foreach (var item in test.Children())
+                        foreach (var item in connectionReferences.Children())
                         {
                             ConnectionReference connectionReference = new ConnectionReference()
                             {
@@ -339,18 +343,18 @@ namespace FlowOwnershipAudit
                                 tier = item.tier
                             };
 
-                            if (flow.properties.connectionReferences == null)
+                            if (flowToUpdate.properties.connectionReferences == null)
                             {
-                                flow.properties.connectionReferences = new List<ConnectionReference>();
+                                flowToUpdate.properties.connectionReferences = new List<ConnectionReference>();
                             }
 
-                            flow.properties.connectionReferences.Add(connectionReference);
+                            flowToUpdate.properties.connectionReferences.Add(connectionReference);
                         }
                     }
 
                     if (ProgressChanged != null)
                     {
-                        ProgressChanged(flow);
+                        ProgressChanged(flowToUpdate);
                     }
                 }
                 else

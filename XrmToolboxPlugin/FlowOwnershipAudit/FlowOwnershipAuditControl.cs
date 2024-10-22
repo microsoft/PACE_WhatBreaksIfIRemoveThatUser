@@ -417,11 +417,11 @@ namespace FlowOwnershipAudit
                                 targetEnvironment: currentTargetEnvironment.Key,
                                 ProgressChanged: (flowObj) =>
                                 {
-                                    Flow flow = flowObj as Flow;
+                                    //Flow flow = flowObj as Flow;
 
                                     FlowTreeNodeElement flowTreeNodeElement = new FlowTreeNodeElement(UpdateNode,
                                                                parentNodeElement: flowDirectoryNode,
-                                                               flow: flow
+                                                               flow: (Flow)flowObj
                                                                )
                                     {
                                         MigrationStatus = MigrationStatus.NotMigratedYet
@@ -429,7 +429,7 @@ namespace FlowOwnershipAudit
 
                                     //flowTreeNodes.Add(flowTreeNodeElement);
 
-                                    GetFlowDetails(flow,
+                                    GetFlowDetails(currentTargetEnvironment.Key, (Flow)flowObj,
                                     ProgressChanged: (flowDetailsObj) =>
                                     {
                                         Flow flowDetails = (Flow)flowDetailsObj;
@@ -449,6 +449,22 @@ namespace FlowOwnershipAudit
                             ListViewItem Item = new ListViewItem(new string[]
                             {"Flows",
                             currentTargetEnvironment.Key.flows.Where(x=> x.isOwnedByX).Count().ToString()});
+                            Item.Group = group;
+                            UpdateListView(Item);
+
+                            //I want to count the number of unique connectionreferences in the flows in the list. 
+                            //The connection references can be found in the property flow.properties.connectionReferences and the unique identifier to group on is the id field.
+
+                            Item = new ListViewItem(new string[]
+                            {"Connection References",
+                            currentTargetEnvironment.Key.flows
+                            .Where(x=>x.properties != null && x.properties.connectionReferences != null)
+                            .SelectMany(flow => flow.properties.connectionReferences)
+                            .Select(connectionReference => connectionReference.id)
+                            .Distinct()
+                            .Count()
+                            .ToString()
+                            });
                             Item.Group = group;
                             UpdateListView(Item);
                         }
@@ -693,7 +709,8 @@ namespace FlowOwnershipAudit
                             }
 
                             // Update flow object
-                            GetFlowDetails(flow);
+                            // TODO?
+                            //GetFlowDetails(flow);
                             GetFlowPermissons(flow);
 
                             tag.updateNodeUi(new NodeUpdateObject(tag)
