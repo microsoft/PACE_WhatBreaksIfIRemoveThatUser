@@ -1068,5 +1068,54 @@ namespace FlowOwnershipAudit
             }
         }
         #endregion
+
+        private void cbExportAllData_Click(object sender, EventArgs e)
+        {
+            if (cbExportAllData.Checked)
+            {
+                cbExportFilteredData.Checked = false;
+            }
+            else
+            {
+                cbExportFilteredData.Checked = true;
+            }
+        }
+
+        private void cbExportFilteredData_Click(object sender, EventArgs e)
+        {
+            if (cbExportFilteredData.Checked)
+            {
+                cbExportAllData.Checked = false;
+            }
+            else
+            {
+                cbExportAllData.Checked = true;
+            }
+        }
+
+        private void cbExportSingleSheet_Click(object sender, EventArgs e)
+        {
+            if (cbExportSingleSheet.Checked)
+            {
+                cbExportMultiSheet.Checked = false;
+            }
+            else
+            {
+                cbExportMultiSheet.Checked = true;
+            }
+
+        }
+
+        private void cbExportMultiSheet_Click(object sender, EventArgs e)
+        {
+            if (cbExportMultiSheet.Checked)
+            {
+                cbExportSingleSheet.Checked = false;
+            }
+            else
+            {
+                cbExportSingleSheet.Checked = true;
+            }
+        }
     }
 }
