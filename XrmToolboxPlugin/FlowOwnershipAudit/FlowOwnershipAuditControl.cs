@@ -999,7 +999,7 @@ namespace FlowOwnershipAudit
             {
                 //this is a connection node or it is a directory tree node that belongs to a connection reference branch - those should never have a checkbox because we dont migrate them now
                 if ((nodeTag.GetType() == typeof(ConnectionTreeNodeElement)
-                    || (nodeTag.GetType() == typeof(ConnectionReferenceTreeNodeElement)
+                    || (nodeTag.GetType() == typeof(ConnectionReferenceTreeNodeElement))
                     || (nodeTag.GetType() == typeof(DirectoryTreeNode) && e.Node.Text.IndexOf("Connection References") != -1)))
                 {
                     e.Node.HideCheckBox();
