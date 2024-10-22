@@ -680,6 +680,14 @@ namespace FlowOwnershipAudit
                             // Get the flow object from the node
                             Flow flow = tag.Flow;
 
+                            #region Reassign Connection References
+                            foreach (ConnectionReference connectionReference in flow.properties.connectionReferences)
+                            {
+                                SetConnectionReferenceOwner(environmentUrl, connectionReference.connectionReferenceLogicalName, targetOwnerId);
+                            }
+                            #endregion
+
+                            #region Reassign Flows
                             // Take ownership information from the flow object
                             string originalOwnerId = GetSystemUserIdFromDataverse(environmentUrl, flow.permissions.Where(x => x.properties.roleName == "Owner").FirstOrDefault().properties.principal.id);
 
@@ -707,6 +715,7 @@ namespace FlowOwnershipAudit
                                 tag.MigrationStatus = MigrationStatus.MigrationFailed;
                                 return;
                             }
+                            #endregion
 
                             // Update flow object
                             // TODO?
@@ -720,38 +729,6 @@ namespace FlowOwnershipAudit
                             });
                             tag.MigrationStatus = MigrationStatus.MigrationSuccessful;
                         }
-
-                        //Reassign Connection References
-                        // get flowTreeNodeElement from Tag
-                        //foreach (var tag in group.Where(x => x.Tag.GetType() == typeof(ConnectionTreeNodeElement)).Select(x => x.Tag as ConnectionTreeNodeElement))
-                        //{
-                        //    // Get the flow object from the node
-                        //    Connection connection = tag.;
-
-                        //    // Set the owner of the flow to the target user
-                        //    if (!SetWorkflowOwner(environmentUrl, connectionReference.properties.createdBy.id, targetOwnerId))
-                        //    {
-                        //        // means something went wrong and we need to abort the current flow reassignment
-                        //        tag.updateNodeUi(new NodeUpdateObject(tag)
-                        //        {
-                        //            UpdateReason = UpdateReason.MigrationFailed,
-                        //            NodeText = "Unable to reassign this connection reference to the target user."
-                        //        });
-                        //        tag.MigrationStatus = MigrationStatus.MigrationFailed;
-                        //        return;
-                        //    }
-
-                        //    // Update flow object
-                        //    //GetFlowDetails(flow);
-                        //    //GetFlowPermissons(flow);
-
-                        //    tag.updateNodeUi(new NodeUpdateObject(tag)
-                        //    {
-                        //        UpdateReason = UpdateReason.MigrationSucceeded,
-                        //        NodeText = "Migration successful"
-                        //    });
-                        //    tag.MigrationStatus = MigrationStatus.MigrationSuccessful;
-                        //}
 
                         LogInfo("Reassigning flows in " + environmentUrl);
                     });

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Windows.Interop;
 using Newtonsoft.Json.Linq;
 using static ScintillaNET.Style;
+using Microsoft.Xrm.Sdk.Workflow.Activities;
 
 namespace FlowOwnershipAudit
 {
@@ -263,17 +264,6 @@ namespace FlowOwnershipAudit
                 }
             }
 
-            //Parallel.ForEach(
-            //    flowList.value,
-            //    new ParallelOptions { MaxDegreeOfParallelism = 20 },
-            //    flow => { GetFlowDetails(flow); }
-            //);
-
-            //foreach (var flow in flowList.value)
-            //{
-            //    GetFlowDetails(flow);
-            //}
-
             // attach flowlist to the current targetenvironment
             targetEnvironment.flows = flowList.value;
         }
@@ -325,7 +315,7 @@ namespace FlowOwnershipAudit
                 HttpResponseMessage response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
                 {
-                    
+
                     string responseContent = response.Content.ReadAsStringAsync().Result;
                     //flow = JsonConvert.DeserializeObject<Flow>(responseContent);
 
@@ -536,7 +526,7 @@ namespace FlowOwnershipAudit
         /// <param name="connectionReferenceId">The ID of the workflow.</param>
         /// <param name="targetOwnerId">The ID of the owner.</param>
         /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
-        public static bool SetConnectionReferenceOwner(string environmentUrl, string connectionReferenceId, string targetOwnerId)
+        public static bool SetConnectionReferenceOwner(string environmentUrl, string connectionReferenceLogicalName, string targetOwnerId)
         {
             var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
 
@@ -544,35 +534,56 @@ namespace FlowOwnershipAudit
             {
                 client.BaseAddress = new Uri(environmentUrl);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-                var method = "PATCH";
-                var httpVerb = new HttpMethod(method);
 
-                var requestBody = new Dictionary<string, object>
-                        {
-                            { "ownerid@odata.bind", $"/systemusers({targetOwnerId})" }
-                        };
-
-                var jsonBody = JsonConvert.SerializeObject(requestBody);
-                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-
-                var httpRequestMessage =
-                    new HttpRequestMessage(httpVerb, $"/api/data/v9.1/connectionreferences({connectionReferenceId})")
-                    {
-                        Content = content
-                    };
-
-                var response = client.SendAsync(httpRequestMessage).Result;
+                //Get Connection Reference from Dataverse based on the connectionreferencelogicalname
+                dynamic connectionReference = new Object();
+                var url = $"/api/data/v9.1/connectionreferences?$filter=connectionreferencelogicalname eq '{connectionReferenceLogicalName}'";
+                HttpResponseMessage response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
                 {
-                    // Owner set successfully
-                    return true;
+                    string responseContent = response.Content.ReadAsStringAsync().Result;
+                    dynamic connectionReferences = JsonConvert.DeserializeObject(responseContent);
+                    if (connectionReferences.value.Count > 0)
+                    {
+                        connectionReference = connectionReferences.value[0];
+                    }
                 }
-                else
+
+                if (connectionReference._owninguser_value != targetOwnerId)
                 {
-                    // Handle the error here
-                    Console.WriteLine($"Error setting owner: {response.ReasonPhrase}");
-                    return false;
+                    string apiUrl = $"{environmentUrl}/api/data/v9.1/Assign";
+
+                    // Create the request body
+                    var assignRequest = new
+                    {
+                        Target = new Dictionary<string, object>
+                        {
+                            { "connectionreferenceid", connectionReference.connectionreferenceid },
+                            { "@odata.type", "Microsoft.Dynamics.CRM.connectionreference" }
+                        },
+                        Assignee = new Dictionary<string, object>
+                        {
+                            { "systemuserid", targetOwnerId },
+                            { "@odata.type", "Microsoft.Dynamics.CRM.systemuser" }
+                        }
+                    };
+                    var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(assignRequest), Encoding.UTF8, "application/json");
+                    response = client.PostAsync(apiUrl, content).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Owner set successfully
+                        return true;
+                    }
+                    else
+                    {
+                        // Handle the error here
+                        Console.WriteLine($"Error setting owner: {response.ReasonPhrase}");
+                        return false;
+                    }
                 }
+
+                return true;
             }
         }
 
