@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace FlowOwnershipAudit.Model
@@ -32,6 +33,8 @@ namespace FlowOwnershipAudit.Model
         public string workflowEntityId { get; set; }
         public string workflowUniqueId { get; set; }
         public bool isManaged { get; set; }
+        [JsonIgnore]
+        public List<ConnectionReference> connectionReferences { get; set; }
     }
 
     public class FlowList
@@ -48,5 +51,14 @@ namespace FlowOwnershipAudit.Model
         public FlowProperties properties { get; set; }
         public List<FlowPermission> permissions { get; set; }
         public bool isOwnedByX { get; set; }
+    }
+
+    public class ConnectionReference
+    {
+        public string connectionName { get; set; }
+        public string connectionReferenceLogicalName { get; set; }
+        public string id { get; set; }
+        public string displayName { get; set; }
+        public string tier { get; set; }
     }
 }

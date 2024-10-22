@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlowOwnershipAudit.TreeViewUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -22,6 +23,7 @@ namespace FlowOwnershipAudit.TreeViewUIElements
             // generate a new guid for the element id
             ElementId = Guid.NewGuid().ToString();
         }
+        internal MigrationStatus MigrationStatus { get; set; }
     }
     internal static class TreeNodeExtensions
     {

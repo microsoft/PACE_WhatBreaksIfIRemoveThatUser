@@ -27,10 +27,10 @@ namespace FlowOwnershipAudit.Model
     public class ConnectionParametersSet
     {
         public string name { get; set; }
-        public ConnectionReferencesValues values { get; set; }
+        public ConnectionValues values { get; set; }
     }
 
-    public class ConnectionReferencesCreatedBy
+    public class ConnectionCreatedBy
     {
         public string id { get; set; }
         public string displayName { get; set; }
@@ -40,19 +40,19 @@ namespace FlowOwnershipAudit.Model
         public string userPrincipalName { get; set; }
     }
 
-    public class ConnectionReferencesEnvironment
+    public class ConnectionEnvironment
     {
         public string id { get; set; }
         public string name { get; set; }
     }
 
-    public class ConnectionReferencesError
+    public class ConnectionError
     {
         public string code { get; set; }
         public string message { get; set; }
     }
 
-    public class ConnectionReferencesProperties
+    public class ConnectionProperties
     {
         public string apiId { get; set; }
         public string displayName { get; set; }
@@ -60,10 +60,10 @@ namespace FlowOwnershipAudit.Model
         public List<Status> statuses { get; set; }
         public ConnectionParameters connectionParameters { get; set; }
         public int keywordsRemaining { get; set; }
-        public ConnectionReferencesCreatedBy createdBy { get; set; }
+        public ConnectionCreatedBy createdBy { get; set; }
         public DateTime createdTime { get; set; }
         public DateTime lastModifiedTime { get; set; }
-        public ConnectionReferencesEnvironment environment { get; set; }
+        public ConnectionEnvironment environment { get; set; }
         public bool allowSharing { get; set; }
         public ConnectionParametersSet connectionParametersSet { get; set; }
         public DateTime? expirationTime { get; set; }
@@ -71,16 +71,16 @@ namespace FlowOwnershipAudit.Model
         public string accountName { get; set; }
     }
 
-    public class ConnectionReferencesList
+    public class ConnectionList
     {
-        public List<ConnectionReference> value { get; set; }
+        public List<Connection> value { get; set; }
     }
 
     public class Status
     {
         public string status { get; set; }
         public string target { get; set; }
-        public ConnectionReferencesError error { get; set; }
+        public ConnectionError error { get; set; }
     }
 
     public class TestLink
@@ -89,16 +89,16 @@ namespace FlowOwnershipAudit.Model
         public string method { get; set; }
     }
 
-    public class ConnectionReference
+    public class Connection
     {
         public string name { get; set; }
         public string id { get; set; }
         public string type { get; set; }
-        public ConnectionReferencesProperties properties { get; set; }
+        public ConnectionProperties properties { get; set; }
         public bool isOwnedByX { get; set; }
     }
 
-    public class ConnectionReferencesValues
+    public class ConnectionValues
     {
     }
 

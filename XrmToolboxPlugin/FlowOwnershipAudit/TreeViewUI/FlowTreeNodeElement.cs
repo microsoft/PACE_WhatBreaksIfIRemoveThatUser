@@ -30,12 +30,12 @@ namespace FlowOwnershipAudit.TreeViewUI
 
         public Uri FlowUri { get => new Uri($"https://make.powerautomate.com/environments/{Flow.properties.environment.name}/solutions/~preferred/flows/{Flow.name}"); }
 
-        // right now we dont have any child objects, but we could have them in the future, for example to show connection references that sit under a flow
+        // right now we dont have any child objects, but we could have them in the future, for example to show connections that sit under a flow
         internal override IEnumerable<TreeNodeElementBase> ChildObjects => throw new NotImplementedException();
 
         internal override TreeNodeElementBase Parent => _parentNodeElement;
 
-        internal MigrationStatus MigrationStatus { get; set; }
+        //internal MigrationStatus MigrationStatus { get; set; }
 
         public FlowTreeNodeElement(Action<NodeUpdateObject> updateNodeUiDelegate,
                                   DirectoryTreeNode parentNodeElement,

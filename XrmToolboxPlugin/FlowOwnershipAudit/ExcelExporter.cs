@@ -22,8 +22,8 @@ namespace FlowOwnershipAudit
 
         internal void ExportToExcel(string filename)
         {
-            // get all environments that have either flow or connection references﻿
-            var environmentsWithFlows = targetEnvironments.Where(env => env.Key.flows.Any() || env.Key.connectionReferences.Any()).Select(x => x.Key).ToList();
+            // get all environments that have components﻿
+            var environmentsWithFlows = targetEnvironments.Where(env => env.Key.flows.Any() || env.Key.connections.Any()).Select(x => x.Key).ToList();
 
             using (var fs = new FileStream(filename, FileMode.Create, FileAccess.Write))
             {
@@ -65,24 +65,24 @@ namespace FlowOwnershipAudit
                             sheet.Cell(rowIndex, 10).SetValue(currentFlow.id.Replace("/providers/Microsoft.ProcessSimple/", flowManagementEnvironment));
                         }
 
-                        // Fill the table range with Connection References data
-                        for (int rowIndex = 1; rowIndex <= environment.connectionReferences.Count; rowIndex++)
+                        // Fill the table range with Connection data
+                        for (int rowIndex = 1; rowIndex <= environment.connections.Count; rowIndex++)
                         {
-                            var currentConnectionReference = environment.connectionReferences[rowIndex - 1];
-                            sheet.Cell(rowIndex + environment.flows.Count, 1).SetValue("Connection Reference");
-                            sheet.Cell(rowIndex + environment.flows.Count, 2).SetValue(currentConnectionReference.id);
-                            sheet.Cell(rowIndex + environment.flows.Count, 3).SetValue(currentConnectionReference.name);
-                            sheet.Cell(rowIndex + environment.flows.Count, 4).SetValue(currentConnectionReference.properties.displayName);
-                            sheet.Cell(rowIndex + environment.flows.Count, 5).SetValue(currentConnectionReference.properties.apiId.Substring(currentConnectionReference.properties.apiId.LastIndexOf('/') + 1));
-                            sheet.Cell(rowIndex + environment.flows.Count, 6).SetValue(string.Join(",", currentConnectionReference.properties.statuses.Select(s => s.status)));
-                            sheet.Cell(rowIndex + environment.flows.Count, 7).SetValue($"{currentConnectionReference.properties.createdTime.ToShortDateString()} {currentConnectionReference.properties.createdTime.ToLongTimeString()}");
-                            sheet.Cell(rowIndex + environment.flows.Count, 8).SetValue(currentConnectionReference.properties.createdBy.email);
-                            sheet.Cell(rowIndex + environment.flows.Count, 9).SetValue($"{currentConnectionReference.properties.lastModifiedTime.ToShortDateString()} {currentConnectionReference.properties.lastModifiedTime.ToLongTimeString()}");
-                            sheet.Cell(rowIndex + environment.flows.Count, 10).SetValue($"https://make.powerapps.com/environments/{environment.name}/connections/{currentConnectionReference.properties.apiId.Substring(currentConnectionReference.properties.apiId.LastIndexOf('/') + 1)}/{currentConnectionReference.name}/details");
+                            var currentConnection = environment.connections[rowIndex - 1];
+                            sheet.Cell(rowIndex + environment.flows.Count, 1).SetValue("Connection");
+                            sheet.Cell(rowIndex + environment.flows.Count, 2).SetValue(currentConnection.id);
+                            sheet.Cell(rowIndex + environment.flows.Count, 3).SetValue(currentConnection.name);
+                            sheet.Cell(rowIndex + environment.flows.Count, 4).SetValue(currentConnection.properties.displayName);
+                            sheet.Cell(rowIndex + environment.flows.Count, 5).SetValue(currentConnection.properties.apiId.Substring(currentConnection.properties.apiId.LastIndexOf('/') + 1));
+                            sheet.Cell(rowIndex + environment.flows.Count, 6).SetValue(string.Join(",", currentConnection.properties.statuses.Select(s => s.status)));
+                            sheet.Cell(rowIndex + environment.flows.Count, 7).SetValue($"{currentConnection.properties.createdTime.ToShortDateString()} {currentConnection.properties.createdTime.ToLongTimeString()}");
+                            sheet.Cell(rowIndex + environment.flows.Count, 8).SetValue(currentConnection.properties.createdBy.email);
+                            sheet.Cell(rowIndex + environment.flows.Count, 9).SetValue($"{currentConnection.properties.lastModifiedTime.ToShortDateString()} {currentConnection.properties.lastModifiedTime.ToLongTimeString()}");
+                            sheet.Cell(rowIndex + environment.flows.Count, 10).SetValue($"https://make.powerapps.com/environments/{environment.name}/connections/{currentConnection.properties.apiId.Substring(currentConnection.properties.apiId.LastIndexOf('/') + 1)}/{currentConnection.name}/details");
                         }
 
                         // create the table
-                        var range = sheet.Range(1, 1, environment.flows.Count + environment.connectionReferences.Count, 10);
+                        var range = sheet.Range(1, 1, environment.flows.Count + environment.connections.Count, 10);
                         var table = range.CreateTable("DataTable");
 
                         table.Theme = XLTableTheme.TableStyleMedium2;

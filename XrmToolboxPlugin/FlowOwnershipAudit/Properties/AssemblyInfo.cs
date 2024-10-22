@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Flow Ownership Audit")]
-[assembly: AssemblyDescription("This tool enables the efficient tracking and management of Microsoft Flows and connection references owned by individual users.")]
+[assembly: AssemblyDescription("This tool enables the efficient tracking and management of components owned by individual users.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("MSFT Pace Setters (Felix Mora / Laurens Vandendriessche)")]
 [assembly: AssemblyProduct("Flow Ownership Audit")]

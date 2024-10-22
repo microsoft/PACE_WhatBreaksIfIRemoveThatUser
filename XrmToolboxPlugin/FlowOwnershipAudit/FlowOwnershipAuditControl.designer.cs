@@ -46,7 +46,7 @@
             this.btnSelectEnvironments = new System.Windows.Forms.Button();
             this.pbMain = new System.Windows.Forms.ProgressBar();
             this.tbTargetUserEmail = new XrmToolBox.Controls.TextBoxWithPlaceholder();
-            this.cbCheckConnectionReferences = new System.Windows.Forms.CheckBox();
+            this.cbCheckConnection = new System.Windows.Forms.CheckBox();
             this.cbCheckFlowOwners = new System.Windows.Forms.CheckBox();
             this.lblWarning = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -113,7 +113,7 @@
             this.tsbResetTool.Size = new System.Drawing.Size(107, 29);
             this.tsbResetTool.Text = "Restart tool";
             this.tsbResetTool.ToolTipText = "Click to reset the plugin to the initial state:\r\nRemoves the selected environment" +
-    "s, target user, log output and all Flows + Connection References that have been " +
+    "s, target user, log output and all components that have been " +
     "loaded.";
             this.tsbResetTool.Click += new System.EventHandler(this.tsbResetTool_Click);
             // 
@@ -148,7 +148,7 @@
             this.btnStartQueries.Size = new System.Drawing.Size(190, 35);
             this.btnStartQueries.TabIndex = 16;
             this.btnStartQueries.Text = "Load Data";
-            this.toolTip1.SetToolTip(this.btnStartQueries, "Query the selected environments for flows and connection references that are owne" +
+            this.toolTip1.SetToolTip(this.btnStartQueries, "Query the selected environments for components that are owne" +
         "d by a specific user.");
             this.btnStartQueries.UseVisualStyleBackColor = true;
             this.btnStartQueries.Click += new System.EventHandler(this.btnStartQueries_Click);
@@ -194,7 +194,7 @@
             this.pnlParameters.Controls.Add(this.btnExportToExcel);
             this.pnlParameters.Controls.Add(this.pbMain);
             this.pnlParameters.Controls.Add(this.tbTargetUserEmail);
-            this.pnlParameters.Controls.Add(this.cbCheckConnectionReferences);
+            this.pnlParameters.Controls.Add(this.cbCheckConnection);
             this.pnlParameters.Controls.Add(this.cbCheckFlowOwners);
             this.pnlParameters.Controls.Add(this.lblWarning);
             this.pnlParameters.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -262,16 +262,16 @@
             // 
             // cbCheckConnectionReferences
             // 
-            this.cbCheckConnectionReferences.AutoSize = true;
-            this.cbCheckConnectionReferences.Checked = true;
-            this.cbCheckConnectionReferences.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbCheckConnectionReferences.Location = new System.Drawing.Point(15, 212);
-            this.cbCheckConnectionReferences.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.cbCheckConnectionReferences.Name = "cbCheckConnectionReferences";
-            this.cbCheckConnectionReferences.Size = new System.Drawing.Size(252, 24);
-            this.cbCheckConnectionReferences.TabIndex = 28;
-            this.cbCheckConnectionReferences.Text = "Check Connection References";
-            this.cbCheckConnectionReferences.UseVisualStyleBackColor = true;
+            this.cbCheckConnection.AutoSize = true;
+            this.cbCheckConnection.Checked = true;
+            this.cbCheckConnection.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbCheckConnection.Location = new System.Drawing.Point(15, 212);
+            this.cbCheckConnection.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.cbCheckConnection.Name = "cbCheckConnections";
+            this.cbCheckConnection.Size = new System.Drawing.Size(252, 24);
+            this.cbCheckConnection.TabIndex = 28;
+            this.cbCheckConnection.Text = "Check Connections";
+            this.cbCheckConnection.UseVisualStyleBackColor = true;
             // 
             // cbCheckFlowOwners
             // 
@@ -484,7 +484,7 @@
         private System.Windows.Forms.Button btnExportToExcel;
         private System.Windows.Forms.ProgressBar pbMain;
         private XrmToolBox.Controls.TextBoxWithPlaceholder tbTargetUserEmail;
-        private System.Windows.Forms.CheckBox cbCheckConnectionReferences;
+        private System.Windows.Forms.CheckBox cbCheckConnection;
         private System.Windows.Forms.CheckBox cbCheckFlowOwners;
         private System.Windows.Forms.Label lblWarning;
         private System.Windows.Forms.TabControl tabControl1;

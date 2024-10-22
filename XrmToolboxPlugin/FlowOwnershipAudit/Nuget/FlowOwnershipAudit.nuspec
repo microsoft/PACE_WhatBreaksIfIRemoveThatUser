@@ -3,7 +3,7 @@
   <metadata>
     <title>Flow Ownership Audit</title>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>This tool enables the efficient tracking and management of Microsoft Flows and connection references owned by individual users.</description>
+    <description>This tool enables the efficient tracking and management of components owned by individual users.</description>
     <repository type="git" url="https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser">
     </repository>
     <projectUrl>https://github.com/microsoft/PACE_WhatBreaksIfIRemoveThatUser</projectUrl>

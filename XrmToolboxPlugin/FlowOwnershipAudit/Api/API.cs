@@ -10,6 +10,9 @@ using FlowOwnershipAudit.Model;
 using Parallel = System.Threading.Tasks.Parallel;
 using System.Text;
 using System.Collections.Generic;
+using System.Windows.Interop;
+using Newtonsoft.Json.Linq;
+using static ScintillaNET.Style;
 
 namespace FlowOwnershipAudit
 {
@@ -144,12 +147,12 @@ namespace FlowOwnershipAudit
             return environmentsList;
         }
 
-        public static void AddConnectionReferencesToEnvironment(string userId, Model.Environment targetEnvironment, Action<object> ProgressChanged)
+        public static void AddConnectionsToEnvironment(string userId, Model.Environment targetEnvironment, Action<object> ProgressChanged)
         {
             string powerAppsEndpoint = "https://api.powerapps.com";
             string apiVersion = "2016-11-01";
 
-            ConnectionReferencesList connectionReferencesList = new ConnectionReferencesList();
+            ConnectionList connectionList = new ConnectionList();
 
             var auth = AuthenticateAsync(AuthType.PowerApps).Result;
 
@@ -162,7 +165,7 @@ namespace FlowOwnershipAudit
                 if (response.IsSuccessStatusCode)
                 {
                     string responseContent = response.Content.ReadAsStringAsync().Result;
-                    connectionReferencesList = JsonConvert.DeserializeObject<ConnectionReferencesList>(responseContent);
+                    connectionList = JsonConvert.DeserializeObject<ConnectionList>(responseContent);
                 }
                 else
                 {
@@ -171,16 +174,16 @@ namespace FlowOwnershipAudit
             }
 
             //Report to UI
-            foreach (var connectionReference in connectionReferencesList.value)
+            foreach (var connection in connectionList.value)
             {
-                if (connectionReference.properties.createdBy.id == userId)
+                if (connection.properties.createdBy.id == userId)
                 {
-                    connectionReference.isOwnedByX = true;
+                    connection.isOwnedByX = true;
 
                     var returnObj = new
                     {
-                        ConnectionReferenceName = connectionReference.name,
-                        ConnectionReferenceId = connectionReference.name,
+                        ConnectionName = connection.name,
+                        ConnectionId = connection.name,
                         EnvironmentId = targetEnvironment.name,
                         EnvironmentName = targetEnvironment.properties.displayName,
                     };
@@ -190,7 +193,7 @@ namespace FlowOwnershipAudit
             }
 
             // attach flowlist to the current targetenvironment
-            targetEnvironment.connectionReferences = connectionReferencesList.value;
+            targetEnvironment.connections = connectionList.value;
         }
         #endregion
 
@@ -246,6 +249,7 @@ namespace FlowOwnershipAudit
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+
                 string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{targetEnvironment.name}/v2/flows?api-version={apiVersion}";
                 HttpResponseMessage response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
@@ -258,6 +262,17 @@ namespace FlowOwnershipAudit
                     // Handle the error here
                 }
             }
+
+            //Parallel.ForEach(
+            //    flowList.value,
+            //    new ParallelOptions { MaxDegreeOfParallelism = 20 },
+            //    flow => { GetFlowDetails(flow); }
+            //);
+
+            //foreach (var flow in flowList.value)
+            //{
+            //    GetFlowDetails(flow);
+            //}
 
             // attach flowlist to the current targetenvironment
             targetEnvironment.flows = flowList.value;
@@ -292,7 +307,7 @@ namespace FlowOwnershipAudit
             }
         }
 
-        public static void GetFlowDetails(Flow flow)
+        public static void GetFlowDetails(Flow flow, Action<object> ProgressChanged = null)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
@@ -302,12 +317,41 @@ namespace FlowOwnershipAudit
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+
                 string url = $"{flowEndpoint}/providers/Microsoft.ProcessSimple/scopes/admin/environments/{flow.properties.environment.name}/flows/{flow.name}?api-version={apiVersion}";
                 HttpResponseMessage response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
                 {
                     string responseContent = response.Content.ReadAsStringAsync().Result;
                     flow = JsonConvert.DeserializeObject<Flow>(responseContent);
+
+                    var flowDynamic = JsonConvert.DeserializeObject<dynamic>(responseContent);
+                    foreach (var test in flowDynamic.properties.connectionReferences.Children())
+                    {
+                        foreach (var item in test.Children())
+                        {
+                            ConnectionReference connectionReference = new ConnectionReference()
+                            {
+                                connectionName = item.connectionName,
+                                connectionReferenceLogicalName = item.connectionReferenceLogicalName,
+                                id = item.id,
+                                displayName = item.displayName,
+                                tier = item.tier
+                            };
+
+                            if (flow.properties.connectionReferences == null)
+                            {
+                                flow.properties.connectionReferences = new List<ConnectionReference>();
+                            }
+
+                            flow.properties.connectionReferences.Add(connectionReference);
+                        }
+                    }
+
+                    if (ProgressChanged != null)
+                    {
+                        ProgressChanged(flow);
+                    }
                 }
                 else
                 {
@@ -481,6 +525,53 @@ namespace FlowOwnershipAudit
                 throw;
             }
         }
+
+        /// <summary>
+        /// Sets the owner of a workflow in the Dataverse environment.
+        /// </summary>
+        /// <param name="connectionReferenceId">The ID of the workflow.</param>
+        /// <param name="targetOwnerId">The ID of the owner.</param>
+        /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
+        public static bool SetConnectionReferenceOwner(string environmentUrl, string connectionReferenceId, string targetOwnerId)
+        {
+            var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(environmentUrl);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+                var method = "PATCH";
+                var httpVerb = new HttpMethod(method);
+
+                var requestBody = new Dictionary<string, object>
+                        {
+                            { "ownerid@odata.bind", $"/systemusers({targetOwnerId})" }
+                        };
+
+                var jsonBody = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+                var httpRequestMessage =
+                    new HttpRequestMessage(httpVerb, $"/api/data/v9.1/connectionreferences({connectionReferenceId})")
+                    {
+                        Content = content
+                    };
+
+                var response = client.SendAsync(httpRequestMessage).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    // Owner set successfully
+                    return true;
+                }
+                else
+                {
+                    // Handle the error here
+                    Console.WriteLine($"Error setting owner: {response.ReasonPhrase}");
+                    return false;
+                }
+            }
+        }
+
         #endregion
     }
 }

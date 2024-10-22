@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -38,13 +39,13 @@ namespace FlowOwnershipAudit
                     _flowsQueryCompleted = value;
 
                     // raise event and inform that all queries have been completed if necessary﻿
-                    if (_flowsQueryCompleted && connectionRefsQueryCompleted)
+                    if (_flowsQueryCompleted && connectionsQueryCompleted)
                     {
                         EnvironmentQueriesCompleted?.Invoke(this, new EventArgs());
                     }
                 }
             }
-            public bool connectionRefsQueryCompleted﻿
+            public bool connectionsQueryCompleted
             {
                 get => _connectionRefsQueryCompleted;
                 set
@@ -52,7 +53,7 @@ namespace FlowOwnershipAudit
                     _connectionRefsQueryCompleted = value;
 
                     // raise event and inform that all queries have been completed if necessary﻿
-                    if (_flowsQueryCompleted && connectionRefsQueryCompleted)
+                    if (_flowsQueryCompleted && connectionsQueryCompleted)
                     {
                         EnvironmentQueriesCompleted?.Invoke(this, new EventArgs());
                     }
@@ -126,8 +127,8 @@ namespace FlowOwnershipAudit
                 // check if handler is present before triggering﻿
                 if (AllEnvironmentsQueriesCompleted != null)
                 {
-                    // check whether all environments in this collection have finished both flow and connection reference queries﻿
-                    if (this.All(x => x.Value.flowsQueryCompleted && x.Value.connectionRefsQueryCompleted))
+                    // check whether all environments in this collection have finished both flow and connection queries﻿
+                    if (this.All(x => x.Value.flowsQueryCompleted && x.Value.connectionsQueryCompleted))
                     {
                         AllEnvironmentsQueriesCompleted(this, new EventArgs());
                     }
@@ -338,12 +339,12 @@ namespace FlowOwnershipAudit
 
             var targetUser = tbTargetUserEmail.Text;
             bool checkFlowOwners = cbCheckFlowOwners.Checked;
-            bool checkConnectionReferences = cbCheckConnectionReferences.Checked;
+            bool checkConnections = cbCheckConnection.Checked;
 
             // disable controls﻿
             tbTargetUserEmail.Enabled = false;
             cbCheckFlowOwners.Enabled = false;
-            cbCheckConnectionReferences.Enabled = false;
+            cbCheckConnection.Enabled = false;
             btnStartQueries.Enabled = false;
             btnSelectEnvironments.Enabled = false;
 
@@ -355,13 +356,14 @@ namespace FlowOwnershipAudit
 
             LogInfo($"Will search the following for {targetUser}:" +
                 $" Flow Ownership: {(cbCheckFlowOwners.Checked ? "yes" : "no")}" +
-                $" Connection References: {(cbCheckConnectionReferences.Checked ? "yes" : "no")}" +
+                $" Connection: {(cbCheckConnection.Checked ? "yes" : "no")}" +
                 $" ...");
 
             LogInfo($"Will query {targetEnvironments.Count()} environments");
 
             List<EnvironmentTreeNodeElement> environmentTreeNodes = new List<EnvironmentTreeNodeElement>();
             List<DirectoryTreeNode> directoryTreeNodes = new List<DirectoryTreeNode>();
+            List<FlowTreeNodeElement> flowTreeNodes = new List<FlowTreeNodeElement>();
 
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
@@ -417,14 +419,31 @@ namespace FlowOwnershipAudit
                                 {
                                     Flow flow = flowObj as Flow;
 
-                                    new FlowTreeNodeElement(UpdateNode,
-                                                           parentNodeElement: flowDirectoryNode,
-                                                           flow: flow
-                                                           )
+                                    FlowTreeNodeElement flowTreeNodeElement = new FlowTreeNodeElement(UpdateNode,
+                                                               parentNodeElement: flowDirectoryNode,
+                                                               flow: flow
+                                                               )
                                     {
                                         MigrationStatus = MigrationStatus.NotMigratedYet
                                     };
+
+                                    //flowTreeNodes.Add(flowTreeNodeElement);
+
+                                    GetFlowDetails(flow,
+                                    ProgressChanged: (flowDetailsObj) =>
+                                    {
+                                        Flow flowDetails = (Flow)flowDetailsObj;
+
+                                        foreach (var connectionReference in flowDetails.properties.connectionReferences)
+                                        {
+                                            ConnectionReferenceTreeNodeElement connectionReferenceTreeNodeElement = new ConnectionReferenceTreeNodeElement(UpdateNode,
+                                            parentNodeElement: flowTreeNodeElement, //flowTreeNodes.Where(x => x.Flow.name == currentFlow.name).SingleOrDefault(),
+                                            connectionReferenceName: connectionReference.connectionReferenceLogicalName);
+
+                                        }
+                                    });
                                 });
+
                             currentTargetEnvironment.Value.flowsQueryCompleted = true;
 
                             ListViewItem Item = new ListViewItem(new string[]
@@ -439,41 +458,41 @@ namespace FlowOwnershipAudit
                             currentTargetEnvironment.Value.flowsQueryCompleted = true;
                         }
 
-                        if (checkConnectionReferences)
+                        if (checkConnections)
                         {
                             // create a directory node that holds the references to the connectionreferences so we know where in the UI to place them﻿
-                            var connectionReferencesDirectoryNode = new DirectoryTreeNode(UpdateNode, "Connection References", environmentNode);
-                            directoryTreeNodes.Add(connectionReferencesDirectoryNode);
+                            var connectionsDirectoryNode = new DirectoryTreeNode(UpdateNode, "Connection", environmentNode);
+                            directoryTreeNodes.Add(connectionsDirectoryNode);
 
-                            AddConnectionReferencesToEnvironment(
+                            AddConnectionsToEnvironment(
                                 userId: userid.ToString(),
                                 targetEnvironment: currentTargetEnvironment.Key,
-                                ProgressChanged: (ConnrectionReferenceObj) =>
+                                ProgressChanged: (ConnectionObj) =>
                                 {
-                                    dynamic connectionReferenceObj = ConnrectionReferenceObj;
-                                    string connectionReferenceName = connectionReferenceObj.ConnectionReferenceName;
-                                    string environmentId = connectionReferenceObj.EnvironmentId;
+                                    dynamic connectionObj = ConnectionObj;
+                                    string connectionName = connectionObj.ConnectionName;
+                                    string environmentId = connectionObj.EnvironmentId;
 
                                     // create treenodeelement﻿
-                                    new ConnectionReferenceTreeNodeElement(UpdateNode,
-                                                           parentNodeElement: connectionReferencesDirectoryNode,
-                                                           connectionReferenceName: connectionReferenceName,
-                                                           environmentId: environmentId﻿
-                                                           );
+                                    new ConnectionTreeNodeElement(UpdateNode,
+                                                               parentNodeElement: connectionsDirectoryNode,
+                                                               connectionName: connectionName,
+                                                               environmentId: environmentId﻿
+                                                               );
                                 });
 
-                            currentTargetEnvironment.Value.connectionRefsQueryCompleted = true;
+                            currentTargetEnvironment.Value.connectionsQueryCompleted = true;
 
                             ListViewItem Item = new ListViewItem(new string[]
-                            {"Connection References",
-                            currentTargetEnvironment.Key.connectionReferences.Where(x=> x.isOwnedByX).Count().ToString()});
+                            {"Connections",
+                            currentTargetEnvironment.Key.connections.Where(x=> x.isOwnedByX).Count().ToString()});
                             Item.Group = group;
                             UpdateListView(Item);
                         }
                         else
                         {
-                            // mark as completed if we are not checking for connection references
-                            currentTargetEnvironment.Value.connectionRefsQueryCompleted = true;
+                            // mark as completed if we are not checking for connections
+                            currentTargetEnvironment.Value.connectionsQueryCompleted = true;
                         }
                     });
                 arg.Result = parallelResult;
@@ -598,7 +617,7 @@ namespace FlowOwnershipAudit
                     LogInfo($"Reassigning flows to {f.TargetOwner}...");
 
                     // start the reassignment process in the background
-                    ReassignCheckedFlows(f.TargetOwner, GetSelectedNodes());
+                    ReassignCheckedObjects(f.TargetOwner, GetSelectedNodes());
                 }
                 else
                 {
@@ -612,7 +631,7 @@ namespace FlowOwnershipAudit
         /// </summary>
         /// <param name="targetOwnerId"></param>
         /// <exception cref="Exception"></exception>
-        private void ReassignCheckedFlows(string targetOwner, IList<TreeNode> selectedNodes)
+        private void ReassignCheckedObjects(string targetOwner, IList<TreeNode> selectedNodes)
         {
             // start progressbar
             pbMain.Style = ProgressBarStyle.Marquee;
@@ -638,10 +657,9 @@ namespace FlowOwnershipAudit
                         // Get target systemuserid from dataverse
                         string targetOwnerId = GetSystemUserIdFromDataverse(environmentUrl, targetOwner);
 
-                        LogInfo("Reassigning flows in " + environmentUrl);
-
+                        //Reassign Flows
                         // get flowTreeNodeElement from Tag
-                        foreach (var tag in group.Select(x => x.Tag as FlowTreeNodeElement))
+                        foreach (var tag in group.Where(x => x.Tag.GetType() == typeof(FlowTreeNodeElement)).Select(x => x.Tag as FlowTreeNodeElement))
                         {
                             // Get the flow object from the node
                             Flow flow = tag.Flow;
@@ -685,6 +703,40 @@ namespace FlowOwnershipAudit
                             });
                             tag.MigrationStatus = MigrationStatus.MigrationSuccessful;
                         }
+
+                        //Reassign Connection References
+                        // get flowTreeNodeElement from Tag
+                        //foreach (var tag in group.Where(x => x.Tag.GetType() == typeof(ConnectionTreeNodeElement)).Select(x => x.Tag as ConnectionTreeNodeElement))
+                        //{
+                        //    // Get the flow object from the node
+                        //    Connection connection = tag.;
+
+                        //    // Set the owner of the flow to the target user
+                        //    if (!SetWorkflowOwner(environmentUrl, connectionReference.properties.createdBy.id, targetOwnerId))
+                        //    {
+                        //        // means something went wrong and we need to abort the current flow reassignment
+                        //        tag.updateNodeUi(new NodeUpdateObject(tag)
+                        //        {
+                        //            UpdateReason = UpdateReason.MigrationFailed,
+                        //            NodeText = "Unable to reassign this connection reference to the target user."
+                        //        });
+                        //        tag.MigrationStatus = MigrationStatus.MigrationFailed;
+                        //        return;
+                        //    }
+
+                        //    // Update flow object
+                        //    //GetFlowDetails(flow);
+                        //    //GetFlowPermissons(flow);
+
+                        //    tag.updateNodeUi(new NodeUpdateObject(tag)
+                        //    {
+                        //        UpdateReason = UpdateReason.MigrationSucceeded,
+                        //        NodeText = "Migration successful"
+                        //    });
+                        //    tag.MigrationStatus = MigrationStatus.MigrationSuccessful;
+                        //}
+
+                        LogInfo("Reassigning flows in " + environmentUrl);
                     });
                 }
                 catch (Exception ex)
@@ -920,13 +972,13 @@ namespace FlowOwnershipAudit
                     // set the sidepanel text
                     rtbSidepanel.Text = sidepanelText;
                 }
-                else if (e.Node.Tag is ConnectionReferenceTreeNodeElement)
+                else if (e.Node.Tag is ConnectionTreeNodeElement)
                 {
-                    var connectionReferenceNode = e.Node.Tag as ConnectionReferenceTreeNodeElement;
+                    var connectionNode = e.Node.Tag as ConnectionTreeNodeElement;
 
                     // get the connection reference details and display in the sidepanel
-                    var sidepanelText = $"Connection Reference Name: {connectionReferenceNode.ConnectionReferenceName}{Environment.NewLine}" +
-                        $"Environment Id: {connectionReferenceNode.EnvironmentId}{Environment.NewLine}";
+                    var sidepanelText = $"Connection Name: {connectionNode.ConnectionName}{Environment.NewLine}" +
+                        $"Environment Id: {connectionNode.EnvironmentId}{Environment.NewLine}";
 
                     // set the sidepanel text
                     rtbSidepanel.Text = sidepanelText;
@@ -941,29 +993,29 @@ namespace FlowOwnershipAudit
             if (e.Node.Bounds.Height == 0)
                 return;
 
-            var nodeTag = e.Node.Tag;
+            var nodeTag = e.Node.Tag as TreeNodeElementBase;
 
             if (nodeTag != null) // this node has a tag
             {
-                // this is a connection reference node or it is a directory tree node that belongs to a connection reference branch - those should never have a checkbox because we dont migrate them now
-                if ((nodeTag.GetType() == typeof(ConnectionReferenceTreeNodeElement)
+                //this is a connection node or it is a directory tree node that belongs to a connection reference branch - those should never have a checkbox because we dont migrate them now
+                if ((nodeTag.GetType() == typeof(ConnectionTreeNodeElement)
+                    || (nodeTag.GetType() == typeof(ConnectionReferenceTreeNodeElement)
                     || (nodeTag.GetType() == typeof(DirectoryTreeNode) && e.Node.Text.IndexOf("Connection References") != -1)))
                 {
                     e.Node.HideCheckBox();
                 }
                 else
                 {
-                    // this is any other node that has a tag - use the tag content to determine whether a checkbox should be drawn or not
-                    var flowNodeTag = e.Node.Tag as FlowTreeNodeElement;
-                    if (flowNodeTag != null)
+                    //this is any other node that has a tag - use the tag content to determine whether a checkbox should be drawn or not
+                    //var nodeTag = e.Node.Tag as TreeNodeElementBase;
+                    if (nodeTag != null)
                     {
-
                         // the only valid reason for us to show a checkbox is because an item has not been migrated yet
-                        switch (flowNodeTag.MigrationStatus)
+                        switch (nodeTag.MigrationStatus)
                         {
                             case MigrationStatus.MigrationFailed:
                             case MigrationStatus.MigrationSuccessful:
-                                Debug.WriteLine($"{DateTime.Now} Hiding checkbox for {e.Node.Text} because migration state of this item is: {flowNodeTag.MigrationStatus}");
+                                Debug.WriteLine($"{DateTime.Now} Hiding checkbox for {e.Node.Text} because migration state of this item is: {nodeTag.MigrationStatus}");
                                 e.Node.HideCheckBox();
                                 break;
                             case MigrationStatus.NotMigratedYet:
