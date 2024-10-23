@@ -368,15 +368,15 @@ namespace FlowOwnershipAudit
             BackgroundWorker bgw = new BackgroundWorker();
             bgw.DoWork += (obj, arg) =>
             {
-                Guid userid;
+                Guid userIdInGraph;
 
                 // get the user id from the graph api. This should be the same for all environments so we dont need to do it in the parallel loop
                 try
                 {
-                    if (!Guid.TryParse(targetUser, out userid))
+                    if (!Guid.TryParse(targetUser, out userIdInGraph))
                     {
-                        var userTask = GetUserIdFromGraph(targetUser);
-                        userid = Guid.Parse(userTask.Result);
+                        var userInGraphTask = GetUserIdFromGraph(targetUser);
+                        userIdInGraph = Guid.Parse(userInGraphTask.Result);
                     }
                 }
                 catch (Exception ex)
@@ -394,6 +394,8 @@ namespace FlowOwnershipAudit
                     parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 10 },
                     body: currentTargetEnvironment =>
                     {
+                        var userInDataverseTask = GetSystemUserIdFromDataverse(currentTargetEnvironment.Key.properties.linkedEnvironmentMetadata.instanceUrl, targetUser);
+
                         // this is the foreach that is running in parallel for each environment﻿
                         // create environment node for the current environment﻿
                         ListViewGroup group = new ListViewGroup(currentTargetEnvironment.Key.properties.displayName, HorizontalAlignment.Left);
@@ -401,7 +403,7 @@ namespace FlowOwnershipAudit
                         environmentTreeNodes.Add(environmentNode);
 
                         LogInfo($"Processing environment {currentTargetEnvironment.Key.name}");
-                        LogInfo($"Looking for {targetUser} with id {userid} in {currentTargetEnvironment.Key.name}");
+                        LogInfo($"Looking for {targetUser} with id {userIdInGraph} in {currentTargetEnvironment.Key.name}");
 
                         if (checkFlowOwners)
                         {
@@ -413,35 +415,36 @@ namespace FlowOwnershipAudit
                                 targetEnvironment: currentTargetEnvironment.Key);
 
                             AddFlowPermissionsToEnvironment(
-                                userId: userid.ToString(),
+                                userId: userIdInGraph.ToString(),
                                 targetEnvironment: currentTargetEnvironment.Key,
                                 ProgressChanged: (flowObj) =>
                                 {
-                                    //Flow flow = flowObj as Flow;
+                                    Flow flow = flowObj as Flow;
 
-                                    FlowTreeNodeElement flowTreeNodeElement = new FlowTreeNodeElement(UpdateNode,
-                                                               parentNodeElement: flowDirectoryNode,
-                                                               flow: (Flow)flowObj
-                                                               )
+                                    if (flow.isOwnedByX)
                                     {
-                                        MigrationStatus = MigrationStatus.NotMigratedYet
-                                    };
-
-                                    //flowTreeNodes.Add(flowTreeNodeElement);
-
-                                    GetFlowDetails(currentTargetEnvironment.Key, (Flow)flowObj,
-                                    ProgressChanged: (flowDetailsObj) =>
-                                    {
-                                        Flow flowDetails = (Flow)flowDetailsObj;
-
-                                        foreach (var connectionReference in flowDetails.properties.connectionReferences)
+                                        FlowTreeNodeElement flowTreeNodeElement = new FlowTreeNodeElement(UpdateNode,
+                                                                   parentNodeElement: flowDirectoryNode,
+                                                                   flow: (Flow)flowObj
+                                                                   )
                                         {
-                                            ConnectionReferenceTreeNodeElement connectionReferenceTreeNodeElement = new ConnectionReferenceTreeNodeElement(UpdateNode,
-                                            parentNodeElement: flowTreeNodeElement, //flowTreeNodes.Where(x => x.Flow.name == currentFlow.name).SingleOrDefault(),
-                                            connectionReferenceName: connectionReference.connectionReferenceLogicalName);
+                                            MigrationStatus = MigrationStatus.NotMigratedYet
+                                        };
 
-                                        }
-                                    });
+                                        GetFlowDetails(userInDataverseTask, currentTargetEnvironment.Key, (Flow)flowObj,
+                                        ProgressChanged: (flowDetailsObj) =>
+                                        {
+                                            Flow flowDetails = (Flow)flowDetailsObj;
+
+                                            foreach (var connectionReference in flowDetails.properties.connectionReferences.Where(x => x.isOwnedByX))
+                                            {
+                                                ConnectionReferenceTreeNodeElement connectionReferenceTreeNodeElement = new ConnectionReferenceTreeNodeElement(UpdateNode,
+                                                parentNodeElement: flowTreeNodeElement, //flowTreeNodes.Where(x => x.Flow.name == currentFlow.name).SingleOrDefault(),
+                                                connectionReferenceName: connectionReference.connectionReferenceLogicalName);
+
+                                            }
+                                        });
+                                    }
                                 });
 
                             currentTargetEnvironment.Value.flowsQueryCompleted = true;
@@ -460,6 +463,7 @@ namespace FlowOwnershipAudit
                             currentTargetEnvironment.Key.flows
                             .Where(x=>x.properties != null && x.properties.connectionReferences != null)
                             .SelectMany(flow => flow.properties.connectionReferences)
+                            .Where(connectionReference => connectionReference.isOwnedByX)
                             .Select(connectionReference => connectionReference.id)
                             .Distinct()
                             .Count()
@@ -481,7 +485,7 @@ namespace FlowOwnershipAudit
                             directoryTreeNodes.Add(connectionsDirectoryNode);
 
                             AddConnectionsToEnvironment(
-                                userId: userid.ToString(),
+                                userId: userIdInGraph.ToString(),
                                 targetEnvironment: currentTargetEnvironment.Key,
                                 ProgressChanged: (ConnectionObj) =>
                                 {
@@ -568,7 +572,7 @@ namespace FlowOwnershipAudit
 
                 using (ExcelExporter exporter = new ExcelExporter(targetEnvironments))
                 {
-                    exporter.ExportToExcel(saveFileDialog1.FileName);
+                    exporter.ExportToExcel(saveFileDialog1.FileName, cbExportAllData.Checked, cbExportMultiSheet.Checked);
                 }
             }
         }
@@ -633,7 +637,7 @@ namespace FlowOwnershipAudit
                     LogInfo($"Reassigning flows to {f.TargetOwner}...");
 
                     // start the reassignment process in the background
-                    ReassignCheckedObjects(f.TargetOwner, GetSelectedNodes());
+                    ReassignCheckedObjects(originalOwner, f.TargetOwner, GetSelectedNodes());
                 }
                 else
                 {
@@ -647,7 +651,7 @@ namespace FlowOwnershipAudit
         /// </summary>
         /// <param name="targetOwnerId"></param>
         /// <exception cref="Exception"></exception>
-        private void ReassignCheckedObjects(string targetOwner, IList<TreeNode> selectedNodes)
+        private void ReassignCheckedObjects(string originalOwner, string targetOwner, IList<TreeNode> selectedNodes)
         {
             // start progressbar
             pbMain.Style = ProgressBarStyle.Marquee;
@@ -681,9 +685,9 @@ namespace FlowOwnershipAudit
                             Flow flow = tag.Flow;
 
                             #region Reassign Connection References
-                            foreach (ConnectionReference connectionReference in flow.properties.connectionReferences)
+                            foreach (ConnectionReference connectionReference in flow.properties.connectionReferences.Where(connectionReference=>connectionReference.isOwnedByX))
                             {
-                                SetConnectionReferenceOwner(environmentUrl, connectionReference.connectionReferenceLogicalName, targetOwnerId);
+                                SetConnectionReferenceOwner(environmentUrl, connectionReference, /*originalOwner,*/ targetOwner);
                             }
                             #endregion
 

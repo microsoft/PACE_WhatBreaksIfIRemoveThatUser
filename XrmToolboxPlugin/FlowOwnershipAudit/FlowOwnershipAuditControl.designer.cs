@@ -41,6 +41,10 @@
             this.btnReassign = new System.Windows.Forms.Button();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.pnlParameters = new System.Windows.Forms.Panel();
+            this.cbExportSingleSheet = new System.Windows.Forms.CheckBox();
+            this.cbExportMultiSheet = new System.Windows.Forms.CheckBox();
+            this.cbExportFilteredData = new System.Windows.Forms.CheckBox();
+            this.cbExportAllData = new System.Windows.Forms.CheckBox();
             this.tbSelectedEnvironments = new System.Windows.Forms.TextBox();
             this.lblSelectedEnvironments_description = new System.Windows.Forms.Label();
             this.btnSelectEnvironments = new System.Windows.Forms.Button();
@@ -59,10 +63,6 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lbDebugOutput = new System.Windows.Forms.ListBox();
             this.pnlMain = new System.Windows.Forms.Panel();
-            this.cbExportAllData = new System.Windows.Forms.CheckBox();
-            this.cbExportFilteredData = new System.Windows.Forms.CheckBox();
-            this.cbExportMultiSheet = new System.Windows.Forms.CheckBox();
-            this.cbExportSingleSheet = new System.Windows.Forms.CheckBox();
             this.toolStripMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -91,7 +91,7 @@
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
-            this.toolStripMenu.Size = new System.Drawing.Size(2142, 34);
+            this.toolStripMenu.Size = new System.Drawing.Size(2142, 38);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
@@ -99,14 +99,14 @@
             // 
             this.tsbClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.tsbClose.Name = "tsbClose";
-            this.tsbClose.Size = new System.Drawing.Size(59, 29);
+            this.tsbClose.Size = new System.Drawing.Size(59, 33);
             this.tsbClose.Text = "Close";
             this.tsbClose.Click += new System.EventHandler(this.tsbClose_Click);
             // 
             // tssSeparator1
             // 
             this.tssSeparator1.Name = "tssSeparator1";
-            this.tssSeparator1.Size = new System.Drawing.Size(6, 34);
+            this.tssSeparator1.Size = new System.Drawing.Size(6, 38);
             // 
             // tsbResetTool
             // 
@@ -114,7 +114,7 @@
             this.tsbResetTool.Image = ((System.Drawing.Image)(resources.GetObject("tsbResetTool.Image")));
             this.tsbResetTool.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbResetTool.Name = "tsbResetTool";
-            this.tsbResetTool.Size = new System.Drawing.Size(107, 29);
+            this.tsbResetTool.Size = new System.Drawing.Size(107, 33);
             this.tsbResetTool.Text = "Restart tool";
             this.tsbResetTool.ToolTipText = "Click to reset the plugin to the initial state:\r\nRemoves the selected environment" +
     "s, target user, log output and all components that have been loaded.";
@@ -125,7 +125,7 @@
             this.tsbHelp.Image = ((System.Drawing.Image)(resources.GetObject("tsbHelp.Image")));
             this.tsbHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbHelp.Name = "tsbHelp";
-            this.tsbHelp.Size = new System.Drawing.Size(77, 29);
+            this.tsbHelp.Size = new System.Drawing.Size(77, 33);
             this.tsbHelp.Text = "Help";
             this.tsbHelp.Click += new System.EventHandler(this.tsbHelp_Click);
             // 
@@ -182,7 +182,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(2134, 1127);
+            this.splitContainer1.Size = new System.Drawing.Size(2134, 1123);
             this.splitContainer1.SplitterDistance = 547;
             this.splitContainer1.TabIndex = 16;
             // 
@@ -208,8 +208,58 @@
             this.pnlParameters.Location = new System.Drawing.Point(0, 0);
             this.pnlParameters.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlParameters.Name = "pnlParameters";
-            this.pnlParameters.Size = new System.Drawing.Size(547, 1127);
+            this.pnlParameters.Size = new System.Drawing.Size(547, 1123);
             this.pnlParameters.TabIndex = 13;
+            // 
+            // cbExportSingleSheet
+            // 
+            this.cbExportSingleSheet.AutoSize = true;
+            this.cbExportSingleSheet.Location = new System.Drawing.Point(183, 381);
+            this.cbExportSingleSheet.Name = "cbExportSingleSheet";
+            this.cbExportSingleSheet.Size = new System.Drawing.Size(168, 24);
+            this.cbExportSingleSheet.TabIndex = 39;
+            this.cbExportSingleSheet.Text = "Single Excel Sheet";
+            this.cbExportSingleSheet.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.cbExportSingleSheet.UseVisualStyleBackColor = true;
+            this.cbExportSingleSheet.Click += new System.EventHandler(this.cbExportSingleSheet_Click);
+            // 
+            // cbExportMultiSheet
+            // 
+            this.cbExportMultiSheet.AutoSize = true;
+            this.cbExportMultiSheet.Checked = true;
+            this.cbExportMultiSheet.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbExportMultiSheet.Location = new System.Drawing.Point(183, 425);
+            this.cbExportMultiSheet.Name = "cbExportMultiSheet";
+            this.cbExportMultiSheet.Size = new System.Drawing.Size(178, 24);
+            this.cbExportMultiSheet.TabIndex = 38;
+            this.cbExportMultiSheet.Text = "Multiple Excel Sheet";
+            this.cbExportMultiSheet.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.cbExportMultiSheet.UseVisualStyleBackColor = true;
+            this.cbExportMultiSheet.Click += new System.EventHandler(this.cbExportMultiSheet_Click);
+            // 
+            // cbExportFilteredData
+            // 
+            this.cbExportFilteredData.AutoSize = true;
+            this.cbExportFilteredData.Location = new System.Drawing.Point(15, 425);
+            this.cbExportFilteredData.Name = "cbExportFilteredData";
+            this.cbExportFilteredData.Size = new System.Drawing.Size(127, 24);
+            this.cbExportFilteredData.TabIndex = 37;
+            this.cbExportFilteredData.Text = "Filtered Data";
+            this.cbExportFilteredData.UseVisualStyleBackColor = true;
+            this.cbExportFilteredData.Click += new System.EventHandler(this.cbExportFilteredData_Click);
+            // 
+            // cbExportAllData
+            // 
+            this.cbExportAllData.AutoSize = true;
+            this.cbExportAllData.Checked = true;
+            this.cbExportAllData.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbExportAllData.Location = new System.Drawing.Point(15, 381);
+            this.cbExportAllData.Name = "cbExportAllData";
+            this.cbExportAllData.Size = new System.Drawing.Size(91, 24);
+            this.cbExportAllData.TabIndex = 36;
+            this.cbExportAllData.Text = "All Data";
+            this.cbExportAllData.UseVisualStyleBackColor = true;
+            this.cbExportAllData.Click += new System.EventHandler(this.cbExportAllData_Click);
             // 
             // tbSelectedEnvironments
             // 
@@ -312,7 +362,7 @@
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1583, 1127);
+            this.tabControl1.Size = new System.Drawing.Size(1583, 1123);
             this.tabControl1.TabIndex = 16;
             this.tabControl1.TabStop = false;
             // 
@@ -323,7 +373,7 @@
             this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPage1.Size = new System.Drawing.Size(1575, 1094);
+            this.tabPage1.Size = new System.Drawing.Size(1575, 1090);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Overview";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -341,7 +391,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.tableLayoutPanel1);
-            this.splitContainer2.Size = new System.Drawing.Size(1567, 1084);
+            this.splitContainer2.Size = new System.Drawing.Size(1567, 1080);
             this.splitContainer2.SplitterDistance = 674;
             this.splitContainer2.TabIndex = 3;
             // 
@@ -353,7 +403,7 @@
             this.tvTreeview.Margin = new System.Windows.Forms.Padding(0);
             this.tvTreeview.Name = "tvTreeview";
             this.tvTreeview.ShowNodeToolTips = true;
-            this.tvTreeview.Size = new System.Drawing.Size(674, 1084);
+            this.tvTreeview.Size = new System.Drawing.Size(674, 1080);
             this.tvTreeview.TabIndex = 1;
             // 
             // tableLayoutPanel1
@@ -368,7 +418,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 400F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(889, 1084);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(889, 1080);
             this.tableLayoutPanel1.TabIndex = 6;
             // 
             // lvComponentCount
@@ -434,62 +484,12 @@
             this.pnlMain.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.pnlMain.Controls.Add(this.splitContainer1);
             this.pnlMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlMain.Location = new System.Drawing.Point(0, 34);
+            this.pnlMain.Location = new System.Drawing.Point(0, 38);
             this.pnlMain.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlMain.Name = "pnlMain";
             this.pnlMain.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.pnlMain.Size = new System.Drawing.Size(2142, 1137);
+            this.pnlMain.Size = new System.Drawing.Size(2142, 1133);
             this.pnlMain.TabIndex = 14;
-            // 
-            // cbExportAllData
-            // 
-            this.cbExportAllData.AutoSize = true;
-            this.cbExportAllData.Checked = true;
-            this.cbExportAllData.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbExportAllData.Location = new System.Drawing.Point(15, 381);
-            this.cbExportAllData.Name = "cbExportAllData";
-            this.cbExportAllData.Size = new System.Drawing.Size(91, 24);
-            this.cbExportAllData.TabIndex = 36;
-            this.cbExportAllData.Text = "All Data";
-            this.cbExportAllData.UseVisualStyleBackColor = true;
-            this.cbExportAllData.Click += new System.EventHandler(this.cbExportAllData_Click);
-            // 
-            // cbExportFilteredData
-            // 
-            this.cbExportFilteredData.AutoSize = true;
-            this.cbExportFilteredData.Location = new System.Drawing.Point(15, 425);
-            this.cbExportFilteredData.Name = "cbExportFilteredData";
-            this.cbExportFilteredData.Size = new System.Drawing.Size(127, 24);
-            this.cbExportFilteredData.TabIndex = 37;
-            this.cbExportFilteredData.Text = "Filtered Data";
-            this.cbExportFilteredData.UseVisualStyleBackColor = true;
-            this.cbExportFilteredData.Click += new System.EventHandler(this.cbExportFilteredData_Click);
-            // 
-            // cbExportMultiSheet
-            // 
-            this.cbExportMultiSheet.AutoSize = true;
-            this.cbExportMultiSheet.Checked = true;
-            this.cbExportMultiSheet.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbExportMultiSheet.Location = new System.Drawing.Point(183, 425);
-            this.cbExportMultiSheet.Name = "cbExportMultiSheet";
-            this.cbExportMultiSheet.Size = new System.Drawing.Size(178, 24);
-            this.cbExportMultiSheet.TabIndex = 38;
-            this.cbExportMultiSheet.Text = "Multiple Excel Sheet";
-            this.cbExportMultiSheet.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.cbExportMultiSheet.UseVisualStyleBackColor = true;
-            this.cbExportMultiSheet.Click += new System.EventHandler(this.cbExportMultiSheet_Click);
-            // 
-            // cbExportSingleSheet
-            // 
-            this.cbExportSingleSheet.AutoSize = true;
-            this.cbExportSingleSheet.Location = new System.Drawing.Point(183, 381);
-            this.cbExportSingleSheet.Name = "cbExportSingleSheet";
-            this.cbExportSingleSheet.Size = new System.Drawing.Size(168, 24);
-            this.cbExportSingleSheet.TabIndex = 39;
-            this.cbExportSingleSheet.Text = "Single Excel Sheet";
-            this.cbExportSingleSheet.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.cbExportSingleSheet.UseVisualStyleBackColor = true;
-            this.cbExportSingleSheet.Click += new System.EventHandler(this.cbExportSingleSheet_Click);
             // 
             // FlowOwnershipAuditControl
             // 

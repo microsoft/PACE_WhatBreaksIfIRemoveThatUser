@@ -60,5 +60,7 @@ namespace FlowOwnershipAudit.Model
         public string id { get; set; }
         public string displayName { get; set; }
         public string tier { get; set; }
+        //public string ownerid { get; set; }
+        public bool isOwnedByX { get; set; }
     }
 }

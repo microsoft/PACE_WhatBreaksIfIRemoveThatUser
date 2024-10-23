@@ -297,7 +297,7 @@ namespace FlowOwnershipAudit
             }
         }
 
-        public static void GetFlowDetails(Model.Environment targetEnvironment, Flow flow, Action<object> ProgressChanged = null)
+        public static void GetFlowDetails(string userId, Model.Environment targetEnvironment, Flow flow, Action<object> ProgressChanged = null)
         {
             string flowEndpoint = "https://api.flow.microsoft.com";
             string apiVersion = "2016-11-01";
@@ -317,7 +317,6 @@ namespace FlowOwnershipAudit
                 {
 
                     string responseContent = response.Content.ReadAsStringAsync().Result;
-                    //flow = JsonConvert.DeserializeObject<Flow>(responseContent);
 
                     var flowDynamic = JsonConvert.DeserializeObject<dynamic>(responseContent);
                     foreach (var connectionReferences in flowDynamic.properties.connectionReferences.Children())
@@ -330,7 +329,9 @@ namespace FlowOwnershipAudit
                                 connectionReferenceLogicalName = item.connectionReferenceLogicalName,
                                 id = item.id,
                                 displayName = item.displayName,
-                                tier = item.tier
+                                tier = item.tier,
+                                //ownerid = GetConnectionReferenceOwner(targetEnvironment.properties.linkedEnvironmentMetadata.instanceUrl, item.connectionName.ToString()),
+                                isOwnedByX = GetConnectionReferenceOwner(targetEnvironment.properties.linkedEnvironmentMetadata.instanceUrl, item.connectionName.ToString()) == userId
                             };
 
                             if (flowToUpdate.properties.connectionReferences == null)
@@ -526,30 +527,57 @@ namespace FlowOwnershipAudit
         /// <param name="connectionReferenceId">The ID of the workflow.</param>
         /// <param name="targetOwnerId">The ID of the owner.</param>
         /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
-        public static bool SetConnectionReferenceOwner(string environmentUrl, string connectionReferenceLogicalName, string targetOwnerId)
+        public static object GetConnectionReferenceOwner(string environmentUrl, string connectionId)
+        {
+            try
+            {
+                var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
+
+                using (HttpClient client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri(environmentUrl);
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+
+                    //Get Connection Reference from Dataverse based on the connectionreferencelogicalname
+                    dynamic connectionReference = new Object();
+                    var url = $"/api/data/v9.1/connectionreferences?$filter=connectionid eq '{connectionId}'";
+                    HttpResponseMessage response = client.GetAsync(url).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseContent = response.Content.ReadAsStringAsync().Result;
+                        dynamic connectionReferences = JsonConvert.DeserializeObject(responseContent);
+                        if (connectionReferences.value.Count > 0)
+                        {
+                            connectionReference = connectionReferences.value[0];
+                            return connectionReference._owninguser_value;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var error = ex.Message;
+            }
+            
+            return "";
+        }
+
+        /// <summary>
+        /// Sets the owner of a workflow in the Dataverse environment.
+        /// </summary>
+        /// <param name="connectionReferenceId">The ID of the workflow.</param>
+        /// <param name="targetOwnerId">The ID of the owner.</param>
+        /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
+        public static bool SetConnectionReferenceOwner(string environmentUrl, ConnectionReference connectionReference,/* string connectionReferenceId, string originalOwner,*/ string targetOwnerId)
         {
             var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
 
+            //string ownerid = GetSystemUserIdFromDataverse(environmentUrl, originalOwner);
+
             using (HttpClient client = new HttpClient())
             {
-                client.BaseAddress = new Uri(environmentUrl);
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-
-                //Get Connection Reference from Dataverse based on the connectionreferencelogicalname
-                dynamic connectionReference = new Object();
-                var url = $"/api/data/v9.1/connectionreferences?$filter=connectionreferencelogicalname eq '{connectionReferenceLogicalName}'";
-                HttpResponseMessage response = client.GetAsync(url).Result;
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseContent = response.Content.ReadAsStringAsync().Result;
-                    dynamic connectionReferences = JsonConvert.DeserializeObject(responseContent);
-                    if (connectionReferences.value.Count > 0)
-                    {
-                        connectionReference = connectionReferences.value[0];
-                    }
-                }
-
-                if (connectionReference._owninguser_value != targetOwnerId)
+                //dynamic connectionReferenceDetails = GetConnectionReferenceOwner(environmentUrl, connectionReferenceLogicalName);
+                if (connectionReference.isOwnedByX)
                 {
                     string apiUrl = $"{environmentUrl}/api/data/v9.1/Assign";
 
@@ -558,7 +586,8 @@ namespace FlowOwnershipAudit
                     {
                         Target = new Dictionary<string, object>
                         {
-                            { "connectionreferenceid", connectionReference.connectionreferenceid },
+                            //{ "connectionreferenceid", connectionReference.connectionreferenceid },
+                            { "connectionreferenceid", connectionReference.id },
                             { "@odata.type", "Microsoft.Dynamics.CRM.connectionreference" }
                         },
                         Assignee = new Dictionary<string, object>
@@ -568,7 +597,7 @@ namespace FlowOwnershipAudit
                         }
                     };
                     var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(assignRequest), Encoding.UTF8, "application/json");
-                    response = client.PostAsync(apiUrl, content).Result;
+                    var response = client.PostAsync(apiUrl, content).Result;
 
                     if (response.IsSuccessStatusCode)
                     {
