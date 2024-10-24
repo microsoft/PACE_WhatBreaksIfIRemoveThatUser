@@ -323,15 +323,15 @@ namespace FlowOwnershipAudit
                     {
                         foreach (var item in connectionReferences.Children())
                         {
+                            dynamic connectionReferenceFromDataverse = GetConnectionReferenceFromDataverse(targetEnvironment.properties.linkedEnvironmentMetadata.instanceUrl, item.connectionName.ToString());
                             ConnectionReference connectionReference = new ConnectionReference()
                             {
                                 connectionName = item.connectionName,
                                 connectionReferenceLogicalName = item.connectionReferenceLogicalName,
-                                id = item.id,
                                 displayName = item.displayName,
                                 tier = item.tier,
-                                //ownerid = GetConnectionReferenceOwner(targetEnvironment.properties.linkedEnvironmentMetadata.instanceUrl, item.connectionName.ToString()),
-                                isOwnedByX = GetConnectionReferenceOwner(targetEnvironment.properties.linkedEnvironmentMetadata.instanceUrl, item.connectionName.ToString()) == userId
+                                isOwnedByX = connectionReferenceFromDataverse._owninguser_value == userId,
+                                connectionReferenceId = connectionReferenceFromDataverse.connectionreferenceid,
                             };
 
                             if (flowToUpdate.properties.connectionReferences == null)
@@ -527,7 +527,7 @@ namespace FlowOwnershipAudit
         /// <param name="connectionReferenceId">The ID of the workflow.</param>
         /// <param name="targetOwnerId">The ID of the owner.</param>
         /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
-        public static object GetConnectionReferenceOwner(string environmentUrl, string connectionId)
+        public static object GetConnectionReferenceFromDataverse(string environmentUrl, string connectionId)
         {
             try
             {
@@ -549,7 +549,7 @@ namespace FlowOwnershipAudit
                         if (connectionReferences.value.Count > 0)
                         {
                             connectionReference = connectionReferences.value[0];
-                            return connectionReference._owninguser_value;
+                            return connectionReference;
                         }
                     }
                 }
@@ -568,14 +568,17 @@ namespace FlowOwnershipAudit
         /// <param name="connectionReferenceId">The ID of the workflow.</param>
         /// <param name="targetOwnerId">The ID of the owner.</param>
         /// <param name="environmentUrl">The URL of the Dataverse environment.</param>
-        public static bool SetConnectionReferenceOwner(string environmentUrl, ConnectionReference connectionReference,/* string connectionReferenceId, string originalOwner,*/ string targetOwnerId)
+        public static bool SetConnectionReferenceOwner(string environmentUrl, ConnectionReference connectionReference, string targetOwner)
         {
             var auth = AuthenticateAsync(AuthType.Dataverse, environmentUrl).Result;
 
-            //string ownerid = GetSystemUserIdFromDataverse(environmentUrl, originalOwner);
+            string targetOwnerId = GetSystemUserIdFromDataverse(environmentUrl, targetOwner);
 
             using (HttpClient client = new HttpClient())
             {
+                client.BaseAddress = new Uri(environmentUrl);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+
                 //dynamic connectionReferenceDetails = GetConnectionReferenceOwner(environmentUrl, connectionReferenceLogicalName);
                 if (connectionReference.isOwnedByX)
                 {
@@ -587,7 +590,7 @@ namespace FlowOwnershipAudit
                         Target = new Dictionary<string, object>
                         {
                             //{ "connectionreferenceid", connectionReference.connectionreferenceid },
-                            { "connectionreferenceid", connectionReference.id },
+                            { "connectionreferenceid", connectionReference.connectionReferenceId },
                             { "@odata.type", "Microsoft.Dynamics.CRM.connectionreference" }
                         },
                         Assignee = new Dictionary<string, object>

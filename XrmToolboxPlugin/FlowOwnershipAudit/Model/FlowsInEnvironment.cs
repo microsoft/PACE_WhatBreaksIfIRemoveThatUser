@@ -57,10 +57,10 @@ namespace FlowOwnershipAudit.Model
     {
         public string connectionName { get; set; }
         public string connectionReferenceLogicalName { get; set; }
-        public string id { get; set; }
         public string displayName { get; set; }
         public string tier { get; set; }
         //public string ownerid { get; set; }
         public bool isOwnedByX { get; set; }
+        public string connectionReferenceId { get; set; }
     }
 }

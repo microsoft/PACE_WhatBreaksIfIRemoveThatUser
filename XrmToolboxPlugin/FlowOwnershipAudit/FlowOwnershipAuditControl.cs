@@ -464,7 +464,7 @@ namespace FlowOwnershipAudit
                             .Where(x=>x.properties != null && x.properties.connectionReferences != null)
                             .SelectMany(flow => flow.properties.connectionReferences)
                             .Where(connectionReference => connectionReference.isOwnedByX)
-                            .Select(connectionReference => connectionReference.id)
+                            .Select(connectionReference => connectionReference.connectionReferenceId)
                             .Distinct()
                             .Count()
                             .ToString()
@@ -846,8 +846,13 @@ namespace FlowOwnershipAudit
                             updateNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Strikeout);
                             updateNode.ToolTipText = nodeUpdateObject.ToolTipText;
                             updateNode.Checked = false;
+                            foreach (TreeNode treeNode in updateNode.Nodes)
+                            {
+                                treeNode.ForeColor = Color.Green;
+                                treeNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Strikeout);
+                            }
                             //TODO: does not work, needs to be handled in the draw method. Don't ask me why, it just does not work
-                            updateNode.HideCheckBox();
+                            //updateNode.HideCheckBox();
                             break;
                         case UpdateReason.MigrationFailed:
                             updateNode.ForeColor = Color.Red;
@@ -855,7 +860,7 @@ namespace FlowOwnershipAudit
                             updateNode.ToolTipText = nodeUpdateObject.ToolTipText;
                             updateNode.Checked = false;
                             //TODO: does not work, needs to be handled in the draw method. Don't ask me why, it just does not work
-                            updateNode.HideCheckBox();
+                            //updateNode.HideCheckBox();
                             break;
                         default:
                             break;
