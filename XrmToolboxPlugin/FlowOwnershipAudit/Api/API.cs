@@ -315,10 +315,11 @@ namespace FlowOwnershipAudit
                 HttpResponseMessage response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
                 {
-
                     string responseContent = response.Content.ReadAsStringAsync().Result;
-
                     var flowDynamic = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+                    flowToUpdate.properties.connectionReferences = new List<ConnectionReference>();
+
                     foreach (var connectionReferences in flowDynamic.properties.connectionReferences.Children())
                     {
                         foreach (var item in connectionReferences.Children())
@@ -334,10 +335,10 @@ namespace FlowOwnershipAudit
                                 connectionReferenceId = connectionReferenceFromDataverse.connectionreferenceid,
                             };
 
-                            if (flowToUpdate.properties.connectionReferences == null)
-                            {
-                                flowToUpdate.properties.connectionReferences = new List<ConnectionReference>();
-                            }
+                            //if (flowToUpdate.properties.connectionReferences == null)
+                            //{
+                            //    flowToUpdate.properties.connectionReferences = new List<ConnectionReference>();
+                            //}
 
                             flowToUpdate.properties.connectionReferences.Add(connectionReference);
                         }

@@ -665,18 +665,19 @@ namespace FlowOwnershipAudit
                     // group nodes by environment
                     var groupedNodes = selectedNodes.GroupBy(x => targetEnvironments.Keys
                         .Where(y => y.flows.Any(z => z.name == ((FlowTreeNodeElement)x.Tag).Flow.name))
-                        .Select(y => y.properties.linkedEnvironmentMetadata.instanceUrl)
+                        //.Select(y => y.properties.linkedEnvironmentMetadata.instanceUrl)
                         .FirstOrDefault());
 
                     // run reassignment in parallel per environment
                     Parallel.ForEach(groupedNodes, (group) =>
                     {
-                        var environmentUrl = group.Key;
+                        var environmentUrl = group.Key.properties.linkedEnvironmentMetadata.instanceUrl;
 
                         LogInfo("Get target systemuserid from dataverse");
 
                         // Get target systemuserid from dataverse
                         string targetOwnerId = GetSystemUserIdFromDataverse(environmentUrl, targetOwner);
+                        string originalOwnerId = GetSystemUserIdFromDataverse(environmentUrl, originalOwner);
 
                         //Reassign Flows
                         // get flowTreeNodeElement from Tag
@@ -694,7 +695,7 @@ namespace FlowOwnershipAudit
 
                             #region Reassign Flows
                             // Take ownership information from the flow object
-                            string originalOwnerId = GetSystemUserIdFromDataverse(environmentUrl, flow.permissions.Where(x => x.properties.roleName == "Owner").FirstOrDefault().properties.principal.id);
+                            //string originalOwnerId = GetSystemUserIdFromDataverse(environmentUrl, flow.permissions.Where(x => x.properties.roleName == "Owner").FirstOrDefault().properties.principal.id);
 
                             // Set the owner of the flow to the target user
                             if (!SetWorkflowOwner(environmentUrl, flow.properties.workflowEntityId, targetOwnerId))
@@ -723,8 +724,7 @@ namespace FlowOwnershipAudit
                             #endregion
 
                             // Update flow object
-                            // TODO?
-                            //GetFlowDetails(flow);
+                            GetFlowDetails(originalOwnerId, group.Key, flow);
                             GetFlowPermissons(flow);
 
                             tag.updateNodeUi(new NodeUpdateObject(tag)
