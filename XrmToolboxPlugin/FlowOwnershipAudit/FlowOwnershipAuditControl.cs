@@ -606,7 +606,8 @@ namespace FlowOwnershipAudit
             rtbSidepanel.Text = sidePanelDefaultText;
 
             // listview
-            lvComponentCount.Clear();
+            lvComponentCount.Items.Clear();
+            lvComponentCount.Groups.Clear();
         }
 
         private void tsbHelp_Click(object sender, EventArgs e)
