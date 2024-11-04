@@ -851,6 +851,9 @@ namespace FlowOwnershipAudit
                             {
                                 treeNode.ForeColor = Color.Green;
                                 treeNode.NodeFont = new Font(tvTreeview.Font, FontStyle.Strikeout);
+
+                                //Connection References can be on Multiple flow nodes, would like to strikeout all of them instead of only the ones of the migration flow
+
                             }
                             //TODO: does not work, needs to be handled in the draw method. Don't ask me why, it just does not work
                             //updateNode.HideCheckBox();

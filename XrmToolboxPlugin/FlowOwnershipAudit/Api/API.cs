@@ -14,6 +14,7 @@ using System.Windows.Interop;
 using Newtonsoft.Json.Linq;
 using static ScintillaNET.Style;
 using Microsoft.Xrm.Sdk.Workflow.Activities;
+using System.Dynamic;
 
 namespace FlowOwnershipAudit
 {
@@ -322,25 +323,24 @@ namespace FlowOwnershipAudit
 
                     foreach (var connectionReferences in flowDynamic.properties.connectionReferences.Children())
                     {
-                        foreach (var item in connectionReferences.Children())
+                        foreach (dynamic item in connectionReferences.Children())
                         {
-                            dynamic connectionReferenceFromDataverse = GetConnectionReferenceFromDataverse(targetEnvironment.properties.linkedEnvironmentMetadata.instanceUrl, item.connectionName.ToString());
-                            ConnectionReference connectionReference = new ConnectionReference()
+                            if (HasProperty(item, "connectionName"))
                             {
-                                connectionName = item.connectionName,
-                                connectionReferenceLogicalName = item.connectionReferenceLogicalName,
-                                displayName = item.displayName,
-                                tier = item.tier,
-                                isOwnedByX = connectionReferenceFromDataverse._owninguser_value == userId,
-                                connectionReferenceId = connectionReferenceFromDataverse.connectionreferenceid,
-                            };
+                                dynamic connectionReferenceFromDataverse = GetConnectionReferenceFromDataverse(targetEnvironment.properties.linkedEnvironmentMetadata.instanceUrl, item.connectionName.ToString());
 
-                            //if (flowToUpdate.properties.connectionReferences == null)
-                            //{
-                            //    flowToUpdate.properties.connectionReferences = new List<ConnectionReference>();
-                            //}
+                                ConnectionReference connectionReference = new ConnectionReference()
+                                {
+                                    connectionName = item.connectionName,
+                                    connectionReferenceLogicalName = item.connectionReferenceLogicalName,
+                                    displayName = item.displayName,
+                                    tier = item.tier,
+                                    isOwnedByX = HasProperty(connectionReferenceFromDataverse, "_owninguser_value") ? connectionReferenceFromDataverse._owninguser_value == userId : false,
+                                    connectionReferenceId = HasProperty(connectionReferenceFromDataverse, "_owninguser_value") ? connectionReferenceFromDataverse.connectionreferenceid : "",
+                                };
 
-                            flowToUpdate.properties.connectionReferences.Add(connectionReference);
+                                flowToUpdate.properties.connectionReferences.Add(connectionReference);
+                            }
                         }
                     }
 
@@ -559,7 +559,7 @@ namespace FlowOwnershipAudit
             {
                 var error = ex.Message;
             }
-            
+
             return "";
         }
 
@@ -621,5 +621,27 @@ namespace FlowOwnershipAudit
         }
 
         #endregion
+
+        #region Helper
+        public static bool HasProperty(dynamic obj, string name)
+        {
+            System.Type objType = obj.GetType();
+
+            if (objType == typeof(ExpandoObject))
+            {
+                return ((IDictionary<string, object>)obj).ContainsKey(name);
+            }
+
+            if (objType == typeof(JObject))
+            {
+                return ((JObject)obj).ContainsKey(name);
+            }
+
+            return objType.GetProperty(name) != null;
+        }
+
+        #endregion
+
+
     }
 }
