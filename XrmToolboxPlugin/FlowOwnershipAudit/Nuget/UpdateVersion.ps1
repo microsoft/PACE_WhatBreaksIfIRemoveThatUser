@@ -29,9 +29,9 @@ $nuspec.Save($nuspecPath)
 
 # Update the AssemblyInfo.cs file
 (Get-Content $assemblyInfoPath) -replace '\[assembly: AssemblyVersion\(".*"\)\]', "[assembly: AssemblyVersion(`"$newVersion`")]" |
-#    Set-Content $assemblyInfoPath
+ Set-Content $assemblyInfoPath
 
 (Get-Content $assemblyInfoPath) -replace '\[assembly: AssemblyFileVersion\(".*"\)\]', "[assembly: AssemblyFileVersion(`"$newVersion`")]" |
-#    Set-Content $assemblyInfoPath
+ Set-Content $assemblyInfoPath
 
 Write-Output "Updated version to $newVersion"

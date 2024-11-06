@@ -14,8 +14,7 @@ This dedicated approach ensures accurate and secure access to the necessary info
 It's a tailored solution for comprehensive flow data management within the XrmToolBox environment.
 
 ## How to use the tool
-As previously mentioned, the standard authentication profiles provided by XrmToolBox cannot be utilized for this plugin. Therefore, you can initiate the Flow and Connect Auditor without prior authentication in XrmToolBox. 
-Upon launching the tool, you may opt to select 'No' when prompted to connect first by XrmToolBox.
+As previously mentioned, the standard authentication profiles provided by XrmToolBox cannot be utilized for this plugin.
 
 Once the tool is active, you will be guided through the following steps to fetch the desired flow information:
 
@@ -24,5 +23,6 @@ Once the tool is active, you will be guided through the following steps to fetch
 - Specify the type of information required: Flows, Connections, Connection References.
 - Click the start button to begin the information retrieval process.
 - Post-query, you have the option to export the gathered data to an Excel document for further analysis.
+- Post-query, you have the ability to reassign flows to a different user.
 
 Please note, the duration for the tool to compile all information is contingent on the number of selected environments, as well as the volume of components within those environments.
